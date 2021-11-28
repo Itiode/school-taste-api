@@ -94,15 +94,15 @@ const updateProfileImage = async (req, res, next) => {
     try {
         const userId = req["user"].id;
         // Remove the folder name (profile-images), leaving just the file name
-        const filename = req["file"].key.split("/")[1];
+        const filename = req["file"]["key"].split("/")[1];
         const profileImage = {
             original: {
                 url: `${config_1.default.get("serverAddress")}/api/users/profile-images/${filename}`,
-                dUrl: req["file"].location,
+                dUrl: req["file"]["location"],
             },
         };
         await user_1.default.updateOne({ _id: userId }, { $set: { profileImage } });
-        // TODO: Delete previous profile images from AWS 
+        // TODO: Delete previous profile images from AWS
         res.send({ msg: "Profile picture updated successfully" });
     }
     catch (e) {
