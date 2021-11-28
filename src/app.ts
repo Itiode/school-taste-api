@@ -34,7 +34,7 @@ app.use(error);
 connectToDB((db: Mongoose | null, err: Error | null) => {
   if (!err) {
     const port = parseInt(config.get("port")) || 3200;
-    app.listen(port, "0.0.0.0", () => {
+    app.listen(port, () => {
       console.log("Connected to DB:", config.get("dbUrl"));
       console.log("Listening on port:", port);
     });
