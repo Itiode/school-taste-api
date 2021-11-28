@@ -7,9 +7,6 @@
     "start": "node dist/app.js",
     "test": "jest --watchAll --verbose"
   },
-  "engines": {
-    "node": ">=14.13.1"
-  },
   "jest": {
     "testEnvironment": "node"
   },
