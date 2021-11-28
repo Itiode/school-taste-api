@@ -1,0 +1,51 @@
+{
+  "name": "school-taste-api",
+  "version": "1.0.0",
+  "description": "SchoolTaste is a social networking platform for students in higher institutions.",
+  "main": "dist/app.js",
+  "scripts": {
+    "start": "node dist/app.js",
+    "test": "jest --watchAll --verbose"
+  },
+  "engines": {
+    "node": ">=14.13.1"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Itiode/school-taste-api.git"
+  },
+  "author": "Precious Damisa",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Itiode/school-taste-api/issues"
+  },
+  "homepage": "https://github.com/Itiode/school-taste-api#readme",
+  "dependencies": {
+    "aws-sdk": "^2.1036.0",
+    "axios": "^0.21.1",
+    "bcrypt": "^5.0.1",
+    "config": "^3.3.6",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "firebase-admin": "^10.0.0",
+    "joi": "^17.4.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.13.2",
+    "multer": "^1.4.3",
+    "multer-s3": "^2.10.0",
+    "nanoid": "^3.1.30"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "@types/config": "0.0.39",
+    "@types/cors": "^2.8.12",
+    "@types/express": "^4.17.13",
+    "@types/jsonwebtoken": "^8.5.4",
+    "@types/multer": "^1.4.7",
+    "@types/node": "^16.3.1",
+    "json-loader": "^0.5.7"
+  }
+}

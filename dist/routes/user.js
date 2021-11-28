@@ -1,0 +1,20 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const multer_1 = __importDefault(require("multer"));
+const s3_1 = require("../shared/utils/s3");
+const upload = (0, multer_1.default)({ storage: (0, s3_1.getStorageConfig)("profile-images") });
+const user_1 = require("../controllers/user");
+const auth_1 = __importDefault(require("../middleware/auth"));
+const router = (0, express_1.default)();
+router.post("/", user_1.addUser);
+router.get("/me", auth_1.default, user_1.getUser);
+router.put("/update-profile-image", auth_1.default, upload.single("profile-image"), user_1.updateProfileImage);
+router.get("/profile-images/:filename", auth_1.default, user_1.getProfileImage);
+router.put("/update-about", auth_1.default, user_1.updateAbout);
+router.put("/update-student-data", auth_1.default, user_1.updateStudentData);
+router.put("/update-messaging-token", auth_1.default, user_1.updateMessagingToken);
+exports.default = router;
