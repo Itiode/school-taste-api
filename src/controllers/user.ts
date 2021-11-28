@@ -1,5 +1,5 @@
 import config from "config";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { RequestHandler } from "express";
 
 import UserModel, {
