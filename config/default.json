@@ -2,5 +2,9 @@
   "port": "3200",
   "dbUrl": "mongodb://localhost:27017/school-taste",
   "serverAddress": "http://192.168.43.39:3200",
-  "jwtAuthPrivateKey": "unsecureJwtAuthPrivateKey"
+  "jwtAuthPrivateKey": "unsecureJwtAuthPrivateKey",
+  "awsBucketName": "school-taste-bucket",
+  "awsBucketRegion": "us-east-1",
+  "awsBucketAccessKeyId": "ACCESS_ID",
+  "awsBucketSecretAccessKey": "SECRET_ACCESS_KEY"
 }
