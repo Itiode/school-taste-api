@@ -49,7 +49,7 @@ const schema = new mongoose_1.Schema({
     reactions: [reaction_1.default],
     reactionCount: Number,
 });
-exports.default = mongoose_1.default.model("SubComment", schema);
+exports.default = mongoose_1.default.model("Sub-Comment", schema);
 function validateAddSubCommentData(data) {
     return joi_1.default.object({
         text: joi_1.default.string().trim().min(1).max(250).required(),

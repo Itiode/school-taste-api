@@ -31,7 +31,7 @@ app.use(auth_1.default);
 (0, db_1.default)((db, err) => {
     if (!err) {
         const port = parseInt(config_1.default.get("port")) || 3200;
-        app.listen(port, "0.0.0.0", () => {
+        app.listen(port, () => {
             console.log("Connected to DB:", config_1.default.get("dbUrl"));
             console.log("Listening on port:", port);
         });

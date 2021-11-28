@@ -42,7 +42,7 @@ const schema = new mongoose_1.Schema({
     viewCount: Number,
     subCommentCount: Number,
 });
-exports.default = mongoose_1.default.model("SubPost", schema);
+exports.default = mongoose_1.default.model("Sub-Post", schema);
 function validateReactToSubPostParams(data) {
     return joi_1.default.object({
         subPostId: joi_1.default.string()

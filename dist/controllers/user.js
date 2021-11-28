@@ -24,7 +24,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateMessagingToken = exports.updateStudentData = exports.updateAbout = exports.getProfileImage = exports.updateProfileImage = exports.getUser = exports.addUser = void 0;
 const config_1 = __importDefault(require("config"));
-const bcrypt_1 = __importDefault(require("bcrypt"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_1 = __importStar(require("../models/user"));
 const s3_1 = require("../shared/utils/s3");
 // TODO: Create a Transaction doc for the 1 free ruby signup bonus
@@ -39,7 +39,7 @@ const addUser = async (req, res, next) => {
         });
         if (fetchedUser)
             return res.status(400).send({ msg: "User already registered" });
-        const hashedPw = await bcrypt_1.default.hash(password, 12);
+        const hashedPw = await bcryptjs_1.default.hash(password, 12);
         const user = await new user_1.default({
             name,
             username,
