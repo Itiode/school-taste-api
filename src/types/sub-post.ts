@@ -14,6 +14,24 @@ export default interface SubPost {
   viewCount: number;
 }
 
+// export default interface SubPost {
+//   _id: string;
+//   type: string;
+//   ppid: string;
+//   url: { original: string; thumbnail: string };
+//   dUrl: { original: string; thumbnail: string };
+//   reactions: Reaction[];
+//   reactionCount: number;
+//   reaction: Reaction;
+//   views: string[];
+//   subCommentCount: number;
+//   viewCount: number;
+//   metadata: {
+//     width: number;
+//     height: number;
+//   };
+// }
+
 export interface SubPostRes {
   id: string;
   type: string;

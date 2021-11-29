@@ -27,23 +27,12 @@ const mongoose_1 = __importStar(require("mongoose"));
 const config_1 = __importDefault(require("config"));
 const Jwt = __importStar(require("jsonwebtoken"));
 const joi_1 = __importDefault(require("joi"));
+const name_1 = __importDefault(require("./schemas/name"));
+const dob_1 = __importDefault(require("./schemas/dob"));
+const school_1 = __importDefault(require("./schemas/school"));
+const student_data_1 = __importDefault(require("./schemas/student-data"));
 const schema = new mongoose_1.Schema({
-    name: {
-        first: {
-            type: String,
-            minLength: 2,
-            maxLength: 25,
-            trim: true,
-            required: true,
-        },
-        last: {
-            type: String,
-            minLength: 2,
-            maxLength: 25,
-            trim: true,
-            required: true,
-        },
-    },
+    name: name_1.default,
     username: {
         type: String,
         trim: true,
@@ -68,30 +57,8 @@ const schema = new mongoose_1.Schema({
         unique: true,
         required: true,
     },
-    gender: { type: String, enum: ["male", "female", "other"], required: true },
-    dob: {
-        day: {
-            type: String,
-            trim: true,
-            minLength: 1,
-            maxLength: 2,
-            required: true,
-        },
-        month: {
-            type: String,
-            trim: true,
-            minLength: 1,
-            maxLength: 2,
-            required: true,
-        },
-        year: {
-            type: String,
-            trim: true,
-            minLength: 4,
-            maxLength: 4,
-            required: true,
-        },
-    },
+    gender: { type: String, enum: ["Male", "Female", "Other"], required: true },
+    dob: dob_1.default,
     profileImage: {
         original: {
             url: { type: String, trim: true },
@@ -103,27 +70,8 @@ const schema = new mongoose_1.Schema({
         },
     },
     about: { type: String, trim: true, minLength: 5, maxLength: 250 },
-    school: {
-        fullName: { type: String, trim: true, maxLength: 250, required: true },
-        shortName: {
-            type: String,
-            trim: true,
-            uppercase: true,
-            maxLength: 25,
-            required: true,
-        },
-    },
-    studentData: {
-        department: { type: String, trim: true, maxLength: 250, required: true },
-        faculty: { type: String, trim: true, maxLength: 250, required: true },
-        level: {
-            type: String,
-            trim: true,
-            minLength: 3,
-            maxLength: 3,
-            required: true,
-        },
-    },
+    school: school_1.default,
+    studentData: student_data_1.default,
     password: { type: String, trim: true, required: true },
     interests: [String],
     hobbies: [String],
@@ -167,7 +115,7 @@ function validateAddUserReq(data) {
         studentData: joi_1.default.object({
             department: joi_1.default.string().trim().max(250).required(),
             faculty: joi_1.default.string().trim().max(250).required(),
-            level: joi_1.default.string().trim().min(3).max(3).required(),
+            level: joi_1.default.string().trim().required(),
         }),
         school: joi_1.default.object({
             fullName: joi_1.default.string().trim().max(250).required(),
@@ -192,7 +140,7 @@ function validateAuthReq(data) {
 exports.validateAuthReq = validateAuthReq;
 function validateAboutData(data) {
     return joi_1.default.object({
-        about: joi_1.default.string().trim().min(5).max(250).required(),
+        about: joi_1.default.string().trim().max(250).required(),
     }).validate(data);
 }
 exports.validateAboutData = validateAboutData;
@@ -200,7 +148,7 @@ function validateUpdateStudentDataReq(data) {
     const schema = joi_1.default.object({
         department: joi_1.default.string().trim().max(250).required(),
         faculty: joi_1.default.string().trim().max(250).required(),
-        level: joi_1.default.string().trim().min(3).max(3).required(),
+        level: joi_1.default.string().trim().required(),
     });
     return schema.validate(data);
 }

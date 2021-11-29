@@ -26,6 +26,8 @@ exports.validateViewPostReq = exports.validateReactToPostParams = exports.valida
 const mongoose_1 = __importStar(require("mongoose"));
 const joi_1 = __importDefault(require("joi"));
 const reaction_1 = __importDefault(require("./schemas/reaction"));
+const school_1 = __importDefault(require("./schemas/school"));
+const student_data_1 = __importDefault(require("./schemas/student-data"));
 const schema = new mongoose_1.Schema({
     creator: {
         id: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
@@ -39,27 +41,8 @@ const schema = new mongoose_1.Schema({
         required: true,
     },
     body: { type: String, trim: true, maxLength: 5000 },
-    school: {
-        fullName: { type: String, trim: true, maxLength: 250, required: true },
-        shortName: {
-            type: String,
-            trim: true,
-            uppercase: true,
-            maxLength: 25,
-            required: true,
-        },
-    },
-    studentData: {
-        department: { type: String, trim: true, maxLength: 250, required: true },
-        faculty: { type: String, trim: true, maxLength: 250, required: true },
-        level: {
-            type: String,
-            trim: true,
-            minLength: 3,
-            maxLength: 3,
-            required: true,
-        },
-    },
+    school: school_1.default,
+    studentData: student_data_1.default,
     searchText: { type: String, trim: true, maxLength: 500, required: true },
     tags: { type: [String] },
     date: { type: Date, default: Date.now },
@@ -72,7 +55,7 @@ const schema = new mongoose_1.Schema({
 exports.default = mongoose_1.default.model("Post", schema);
 function validateCreatePostReq(data) {
     return joi_1.default.object({
-        title: joi_1.default.string().trim().max(100).required(),
+        title: joi_1.default.string().trim().max(250).required(),
         body: joi_1.default.string().trim().max(5000),
     }).validate(data);
 }

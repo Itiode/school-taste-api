@@ -8,7 +8,9 @@ import {
   ViewPostParams,
 } from "../types/post";
 
-import ReactionSchema from "./schemas/reaction";
+import reactionSchema from "./schemas/reaction";
+import schoolSchema from "./schemas/school";
+import studentDataSchema from "./schemas/student-data";
 
 const schema = new Schema<Post>({
   creator: {
@@ -23,31 +25,12 @@ const schema = new Schema<Post>({
     required: true,
   },
   body: { type: String, trim: true, maxLength: 5000 },
-  school: {
-    fullName: { type: String, trim: true, maxLength: 250, required: true },
-    shortName: {
-      type: String,
-      trim: true,
-      uppercase: true,
-      maxLength: 25,
-      required: true,
-    },
-  },
-  studentData: {
-    department: { type: String, trim: true, maxLength: 250, required: true },
-    faculty: { type: String, trim: true, maxLength: 250, required: true },
-    level: {
-      type: String,
-      trim: true,
-      minLength: 3,
-      maxLength: 3,
-      required: true,
-    },
-  },
+  school: schoolSchema,
+  studentData: studentDataSchema,
   searchText: { type: String, trim: true, maxLength: 500, required: true },
   tags: { type: [String] },
   date: { type: Date, default: Date.now },
-  reactions: [ReactionSchema],
+  reactions: [reactionSchema],
   reactionCount: Number,
   views: [String],
   viewCount: Number,
@@ -58,7 +41,7 @@ export default mongoose.model("Post", schema);
 
 export function validateCreatePostReq(data: CreatePostReq) {
   return Joi.object({
-    title: Joi.string().trim().max(100).required(),
+    title: Joi.string().trim().max(250).required(),
     body: Joi.string().trim().max(5000),
   }).validate(data);
 }

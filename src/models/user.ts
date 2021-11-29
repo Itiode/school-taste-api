@@ -5,25 +5,14 @@ import Joi from "joi";
 
 import { User, AddUserReq, AuthReq } from "../types/user";
 import { UpdateStudentDataReq, AboutData } from "./../types/user";
+import nameSchema from "./schemas/name";
+import dobSchema from "./schemas/dob";
+import schoolSchema from "./schemas/school";
+import studentDataSchema from "./schemas/student-data";
 
 const schema = new Schema<User>(
   {
-    name: {
-      first: {
-        type: String,
-        minLength: 2,
-        maxLength: 25,
-        trim: true,
-        required: true,
-      },
-      last: {
-        type: String,
-        minLength: 2,
-        maxLength: 25,
-        trim: true,
-        required: true,
-      },
-    },
+    name: nameSchema,
     username: {
       type: String,
       trim: true,
@@ -48,30 +37,8 @@ const schema = new Schema<User>(
       unique: true,
       required: true,
     },
-    gender: { type: String, enum: ["male", "female", "other"], required: true },
-    dob: {
-      day: {
-        type: String,
-        trim: true,
-        minLength: 1,
-        maxLength: 2,
-        required: true,
-      },
-      month: {
-        type: String,
-        trim: true,
-        minLength: 1,
-        maxLength: 2,
-        required: true,
-      },
-      year: {
-        type: String,
-        trim: true,
-        minLength: 4,
-        maxLength: 4,
-        required: true,
-      },
-    },
+    gender: { type: String, enum: ["Male", "Female", "Other"], required: true },
+    dob: dobSchema,
     profileImage: {
       original: {
         url: { type: String, trim: true },
@@ -83,27 +50,8 @@ const schema = new Schema<User>(
       },
     },
     about: { type: String, trim: true, minLength: 5, maxLength: 250 },
-    school: {
-      fullName: { type: String, trim: true, maxLength: 250, required: true },
-      shortName: {
-        type: String,
-        trim: true,
-        uppercase: true,
-        maxLength: 25,
-        required: true,
-      },
-    },
-    studentData: {
-      department: { type: String, trim: true, maxLength: 250, required: true },
-      faculty: { type: String, trim: true, maxLength: 250, required: true },
-      level: {
-        type: String,
-        trim: true,
-        minLength: 3,
-        maxLength: 3,
-        required: true,
-      },
-    },
+    school: schoolSchema,
+    studentData: studentDataSchema,
     password: { type: String, trim: true, required: true },
     interests: [String],
     hobbies: [String],
@@ -155,7 +103,7 @@ export function validateAddUserReq(data: AddUserReq) {
     studentData: Joi.object({
       department: Joi.string().trim().max(250).required(),
       faculty: Joi.string().trim().max(250).required(),
-      level: Joi.string().trim().min(3).max(3).required(),
+      level: Joi.string().trim().required(),
     }),
     school: Joi.object({
       fullName: Joi.string().trim().max(250).required(),
@@ -182,7 +130,7 @@ export function validateAuthReq(data: AuthReq) {
 
 export function validateAboutData(data: AboutData) {
   return Joi.object({
-    about: Joi.string().trim().min(5).max(250).required(),
+    about: Joi.string().trim().max(250).required(),
   }).validate(data);
 }
 
@@ -190,7 +138,7 @@ export function validateUpdateStudentDataReq(data: UpdateStudentDataReq) {
   const schema = Joi.object({
     department: Joi.string().trim().max(250).required(),
     faculty: Joi.string().trim().max(250).required(),
-    level: Joi.string().trim().min(3).max(3).required(),
+    level: Joi.string().trim().required(),
   });
 
   return schema.validate(data);

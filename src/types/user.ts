@@ -1,22 +1,47 @@
-import ProfileImage from "./profile-image";
-
 export interface User {
-  name: { first: string; last: string };
+  name: Name;
   username: string;
   email: string;
   phone: string;
   gender: string;
-  dob: { day: string; month: string; year: string };
+  dob: DOB;
   about: string;
   profileImage: ProfileImage;
-  school: { fullName: string; shortName: string };
-  studentData: { department: string; faculty: string; level: string };
+  school: School;
+  studentData: StudentData;
   password: string;
   interests: string[];
   hobbies: string[];
   roles: string[];
   rubies: number;
   messagingToken: string;
+}
+
+export interface Name {
+  first: string;
+  last: string;
+}
+
+export interface DOB {
+  day: string;
+  month: string;
+  year: string;
+}
+
+export interface StudentData {
+  department: string;
+  faculty: string;
+  level: string;
+}
+
+export interface School {
+  fullName: string;
+  shortName: string;
+}
+
+export interface ProfileImage {
+  thumbnail: { url: string; dUrl: string };
+  original: { url: string; dUrl: string };
 }
 
 export interface AddUserReq {
