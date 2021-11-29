@@ -33,7 +33,7 @@ app.use(error);
 
 connectToDB((db: Mongoose | null, err: Error | null) => {
   if (!err) {
-    const port = parseInt(config.get("port")) || 8080;
+    const port = process.env.PORT || 8080;
     app.listen(port, () => {
       console.log("Connected to DB:", config.get("dbUrl"));
       console.log("Listening on port:", port);

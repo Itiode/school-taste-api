@@ -1,9 +1,8 @@
+import Creator from "./creator";
+
 export default interface Notification {
   _id: string;
-  creators: {
-    id: string;
-    name: string;
-  }[];
+  creators: Creator[];
   subscriber: {
     id: string;
   };
@@ -20,10 +19,7 @@ export interface GetNotificationsQuery {
 
 export interface NotificationRes {
   id: string;
-  creators: {
-    id: string;
-    name: string;
-  }[];
+  creators: Creator[];
   type: string;
   date: Date;
   phrase: string;

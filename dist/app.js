@@ -30,7 +30,7 @@ app.use("/api/notifications", notification_1.default);
 app.use(auth_1.default);
 (0, db_1.default)((db, err) => {
     if (!err) {
-        const port = parseInt(config_1.default.get("port")) || 8080;
+        const port = process.env.PORT || 8080;
         app.listen(port, () => {
             console.log("Connected to DB:", config_1.default.get("dbUrl"));
             console.log("Listening on port:", port);

@@ -69,7 +69,7 @@ const createPost = async (req, res, next) => {
                 await new sub_post_1.default({
                     type: "Image",
                     ppid: post._id,
-                    url: `${config_1.default.get("serverAddress")}/api/posts/images/${filename}`,
+                    url: `${config_1.default.get("serverAddress")}api/posts/images/${filename}`,
                     dUrl: file.location,
                 }).save();
             }

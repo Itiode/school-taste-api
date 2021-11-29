@@ -131,7 +131,7 @@ export const updateProfileImage: RequestHandler<any, SimpleRes> = async (
       original: {
         url: `${config.get(
           "serverAddress"
-        )}/api/users/profile-images/${filename}`,
+        )}api/users/profile-images/${filename}`,
         dUrl: req["file"]!["location"],
       },
     };

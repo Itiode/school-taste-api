@@ -97,7 +97,7 @@ const updateProfileImage = async (req, res, next) => {
         const filename = req["file"]["key"].split("/")[1];
         const profileImage = {
             original: {
-                url: `${config_1.default.get("serverAddress")}/api/users/profile-images/${filename}`,
+                url: `${config_1.default.get("serverAddress")}api/users/profile-images/${filename}`,
                 dUrl: req["file"]["location"],
             },
         };

@@ -82,7 +82,7 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
         await new SubPostModel({
           type: "Image",
           ppid: post._id,
-          url: `${config.get("serverAddress")}/api/posts/images/${filename}`,
+          url: `${config.get("serverAddress")}api/posts/images/${filename}`,
           dUrl: file.location,
         }).save();
       }

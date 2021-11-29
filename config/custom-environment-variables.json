@@ -1,5 +1,6 @@
 {
   "dbUrl": "schoolTaste_dbUrl",
+  "serverAddress": "schoolTaste_serverAddress",
   "jwtAuthPrivateKey": "schoolTaste_jwtAuthPrivateKey",
   "awsBucketName": "schoolTaste_awsBucketName",
   "awsBucketRegion": "schoolTaste_awsBucketRegion",
