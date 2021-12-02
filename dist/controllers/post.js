@@ -75,13 +75,13 @@ const createPost = async (req, res, next) => {
             }
         }
         // Create notifications and notify departmental mates.
-        const departmentalMates = await user_1.default.find({
+        const depMates = await user_1.default.find({
             "school.fullName": school.fullName,
             "studentData.faculty": faculty,
             "studentData.department": department,
             "studentData.level": level,
         }).select("_id name messagingToken");
-        for (let depMate of departmentalMates) {
+        for (let depMate of depMates) {
             const notification = new notification_1.default({
                 creators: [
                     {

@@ -89,14 +89,14 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
     }
 
     // Create notifications and notify departmental mates.
-    const departmentalMates = await UserModel.find({
+    const depMates = await UserModel.find({
       "school.fullName": school.fullName,
       "studentData.faculty": faculty,
       "studentData.department": department,
       "studentData.level": level,
     }).select("_id name messagingToken");
 
-    for (let depMate of departmentalMates) {
+    for (let depMate of depMates) {
       const notification = new NotificationModel({
         creators: [
           {
