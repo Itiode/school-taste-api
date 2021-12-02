@@ -1,8 +1,9 @@
 import { RequestHandler } from "express";
 
-import {
+import Notification, {
   GetNotificationsRes,
   GetNotificationsQuery,
+  NotificationRes,
 } from "../types/notification";
 import UserModel from "../models/user";
 import NotificationModel from "../models/notification";
@@ -22,17 +23,33 @@ export const getNotifications: RequestHandler<
     if (!user)
       return res.status(404).send({ msg: "No user with the given ID" });
 
-    const notifications = await NotificationModel.find({
+    const notifs = await NotificationModel.find({
       "subscriber.id": userId,
     })
       // .skip((pageNumber - 1) * pageSize)
       // .limit(pageSize)
+      .select("-__v")
       .sort({ _id: -1 });
+
+    const transformedNotifs: NotificationRes[] = notifs.map(
+      (n: Notification) => {
+        return {
+          id: n._id,
+          creators: n.creators,
+          subscriber: n.subscriber,
+          type: n.type,
+          phrase: n.phrase,
+          payload: n.payload,
+          date: n.date,
+          seen: n.seen,
+        };
+      }
+    );
 
     res.send({
       msg: "Notifications fetched successfully",
-      count: notifications.length,
-      data: notifications,
+      count: notifs.length,
+      data: transformedNotifs,
     });
   } catch (e) {
     next(new Error("Error in adding sub comment: " + e));

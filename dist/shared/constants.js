@@ -26,11 +26,12 @@ exports.validReactionTypes = [
     "Crying",
 ];
 exports.validSubPostTypes = ["Image", "Video", "Gif", "Sticker"];
+// POST NOTIFICATION TYPES
 exports.postNotificationType = {
-    createdPostNotification: 'CreatedPostNotification',
+    createdPostNotification: "CreatedPostNotification",
     likedPostNotification: "LikedPostNotification",
     reactedToPostNotification: "ReactedToPostNotification",
-    commentedOnPostNotification: 'CommentedOnPostNotification',
+    commentedOnPostNotification: "CommentedOnPostNotification",
 };
 exports.subPostNotificationType = {
     likedSubPostNotification: "LikedSubPostNotification",

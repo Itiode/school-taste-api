@@ -14,16 +14,29 @@ const getNotifications = async (req, res, next) => {
         const user = await user_1.default.findById(userId).select("_id");
         if (!user)
             return res.status(404).send({ msg: "No user with the given ID" });
-        const notifications = await notification_1.default.find({
+        const notifs = await notification_1.default.find({
             "subscriber.id": userId,
         })
             // .skip((pageNumber - 1) * pageSize)
             // .limit(pageSize)
+            .select("-__v")
             .sort({ _id: -1 });
+        const transformedNotifs = notifs.map((n) => {
+            return {
+                id: n._id,
+                creators: n.creators,
+                subscriber: n.subscriber,
+                type: n.type,
+                phrase: n.phrase,
+                payload: n.payload,
+                date: n.date,
+                seen: n.seen,
+            };
+        });
         res.send({
             msg: "Notifications fetched successfully",
-            count: notifications.length,
-            data: notifications,
+            count: notifs.length,
+            data: transformedNotifs,
         });
     }
     catch (e) {

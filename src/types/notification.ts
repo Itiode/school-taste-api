@@ -10,6 +10,13 @@ export default interface Notification {
   date: Date;
   phrase: string;
   payload?: string;
+  seen: boolean;
+  image: {
+    thumbnail: {
+      url: string;
+      dUrl: string;
+    };
+  };
 }
 
 export interface GetNotificationsQuery {
@@ -24,6 +31,12 @@ export interface NotificationRes {
   date: Date;
   phrase: string;
   payload?: string;
+  seen: boolean;
+  image?: {
+    thumbnail: {
+      url: string;
+    };
+  };
 }
 
 export interface GetNotificationsRes {

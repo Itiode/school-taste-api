@@ -12,6 +12,13 @@ const schema = new Schema<Notification>({
   date: { type: Date, default: Date.now },
   phrase: { type: String, trim: true, maxLength: 100, required: true },
   payload: { type: String, trim: true, maxLength: 100 },
+  seen: { type: Boolean, default: false },
+  image: {
+    thumbnail: {
+      url: { type: String, trim: true },
+      dUrl: { type: String, trim: true },
+    },
+  },
 });
 
 export default mongoose.model("Notification", schema);

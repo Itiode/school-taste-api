@@ -31,7 +31,7 @@ app.use(auth_1.default);
 (0, db_1.default)((db, err) => {
     if (!err) {
         const port = process.env.PORT || 8080;
-        app.listen(port, () => {
+        app.listen(3200, '0.0.0.0', () => {
             console.log("Connected to DB:", config_1.default.get("dbUrl"));
             console.log("Listening on port:", port);
         });
