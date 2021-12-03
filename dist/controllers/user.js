@@ -68,7 +68,7 @@ const getUser = async (req, res, next) => {
         const user = await user_1.default.findById(userId).select("-password -__v -createdAt -updatedAt");
         if (!user)
             return res.status(404).send({ msg: "User not found" });
-        const { _id: id, name, username, email, phone, dob, gender, school, studentData, rubyBalance, } = user;
+        const { _id: id, name, username, email, phone, dob, about, gender, school, studentData, rubyBalance, } = user;
         res.send({
             msg: "User's data fetched successfully",
             data: {
@@ -79,6 +79,7 @@ const getUser = async (req, res, next) => {
                 phone,
                 gender,
                 dob,
+                about,
                 school,
                 studentData,
                 rubyBalance,

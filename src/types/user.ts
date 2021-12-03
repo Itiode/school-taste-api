@@ -75,6 +75,7 @@ export interface GetUserRes {
     email: string;
     phone: string;
     dob: { day: string; month: string; year: string };
+    about: string;
     gender: string;
     school: {
       shortName: string;
