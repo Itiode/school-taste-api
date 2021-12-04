@@ -11,7 +11,7 @@ export default interface Notification {
   phrase: string;
   payload?: string;
   seen: boolean;
-  image: {
+  image?: {
     thumbnail: {
       url: string;
       dUrl: string;

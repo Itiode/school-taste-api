@@ -54,7 +54,7 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
 
     const { title, body } = req.body;
 
-    const { name, studentData, school } = user;
+    const { name, studentData, school, profileImage } = user;
 
     const userFullName = name.first + " " + name.last;
     const { department, faculty, level } = studentData;
@@ -94,7 +94,7 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
       "studentData.faculty": faculty,
       "studentData.department": department,
       "studentData.level": level,
-    }).select("_id name messagingToken");
+    }).select("_id name messagingToken profileImage");
 
     for (let depMate of depMates) {
       const notification = new NotificationModel({
@@ -108,6 +108,7 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
         type: postNotificationType.createdPostNotification,
         phrase: "created a post",
         payload: getNotificationPayload(post.title),
+        image: { thumbnail: { url: profileImage.original.url } },
       });
 
       await notification.save();
@@ -237,12 +238,13 @@ export const reactToPost: RequestHandler<
     if (!rxTypeIsValid)
       return res.status(400).send({ msg: "Invalid reaction type" });
 
-    const userId = req["user"].id;
+    const reactingUserId = req["user"].id;
 
-    const user = await UserModel.findById(userId).select("_id name");
-    const { name } = user;
+    const reactingUser = await UserModel.findById(reactingUserId).select(
+      "_id name profileImage"
+    );
 
-    if (!user)
+    if (!reactingUser)
       return res.status(404).send({ msg: "No user with the given ID" });
 
     const { postId } = req.params;
@@ -255,7 +257,7 @@ export const reactToPost: RequestHandler<
       return res.status(404).send({ msg: "No post with the given ID" });
 
     const reaction = post.reactions.find(
-      (reaction: any) => reaction.userId.toHexString() === userId
+      (reaction: any) => reaction.userId.toHexString() === reactingUserId
     );
 
     if (reaction) {
@@ -263,7 +265,7 @@ export const reactToPost: RequestHandler<
       if (reaction.type === reactionType) {
         await PostModel.updateOne(
           { _id: postId },
-          { $pull: { reactions: { userId } } }
+          { $pull: { reactions: { reactingUserId } } }
         );
         await PostModel.updateOne(
           { _id: postId },
@@ -273,41 +275,13 @@ export const reactToPost: RequestHandler<
       } else {
         await PostModel.updateOne(
           { _id: postId },
-          { $pull: { reactions: { userId } } }
+          { $pull: { reactions: { reactingUserId } } }
         );
 
         await PostModel.updateOne(
           { _id: postId },
-          { $push: { reactions: { userId, type: reactionType } } }
+          { $push: { reactions: { reactingUserId, type: reactionType } } }
         );
-      }
-
-      await new NotificationModel({
-        creators: [
-          {
-            id: userId,
-            name: `${name.first} ${name.last}`,
-          },
-        ],
-        subscriber: { id: post.creator.id },
-        type: postNotificationType.reactedToPostNotification,
-        phrase: "reacted to",
-        payload: getNotificationPayload(post.title),
-      }).save();
-
-      if (userId !== post.creator.id.toHexString()) {
-        await new NotificationModel({
-          creators: [
-            {
-              id: userId,
-              name: `${name.first} ${name.last}`,
-            },
-          ],
-          subscriber: { id: userId },
-          type: postNotificationType.reactedToPostNotification,
-          phrase: "reacted to",
-          payload: getNotificationPayload(post.title),
-        }).save();
       }
 
       return res.send({ msg: "Reacted to post successfully" });
@@ -316,9 +290,57 @@ export const reactToPost: RequestHandler<
     // When the user reacts for the first time.
     await PostModel.updateOne(
       { _id: postId },
-      { $push: { reactions: { userId, type: reactionType } } }
+      { $push: { reactions: { userId: reactingUserId, type: reactionType } } }
     );
     await PostModel.updateOne({ _id: postId }, { $inc: { reactionCount: 1 } });
+
+    const image = {
+      thumbnail: { url: reactingUser.profileImage.original.url },
+    };
+
+    if (reactingUserId !== post.creator.id.toHexString()) {
+      await new NotificationModel({
+        creators: [
+          {
+            id: reactingUserId,
+            name: `${reactingUser.name.first} ${reactingUser.name.last}`,
+          },
+        ],
+        subscriber: { id: reactingUserId },
+        type: postNotificationType.reactedToPostNotification,
+        phrase: "reacted to",
+        payload: getNotificationPayload(post.title),
+        image,
+      }).save();
+
+      await new NotificationModel({
+        creators: [
+          {
+            id: reactingUserId,
+            name: `${reactingUser.name.first} ${reactingUser.name.last}`,
+          },
+        ],
+        subscriber: { id: post.creator.id },
+        type: postNotificationType.reactedToPostNotification,
+        phrase: "reacted to",
+        payload: getNotificationPayload(post.title),
+        image,
+      }).save();
+    } else {
+      await new NotificationModel({
+        creators: [
+          {
+            id: reactingUserId,
+            name: `${reactingUser.name.first} ${reactingUser.name.last}`,
+          },
+        ],
+        subscriber: { id: post.creator.id },
+        type: postNotificationType.reactedToPostNotification,
+        phrase: "reacted to",
+        payload: getNotificationPayload(post.title),
+        image,
+      }).save();
+    }
 
     res.send({ msg: "Reacted to post successfully" });
   } catch (e) {

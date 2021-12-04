@@ -46,7 +46,7 @@ const createPost = async (req, res, next) => {
                 .status(404)
                 .send({ msg: "Cant't create post, user not found" });
         const { title, body } = req.body;
-        const { name, studentData, school } = user;
+        const { name, studentData, school, profileImage } = user;
         const userFullName = name.first + " " + name.last;
         const { department, faculty, level } = studentData;
         const searchText = `${title} ${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department} ${faculty} ${level}`;
@@ -80,7 +80,7 @@ const createPost = async (req, res, next) => {
             "studentData.faculty": faculty,
             "studentData.department": department,
             "studentData.level": level,
-        }).select("_id name messagingToken");
+        }).select("_id name messagingToken profileImage");
         for (let depMate of depMates) {
             const notification = new notification_1.default({
                 creators: [
@@ -93,6 +93,7 @@ const createPost = async (req, res, next) => {
                 type: constants_2.postNotificationType.createdPostNotification,
                 phrase: "created a post",
                 payload: (0, functions_1.getNotificationPayload)(post.title),
+                image: { thumbnail: { url: profileImage.original.url } },
             });
             await notification.save();
             const fcmPayload = {
@@ -193,58 +194,77 @@ const reactToPost = async (req, res, next) => {
         const rxTypeIsValid = (0, validators_1.validateReactionType)(reactionType);
         if (!rxTypeIsValid)
             return res.status(400).send({ msg: "Invalid reaction type" });
-        const userId = req["user"].id;
-        const user = await user_1.default.findById(userId).select("_id name");
-        const { name } = user;
-        if (!user)
+        const reactingUserId = req["user"].id;
+        const reactingUser = await user_1.default.findById(reactingUserId).select("_id name profileImage");
+        if (!reactingUser)
             return res.status(404).send({ msg: "No user with the given ID" });
         const { postId } = req.params;
         const post = await post_1.default.findById(postId).select("_id reactions creator title");
         if (!post)
             return res.status(404).send({ msg: "No post with the given ID" });
-        const reaction = post.reactions.find((reaction) => reaction.userId.toHexString() === userId);
+        const reaction = post.reactions.find((reaction) => reaction.userId.toHexString() === reactingUserId);
         if (reaction) {
             // If the user doesn't want to react anymore
             if (reaction.type === reactionType) {
-                await post_1.default.updateOne({ _id: postId }, { $pull: { reactions: { userId } } });
+                await post_1.default.updateOne({ _id: postId }, { $pull: { reactions: { reactingUserId } } });
                 await post_1.default.updateOne({ _id: postId }, { $inc: { reactionCount: -1 } });
                 // If the user changes their reaction.
             }
             else {
-                await post_1.default.updateOne({ _id: postId }, { $pull: { reactions: { userId } } });
-                await post_1.default.updateOne({ _id: postId }, { $push: { reactions: { userId, type: reactionType } } });
+                await post_1.default.updateOne({ _id: postId }, { $pull: { reactions: { reactingUserId } } });
+                await post_1.default.updateOne({ _id: postId }, { $push: { reactions: { reactingUserId, type: reactionType } } });
             }
+            return res.send({ msg: "Reacted to post successfully" });
+        }
+        // When the user reacts for the first time.
+        await post_1.default.updateOne({ _id: postId }, { $push: { reactions: { userId: reactingUserId, type: reactionType } } });
+        await post_1.default.updateOne({ _id: postId }, { $inc: { reactionCount: 1 } });
+        const image = {
+            thumbnail: { url: reactingUser.profileImage.original.url },
+        };
+        if (reactingUserId !== post.creator.id.toHexString()) {
             await new notification_1.default({
                 creators: [
                     {
-                        id: userId,
-                        name: `${name.first} ${name.last}`,
+                        id: reactingUserId,
+                        name: `${reactingUser.name.first} ${reactingUser.name.last}`,
+                    },
+                ],
+                subscriber: { id: reactingUserId },
+                type: constants_2.postNotificationType.reactedToPostNotification,
+                phrase: "reacted to",
+                payload: (0, functions_1.getNotificationPayload)(post.title),
+                image,
+            }).save();
+            await new notification_1.default({
+                creators: [
+                    {
+                        id: reactingUserId,
+                        name: `${reactingUser.name.first} ${reactingUser.name.last}`,
                     },
                 ],
                 subscriber: { id: post.creator.id },
                 type: constants_2.postNotificationType.reactedToPostNotification,
                 phrase: "reacted to",
                 payload: (0, functions_1.getNotificationPayload)(post.title),
+                image,
             }).save();
-            if (userId !== post.creator.id.toHexString()) {
-                await new notification_1.default({
-                    creators: [
-                        {
-                            id: userId,
-                            name: `${name.first} ${name.last}`,
-                        },
-                    ],
-                    subscriber: { id: userId },
-                    type: constants_2.postNotificationType.reactedToPostNotification,
-                    phrase: "reacted to",
-                    payload: (0, functions_1.getNotificationPayload)(post.title),
-                }).save();
-            }
-            return res.send({ msg: "Reacted to post successfully" });
         }
-        // When the user reacts for the first time.
-        await post_1.default.updateOne({ _id: postId }, { $push: { reactions: { userId, type: reactionType } } });
-        await post_1.default.updateOne({ _id: postId }, { $inc: { reactionCount: 1 } });
+        else {
+            await new notification_1.default({
+                creators: [
+                    {
+                        id: reactingUserId,
+                        name: `${reactingUser.name.first} ${reactingUser.name.last}`,
+                    },
+                ],
+                subscriber: { id: post.creator.id },
+                type: constants_2.postNotificationType.reactedToPostNotification,
+                phrase: "reacted to",
+                payload: (0, functions_1.getNotificationPayload)(post.title),
+                image,
+            }).save();
+        }
         res.send({ msg: "Reacted to post successfully" });
     }
     catch (e) {
