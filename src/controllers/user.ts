@@ -91,6 +91,7 @@ export const getUser: RequestHandler<any, GetUserRes> = async (
       email,
       phone,
       dob,
+      profileImage,
       about,
       gender,
       school,
@@ -108,6 +109,7 @@ export const getUser: RequestHandler<any, GetUserRes> = async (
         phone,
         gender,
         dob,
+        profileImage,
         about,
         school,
         studentData,
@@ -129,6 +131,7 @@ export const updateProfileImage: RequestHandler<any, SimpleRes> = async (
 
     // Remove the folder name (profile-images), leaving just the file name
     const filename = req["file"]!["key"].split("/")[1];
+
     const profileImage = {
       original: {
         url: `${config.get(
@@ -142,9 +145,9 @@ export const updateProfileImage: RequestHandler<any, SimpleRes> = async (
 
     // TODO: Delete previous profile images from AWS
 
-    res.send({ msg: "Profile picture updated successfully" });
+    res.send({ msg: "Profile image updated successfully" });
   } catch (e) {
-    next(new Error("Error in updating profile picture: " + e));
+    next(new Error("Error in updating profile image: " + e));
   }
 };
 

@@ -68,7 +68,7 @@ const getUser = async (req, res, next) => {
         const user = await user_1.default.findById(userId).select("-password -__v -createdAt -updatedAt");
         if (!user)
             return res.status(404).send({ msg: "User not found" });
-        const { _id: id, name, username, email, phone, dob, about, gender, school, studentData, rubyBalance, } = user;
+        const { _id: id, name, username, email, phone, dob, profileImage, about, gender, school, studentData, rubyBalance, } = user;
         res.send({
             msg: "User's data fetched successfully",
             data: {
@@ -79,6 +79,7 @@ const getUser = async (req, res, next) => {
                 phone,
                 gender,
                 dob,
+                profileImage,
                 about,
                 school,
                 studentData,
@@ -104,10 +105,10 @@ const updateProfileImage = async (req, res, next) => {
         };
         await user_1.default.updateOne({ _id: userId }, { $set: { profileImage } });
         // TODO: Delete previous profile images from AWS
-        res.send({ msg: "Profile picture updated successfully" });
+        res.send({ msg: "Profile image updated successfully" });
     }
     catch (e) {
-        next(new Error("Error in updating profile picture: " + e));
+        next(new Error("Error in updating profile image: " + e));
     }
 };
 exports.updateProfileImage = updateProfileImage;
