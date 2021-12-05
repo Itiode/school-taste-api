@@ -34,6 +34,7 @@ export interface PostRes {
   school: { fullName: string; shortName: string };
   studentData: { department: string; faculty: string; level: string };
   date: Date;
+  formattedDate: string;
   reactionCount: number;
   reaction: Reaction;
   viewCount: number;

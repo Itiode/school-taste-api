@@ -7,6 +7,7 @@ import Notification, {
 } from "../types/notification";
 import UserModel from "../models/user";
 import NotificationModel from "../models/notification";
+import {formatDate} from '../shared/utils/date-format';
 
 export const getNotifications: RequestHandler<
   any,
@@ -41,7 +42,10 @@ export const getNotifications: RequestHandler<
           phrase: n.phrase,
           payload: n.payload,
           date: n.date,
+          formattedDate: formatDate(n.date.toString()),
           seen: n.seen,
+          image: n.image,
+
         };
       }
     );

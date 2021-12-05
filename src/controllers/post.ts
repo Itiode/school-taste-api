@@ -33,6 +33,7 @@ import { validateReactionType } from "../shared/utils/validators";
 import { messagingOptions } from "../main/firebase";
 import { getFileFromS3 } from "../shared/utils/s3";
 import { getNotificationPayload } from "../shared/utils/functions";
+import { formatDate } from "../shared/utils/date-format";
 import { postNotificationType } from "../shared/constants";
 
 export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
@@ -191,6 +192,7 @@ export const getPosts: RequestHandler<any, GetPostsRes, any, GetPostsQuery> =
           school: p.school,
           studentData: p.studentData,
           date: p.date,
+          formattedDate: formatDate(p.date),
           reactionCount: p.reactionCount ? p.reactionCount : 0,
           reaction: postReaction ? postReaction : { type: "", userId: "" },
           viewCount: p.viewCount,

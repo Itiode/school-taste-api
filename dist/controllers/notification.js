@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getNotifications = void 0;
 const user_1 = __importDefault(require("../models/user"));
 const notification_1 = __importDefault(require("../models/notification"));
+const date_format_1 = require("../shared/utils/date-format");
 const getNotifications = async (req, res, next) => {
     try {
         const pageNumber = +req.query.pageNumber;
@@ -30,7 +31,9 @@ const getNotifications = async (req, res, next) => {
                 phrase: n.phrase,
                 payload: n.payload,
                 date: n.date,
+                formattedDate: (0, date_format_1.formatDate)(n.date.toString()),
                 seen: n.seen,
+                image: n.image,
             };
         });
         res.send({

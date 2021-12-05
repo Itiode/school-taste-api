@@ -33,6 +33,7 @@ const constants_1 = require("../shared/constants");
 const validators_1 = require("../shared/utils/validators");
 const s3_1 = require("../shared/utils/s3");
 const functions_1 = require("../shared/utils/functions");
+const date_format_1 = require("../shared/utils/date-format");
 const constants_2 = require("../shared/constants");
 const createPost = async (req, res, next) => {
     const { error } = (0, post_1.validateCreatePostReq)(req.body);
@@ -157,6 +158,7 @@ const getPosts = async (req, res, next) => {
                 school: p.school,
                 studentData: p.studentData,
                 date: p.date,
+                formattedDate: (0, date_format_1.formatDate)(p.date),
                 reactionCount: p.reactionCount ? p.reactionCount : 0,
                 reaction: postReaction ? postReaction : { type: "", userId: "" },
                 viewCount: p.viewCount,

@@ -29,6 +29,7 @@ export interface NotificationRes {
   creators: Creator[];
   type: string;
   date: Date;
+  formattedDate: string;
   phrase: string;
   payload?: string;
   seen: boolean;
