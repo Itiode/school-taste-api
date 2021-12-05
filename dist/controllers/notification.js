@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getNotifications = void 0;
+exports.deleteNotification = exports.markAsSeen = exports.getNotifications = void 0;
 const user_1 = __importDefault(require("../models/user"));
 const notification_1 = __importDefault(require("../models/notification"));
 const date_format_1 = require("../shared/utils/date-format");
@@ -47,3 +47,37 @@ const getNotifications = async (req, res, next) => {
     }
 };
 exports.getNotifications = getNotifications;
+const markAsSeen = async (req, res, next) => {
+    try {
+        const userId = req["user"].id;
+        const user = await user_1.default.findById(userId).select("_id");
+        if (!user)
+            return res.status(404).send({ msg: "No user with the given ID" });
+        await notification_1.default.updateOne({
+            _id: req.params.notificationId,
+            "subscriber.id": userId,
+        }, { seen: true });
+        res.send({ msg: "Notification marked as seen successfully" });
+    }
+    catch (e) {
+        next(new Error("Error in marking notification as seen: " + e));
+    }
+};
+exports.markAsSeen = markAsSeen;
+const deleteNotification = async (req, res, next) => {
+    try {
+        const userId = req["user"].id;
+        const user = await user_1.default.findById(userId).select("_id");
+        if (!user)
+            return res.status(404).send({ msg: "No user with the given ID" });
+        await notification_1.default.deleteOne({
+            _id: req.params.notificationId,
+            "subscriber.id": userId,
+        });
+        res.send({ msg: "Notification deleted successfully" });
+    }
+    catch (e) {
+        next(new Error("Error in deleting notification: " + e));
+    }
+};
+exports.deleteNotification = deleteNotification;

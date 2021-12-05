@@ -24,6 +24,10 @@ export interface GetNotificationsQuery {
   pageSize: string;
 }
 
+export interface UpdateNotificationParams {
+  notificationId: string;
+}
+
 export interface NotificationRes {
   id: string;
   creators: Creator[];

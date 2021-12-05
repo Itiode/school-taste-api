@@ -1,3 +1,7 @@
+export interface SimpleParams {
+  userId: string;
+}
+
 export interface SimpleRes {
   msg: string;
 }
