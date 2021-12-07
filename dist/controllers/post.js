@@ -94,6 +94,7 @@ const createPost = async (req, res, next) => {
                     subscriber: { id: depMate._id },
                     type: constants_2.postNotificationType.createdPostNotification,
                     phrase: constants_2.notificationPhrase.created,
+                    contentId: post._id,
                     payload: (0, functions_1.getNotificationPayload)(post.title),
                     image: { thumbnail: { url: profileImage.original.url } },
                 });
@@ -250,6 +251,7 @@ const reactToPost = async (req, res, next) => {
                 type: notifType,
                 phrase,
                 payload,
+                contentId: postId,
                 image,
             }).save();
             await new notification_1.default({
@@ -259,6 +261,7 @@ const reactToPost = async (req, res, next) => {
                 type: notifType,
                 phrase,
                 payload,
+                contentId: postId,
                 image,
             }).save();
         }

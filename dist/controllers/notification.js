@@ -31,6 +31,7 @@ const getNotifications = async (req, res, next) => {
                 type: n.type,
                 phrase: n.phrase,
                 payload: n.payload,
+                contentId: n.contentId,
                 date: n.date,
                 formattedDate: (0, date_format_1.formatDate)(n.date.toString()),
                 seen: n.seen,

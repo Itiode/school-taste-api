@@ -109,6 +109,7 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
           subscriber: { id: depMate._id },
           type: postNotificationType.createdPostNotification,
           phrase: notificationPhrase.created,
+          contentId: post._id,
           payload: getNotificationPayload(post.title),
           image: { thumbnail: { url: profileImage.original.url } },
         });
@@ -330,6 +331,7 @@ export const reactToPost: RequestHandler<
         type: notifType,
         phrase,
         payload,
+        contentId: postId,
         image,
       }).save();
 
@@ -340,6 +342,7 @@ export const reactToPost: RequestHandler<
         type: notifType,
         phrase,
         payload,
+        contentId: postId,
         image,
       }).save();
     }

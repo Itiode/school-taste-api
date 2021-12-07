@@ -44,6 +44,7 @@ export const getNotifications: RequestHandler<
           type: n.type,
           phrase: n.phrase,
           payload: n.payload,
+          contentId: n.contentId,
           date: n.date,
           formattedDate: formatDate(n.date.toString()),
           seen: n.seen,
