@@ -16,6 +16,8 @@ import {
   CreatePostReq,
   GetPostsQuery,
   GetPostsRes,
+  GetPostParams,
+  GetPostRes,
   ReactToPostParams,
   ReactToPostReq,
   ViewPostParams,
@@ -132,6 +134,72 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
   }
 };
 
+// TODO: Create a reusable function for creating a mod post and sub posts
+export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const userId = req["user"].id;
+    const user = await UserModel.findById(userId).select("_id");
+    if (!user)
+      return res.status(404).send({ msg: "No user with the given ID" });
+
+    const post = await PostModel.findById(req.params.postId).select(
+      "-__v -searchText -tags"
+    );
+
+    if (!post) res.status(404).send({ msg: "No post with the given ID" });
+
+    const subPosts = await SubPostModel.find({ ppid: post._id }).select(
+      "-__v -views -ppid -dUrl"
+    );
+
+    const modifiedSubPosts: SubPostRes[] = [];
+    for (const sP of subPosts) {
+      const sPReaction = sP.reactions.find(
+        (r: any) => r.userId.toHexString() === userId
+      );
+
+      modifiedSubPosts.push({
+        id: sP._id,
+        type: sP.type,
+        url: sP.url,
+        reaction: sPReaction ? sPReaction : { type: "", userId: "" },
+        reactionCount: sP.reactionCount ? sP.reactionCount : 0,
+        subCommentCount: sP.subCommentCount,
+        viewCount: sP.viewCount,
+      });
+    }
+
+    const postReaction = post.reactions.find(
+      (r: any) => r.userId.toHexString() === userId
+    );
+
+    const modPost = {
+      id: post._id,
+      creator: post.creator,
+      title: post.title,
+      body: post.body,
+      subPosts: modifiedSubPosts,
+      school: post.school,
+      studentData: post.studentData,
+      date: post.date,
+      formattedDate: formatDate(post.date),
+      reactionCount: post.reactionCount ? post.reactionCount : 0,
+      reaction: postReaction ? postReaction : { type: "", userId: "" },
+      viewCount: post.viewCount,
+      commentCount: post.commentCount,
+    };
+
+    res.send({ msg: "Post gotten successfully", data: modPost });
+  } catch (e) {
+    next(new Error("Error in getting post: " + e));
+  }
+};
+
+// TODO: Create a reusable function for creating a mod post and sub posts
 export const getPosts: RequestHandler<any, GetPostsRes, any, GetPostsQuery> =
   async (req, res, next) => {
     const userId = req["user"].id;

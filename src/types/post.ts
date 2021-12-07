@@ -59,6 +59,15 @@ export interface GetPostsRes {
   data?: PostRes[];
 }
 
+export interface GetPostParams {
+  postId: string;
+}
+
+export interface GetPostRes {
+  msg: string;
+  data?: PostRes;
+}
+
 export interface ReactToPostReq {
   reactionType: string;
 }

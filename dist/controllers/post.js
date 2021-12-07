@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.viewPost = exports.reactToPost = exports.getPostImage = exports.getPosts = exports.createPost = void 0;
+exports.viewPost = exports.reactToPost = exports.getPostImage = exports.getPosts = exports.getPost = exports.createPost = void 0;
 const config_1 = __importDefault(require("config"));
 const post_1 = __importStar(require("../models/post"));
 const notification_1 = __importDefault(require("../models/notification"));
@@ -114,6 +114,54 @@ const createPost = async (req, res, next) => {
     }
 };
 exports.createPost = createPost;
+// TODO: Create a reusable function for creating a mod post and sub posts
+const getPost = async (req, res, next) => {
+    try {
+        const userId = req["user"].id;
+        const user = await user_1.default.findById(userId).select("_id");
+        if (!user)
+            return res.status(404).send({ msg: "No user with the given ID" });
+        const post = await post_1.default.findById(req.params.postId).select("-__v -searchText -tags");
+        if (!post)
+            res.status(404).send({ msg: "No post with the given ID" });
+        const subPosts = await sub_post_1.default.find({ ppid: post._id }).select("-__v -views -ppid -dUrl");
+        const modifiedSubPosts = [];
+        for (const sP of subPosts) {
+            const sPReaction = sP.reactions.find((r) => r.userId.toHexString() === userId);
+            modifiedSubPosts.push({
+                id: sP._id,
+                type: sP.type,
+                url: sP.url,
+                reaction: sPReaction ? sPReaction : { type: "", userId: "" },
+                reactionCount: sP.reactionCount ? sP.reactionCount : 0,
+                subCommentCount: sP.subCommentCount,
+                viewCount: sP.viewCount,
+            });
+        }
+        const postReaction = post.reactions.find((r) => r.userId.toHexString() === userId);
+        const modPost = {
+            id: post._id,
+            creator: post.creator,
+            title: post.title,
+            body: post.body,
+            subPosts: modifiedSubPosts,
+            school: post.school,
+            studentData: post.studentData,
+            date: post.date,
+            formattedDate: (0, date_format_1.formatDate)(post.date),
+            reactionCount: post.reactionCount ? post.reactionCount : 0,
+            reaction: postReaction ? postReaction : { type: "", userId: "" },
+            viewCount: post.viewCount,
+            commentCount: post.commentCount,
+        };
+        res.send({ msg: "Post gotten successfully", data: modPost });
+    }
+    catch (e) {
+        next(new Error("Error in getting post: " + e));
+    }
+};
+exports.getPost = getPost;
+// TODO: Create a reusable function for creating a mod post and sub posts
 const getPosts = async (req, res, next) => {
     const userId = req["user"].id;
     const pageNumber = +req.query.pageNumber;
