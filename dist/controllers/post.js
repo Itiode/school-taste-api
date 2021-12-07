@@ -40,8 +40,8 @@ const createPost = async (req, res, next) => {
     if (error)
         return res.status(400).send({ msg: error.details[0].message });
     try {
-        const userId = req["user"].id;
-        const user = await user_1.default.findById(userId);
+        const creatorId = req["user"].id;
+        const user = await user_1.default.findById(creatorId);
         if (!user)
             return res
                 .status(404)
@@ -53,7 +53,7 @@ const createPost = async (req, res, next) => {
         const searchText = `${title} ${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department} ${faculty} ${level}`;
         const post = await new post_1.default({
             creator: {
-                id: userId,
+                id: creatorId,
                 name: userFullName,
             },
             title,
@@ -83,11 +83,11 @@ const createPost = async (req, res, next) => {
             "studentData.level": level,
         }).select("_id name messagingToken profileImage");
         for (let depMate of depMates) {
-            if (depMate._id.toHexString() !== user._id.toHexString()) {
+            if (depMate._id.toHexString() !== creatorId) {
                 const notification = new notification_1.default({
                     creators: [
                         {
-                            id: userId,
+                            id: creatorId,
                             name: `${name.first} ${name.last}`,
                         },
                     ],
@@ -225,10 +225,12 @@ const reactToPost = async (req, res, next) => {
         await post_1.default.updateOne({ _id: postId }, { $inc: { reactionCount: 1 } });
         if (reactingUserId !== post.creator.id.toHexString()) {
             const postOwner = await user_1.default.findById(post.creator.id).select("name");
-            const ownerData = {
-                id: post.creator.id,
-                name: `${postOwner.name.first} ${postOwner.name.last}`,
-            };
+            const owners = [
+                {
+                    id: post.creator.id,
+                    name: `${postOwner.name.first} ${postOwner.name.last}`,
+                },
+            ];
             const creators = [
                 {
                     id: reactingUserId,
@@ -243,7 +245,7 @@ const reactToPost = async (req, res, next) => {
             };
             await new notification_1.default({
                 creators,
-                owner: ownerData,
+                owners,
                 subscriber: { id: reactingUserId },
                 type: notifType,
                 phrase,
@@ -252,7 +254,7 @@ const reactToPost = async (req, res, next) => {
             }).save();
             await new notification_1.default({
                 creators,
-                owner: ownerData,
+                owners,
                 subscriber: { id: post.creator.id },
                 type: notifType,
                 phrase,

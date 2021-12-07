@@ -6,10 +6,11 @@ export default interface Notification {
   subscriber: {
     id: string;
   };
-  owner: Owner;
+  owners: Owner[];
   type: string;
   date: Date;
   phrase: string;
+  contentId: string;
   payload?: string;
   seen: boolean;
   image?: {
@@ -33,10 +34,11 @@ export interface NotificationRes {
   id: string;
   creators: Creator[];
   type: string;
-  owner: Owner;
+  owners: Owner[];
   date: Date;
   formattedDate: string;
   phrase: string;
+  contentId: string;
   payload?: string;
   seen: boolean;
   image?: {

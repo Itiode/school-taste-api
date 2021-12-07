@@ -45,9 +45,9 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
   if (error) return res.status(400).send({ msg: error.details[0].message });
 
   try {
-    const userId = req["user"].id;
+    const creatorId = req["user"].id;
 
-    const user = await UserModel.findById(userId);
+    const user = await UserModel.findById(creatorId);
     if (!user)
       return res
         .status(404)
@@ -64,7 +64,7 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
 
     const post = await new PostModel({
       creator: {
-        id: userId,
+        id: creatorId,
         name: userFullName,
       },
       title,
@@ -98,11 +98,11 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
     }).select("_id name messagingToken profileImage");
 
     for (let depMate of depMates) {
-      if (depMate._id.toHexString() !== user._id.toHexString()) {
+      if (depMate._id.toHexString() !== creatorId) {
         const notification = new NotificationModel({
           creators: [
             {
-              id: userId,
+              id: creatorId,
               name: `${name.first} ${name.last}`,
             },
           ],
@@ -302,10 +302,13 @@ export const reactToPost: RequestHandler<
       const postOwner = await UserModel.findById(post.creator.id).select(
         "name"
       );
-      const ownerData = {
-        id: post.creator.id,
-        name: `${postOwner.name.first} ${postOwner.name.last}`,
-      };
+      const owners = [
+        {
+          id: post.creator.id,
+          name: `${postOwner.name.first} ${postOwner.name.last}`,
+        },
+      ];
+
       const creators = [
         {
           id: reactingUserId,
@@ -322,7 +325,7 @@ export const reactToPost: RequestHandler<
 
       await new NotificationModel({
         creators,
-        owner: ownerData,
+        owners,
         subscriber: { id: reactingUserId },
         type: notifType,
         phrase,
@@ -332,7 +335,7 @@ export const reactToPost: RequestHandler<
 
       await new NotificationModel({
         creators,
-        owner: ownerData,
+        owners,
         subscriber: { id: post.creator.id },
         type: notifType,
         phrase,
