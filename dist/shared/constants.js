@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.birthdayNotificationType = exports.subCommentNotificationType = exports.commentNotificationType = exports.subPostNotificationType = exports.postNotificationType = exports.validSubPostTypes = exports.validReactionTypes = exports.maxViewsForRubyCredit = exports.rubyDebit = exports.rubyCredit = exports.txDescription = void 0;
+exports.birthdayNotificationType = exports.commentNotificationType = exports.postNotificationType = exports.notificationPhrase = exports.validSubPostTypes = exports.validReactionTypes = exports.maxViewsForRubyCredit = exports.rubyDebit = exports.rubyCredit = exports.txDescription = void 0;
 exports.txDescription = {
     contentCreation: "SchoolTaste content creation",
     whatsPoolWinner: "WhatsPool winner",
@@ -26,6 +26,12 @@ exports.validReactionTypes = [
     "Crying",
 ];
 exports.validSubPostTypes = ["Image", "Video", "Gif", "Sticker"];
+exports.notificationPhrase = {
+    created: 'created',
+    liked: 'liked',
+    reacted: 'reacted',
+    commentedOn: 'commented on'
+};
 // POST NOTIFICATION TYPES
 exports.postNotificationType = {
     createdPostNotification: "CreatedPostNotification",
@@ -33,17 +39,9 @@ exports.postNotificationType = {
     reactedToPostNotification: "ReactedToPostNotification",
     commentedOnPostNotification: "CommentedOnPostNotification",
 };
-exports.subPostNotificationType = {
-    likedSubPostNotification: "LikedSubPostNotification",
-    reactedToSubPostNotification: "ReactedToSubPostNotification",
-};
 exports.commentNotificationType = {
     likedCommentNotification: "LikedCommentNotification",
     reactedToCommentNotification: "ReactedToCommentNotification",
-};
-exports.subCommentNotificationType = {
-    likedSubCommentNotification: "LikedSubCommentNotification",
-    reactedToSubCommentNotification: "ReactedToSubCommentNotification",
 };
 exports.birthdayNotificationType = {
     birthdayNotification: "BirthdayNotification",

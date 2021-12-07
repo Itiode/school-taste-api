@@ -1,5 +1,5 @@
-import Reaction from './reaction';
-import SubNews from './sub-news';
+import { Reaction } from "./shared";
+import SubNews from "./sub-news";
 
 export interface News {
   _id: string;

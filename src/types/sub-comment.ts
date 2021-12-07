@@ -1,4 +1,4 @@
-import Reaction from "./reaction";
+import { Reaction } from "./shared";
 
 export interface SubComment {
   _id: string;

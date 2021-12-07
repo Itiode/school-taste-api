@@ -1,6 +1,5 @@
 # TODO
-- Delete previous profile images after successful update.
-
+- Use "liked" for LikedPostNotifications and 'reacted to' for other reactions.
 - Add Location field which should be an object with the following properties
 1. street
 2. city
@@ -10,5 +9,3 @@
 - Add a login field which should be an object with the following properties
 1. id
 2. username"
-"# school-taste-api" 
-"# school-taste-api" 

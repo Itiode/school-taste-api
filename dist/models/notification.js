@@ -24,11 +24,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const creator_1 = __importDefault(require("../models/schemas/creator"));
+const owner_1 = __importDefault(require("../models/schemas/owner"));
 const schema = new mongoose_1.Schema({
-    creators: [creator_1.default],
+    creators: { type: [creator_1.default], required: true },
     subscriber: {
         id: { type: mongoose_1.Schema.Types.ObjectId, required: true, ref: "User" },
     },
+    owner: owner_1.default,
     type: { type: String, trim: true, maxLength: 100, required: true },
     date: { type: Date, default: Date.now },
     phrase: { type: String, trim: true, maxLength: 100, required: true },

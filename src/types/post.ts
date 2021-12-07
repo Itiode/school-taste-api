@@ -1,5 +1,5 @@
 import { SubPostRes } from "./sub-post";
-import Reaction from "./reaction";
+import { Reaction } from "./shared";
 
 export interface Post {
   _id: string;

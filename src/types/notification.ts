@@ -1,4 +1,4 @@
-import Creator from "./creator";
+import {Creator, Owner} from "./shared";
 
 export default interface Notification {
   _id: string;
@@ -6,6 +6,7 @@ export default interface Notification {
   subscriber: {
     id: string;
   };
+  owner: Owner;
   type: string;
   date: Date;
   phrase: string;
@@ -32,6 +33,7 @@ export interface NotificationRes {
   id: string;
   creators: Creator[];
   type: string;
+  owner: Owner;
   date: Date;
   formattedDate: string;
   phrase: string;

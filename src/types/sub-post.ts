@@ -1,4 +1,4 @@
-import Reaction from "./reaction";
+import { Reaction } from "./shared";
 
 export default interface SubPost {
   _id: string;

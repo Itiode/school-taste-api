@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 
-import Reaction from "../../types/reaction";
+import { Reaction } from "../../types/shared";
 
 export default new Schema<Reaction>(
   {

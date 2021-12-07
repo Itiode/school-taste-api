@@ -29,6 +29,13 @@ export const validReactionTypes: string[] = [
 
 export const validSubPostTypes: string[] = ["Image", "Video", "Gif", "Sticker"];
 
+export const notificationPhrase = {
+  created: 'created',
+  liked: 'liked',
+  reacted: 'reacted',
+  commentedOn: 'commented on'
+}
+
 // POST NOTIFICATION TYPES
 export const postNotificationType = {
   createdPostNotification: "CreatedPostNotification",
@@ -37,19 +44,9 @@ export const postNotificationType = {
   commentedOnPostNotification: "CommentedOnPostNotification",
 };
 
-export const subPostNotificationType = {
-  likedSubPostNotification: "LikedSubPostNotification",
-  reactedToSubPostNotification: "ReactedToSubPostNotification",
-};
-
 export const commentNotificationType = {
   likedCommentNotification: "LikedCommentNotification",
   reactedToCommentNotification: "ReactedToCommentNotification",
-};
-
-export const subCommentNotificationType = {
-  likedSubCommentNotification: "LikedSubCommentNotification",
-  reactedToSubCommentNotification: "ReactedToSubCommentNotification",
 };
 
 export const birthdayNotificationType = {

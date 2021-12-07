@@ -92,7 +92,7 @@ const createPost = async (req, res, next) => {
                 ],
                 subscriber: { id: depMate._id },
                 type: constants_2.postNotificationType.createdPostNotification,
-                phrase: "created a post",
+                phrase: constants_2.notificationPhrase.created,
                 payload: (0, functions_1.getNotificationPayload)(post.title),
                 image: { thumbnail: { url: profileImage.original.url } },
             });
@@ -221,49 +221,40 @@ const reactToPost = async (req, res, next) => {
         // When the user reacts for the first time.
         await post_1.default.updateOne({ _id: postId }, { $push: { reactions: { userId: reactingUserId, type: reactionType } } });
         await post_1.default.updateOne({ _id: postId }, { $inc: { reactionCount: 1 } });
-        const image = {
-            thumbnail: { url: reactingUser.profileImage.original.url },
-        };
         if (reactingUserId !== post.creator.id.toHexString()) {
+            const postOwner = await user_1.default.findById(post.creator.id).select("name");
+            const ownerData = {
+                id: post.creator.id,
+                name: `${postOwner.name.first} ${postOwner.name.last}`,
+            };
+            const creators = [
+                {
+                    id: reactingUserId,
+                    name: `${reactingUser.name.first} ${reactingUser.name.last}`,
+                },
+            ];
+            const notifType = constants_2.postNotificationType.reactedToPostNotification;
+            const phrase = constants_2.notificationPhrase.liked;
+            const payload = (0, functions_1.getNotificationPayload)(post.title);
+            const image = {
+                thumbnail: { url: reactingUser.profileImage.original.url },
+            };
             await new notification_1.default({
-                creators: [
-                    {
-                        id: reactingUserId,
-                        name: `${reactingUser.name.first} ${reactingUser.name.last}`,
-                    },
-                ],
+                creators,
+                owner: ownerData,
                 subscriber: { id: reactingUserId },
-                type: constants_2.postNotificationType.reactedToPostNotification,
-                phrase: "reacted to",
-                payload: (0, functions_1.getNotificationPayload)(post.title),
+                type: notifType,
+                phrase,
+                payload,
                 image,
             }).save();
             await new notification_1.default({
-                creators: [
-                    {
-                        id: reactingUserId,
-                        name: `${reactingUser.name.first} ${reactingUser.name.last}`,
-                    },
-                ],
+                creators,
+                owner: ownerData,
                 subscriber: { id: post.creator.id },
-                type: constants_2.postNotificationType.reactedToPostNotification,
-                phrase: "reacted to",
-                payload: (0, functions_1.getNotificationPayload)(post.title),
-                image,
-            }).save();
-        }
-        else {
-            await new notification_1.default({
-                creators: [
-                    {
-                        id: reactingUserId,
-                        name: `${reactingUser.name.first} ${reactingUser.name.last}`,
-                    },
-                ],
-                subscriber: { id: post.creator.id },
-                type: constants_2.postNotificationType.reactedToPostNotification,
-                phrase: "reacted to",
-                payload: (0, functions_1.getNotificationPayload)(post.title),
+                type: notifType,
+                phrase,
+                payload,
                 image,
             }).save();
         }

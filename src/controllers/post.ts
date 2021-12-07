@@ -21,7 +21,7 @@ import {
   ViewPostParams,
 } from "../types/post";
 import { SubPostRes } from "../types/sub-post";
-import Reaction from "../types/reaction";
+import { Reaction } from "../types/shared";
 import { SimpleRes, GetImageParams } from "../types/shared";
 import TransactionModel from "../models/transaction";
 import {
@@ -34,7 +34,7 @@ import { messagingOptions } from "../main/firebase";
 import { getFileFromS3 } from "../shared/utils/s3";
 import { getNotificationPayload } from "../shared/utils/functions";
 import { formatDate } from "../shared/utils/date-format";
-import { postNotificationType } from "../shared/constants";
+import { postNotificationType, notificationPhrase } from "../shared/constants";
 
 export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
   req,
@@ -107,7 +107,7 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
         ],
         subscriber: { id: depMate._id },
         type: postNotificationType.createdPostNotification,
-        phrase: "created a post",
+        phrase: notificationPhrase.created,
         payload: getNotificationPayload(post.title),
         image: { thumbnail: { url: profileImage.original.url } },
       });
@@ -296,50 +296,45 @@ export const reactToPost: RequestHandler<
     );
     await PostModel.updateOne({ _id: postId }, { $inc: { reactionCount: 1 } });
 
-    const image = {
-      thumbnail: { url: reactingUser.profileImage.original.url },
-    };
-
     if (reactingUserId !== post.creator.id.toHexString()) {
+      const postOwner = await UserModel.findById(post.creator.id).select(
+        "name"
+      );
+      const ownerData = {
+        id: post.creator.id,
+        name: `${postOwner.name.first} ${postOwner.name.last}`,
+      };
+      const creators = [
+        {
+          id: reactingUserId,
+          name: `${reactingUser.name.first} ${reactingUser.name.last}`,
+        },
+      ];
+
+      const notifType = postNotificationType.reactedToPostNotification;
+      const phrase = notificationPhrase.liked;
+      const payload = getNotificationPayload(post.title);
+      const image = {
+        thumbnail: { url: reactingUser.profileImage.original.url },
+      };
+
       await new NotificationModel({
-        creators: [
-          {
-            id: reactingUserId,
-            name: `${reactingUser.name.first} ${reactingUser.name.last}`,
-          },
-        ],
+        creators,
+        owner: ownerData,
         subscriber: { id: reactingUserId },
-        type: postNotificationType.reactedToPostNotification,
-        phrase: "reacted to",
-        payload: getNotificationPayload(post.title),
+        type: notifType,
+        phrase,
+        payload,
         image,
       }).save();
 
       await new NotificationModel({
-        creators: [
-          {
-            id: reactingUserId,
-            name: `${reactingUser.name.first} ${reactingUser.name.last}`,
-          },
-        ],
+        creators,
+        owner: ownerData,
         subscriber: { id: post.creator.id },
-        type: postNotificationType.reactedToPostNotification,
-        phrase: "reacted to",
-        payload: getNotificationPayload(post.title),
-        image,
-      }).save();
-    } else {
-      await new NotificationModel({
-        creators: [
-          {
-            id: reactingUserId,
-            name: `${reactingUser.name.first} ${reactingUser.name.last}`,
-          },
-        ],
-        subscriber: { id: post.creator.id },
-        type: postNotificationType.reactedToPostNotification,
-        phrase: "reacted to",
-        payload: getNotificationPayload(post.title),
+        type: notifType,
+        phrase,
+        payload,
         image,
       }).save();
     }

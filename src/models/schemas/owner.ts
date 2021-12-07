@@ -1,8 +1,8 @@
 import { Schema } from "mongoose";
 
-import {Creator} from "../../types/shared";
+import { Owner } from "../../types/shared";
 
-export default new Schema<Creator>(
+export default new Schema<Owner>(
   {
     id: Schema.Types.ObjectId,
     name: {
