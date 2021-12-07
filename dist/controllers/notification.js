@@ -27,6 +27,7 @@ const getNotifications = async (req, res, next) => {
                 id: n._id,
                 creators: n.creators,
                 subscriber: n.subscriber,
+                owner: n.owner,
                 type: n.type,
                 phrase: n.phrase,
                 payload: n.payload,
