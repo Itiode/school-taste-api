@@ -83,26 +83,28 @@ const createPost = async (req, res, next) => {
             "studentData.level": level,
         }).select("_id name messagingToken profileImage");
         for (let depMate of depMates) {
-            const notification = new notification_1.default({
-                creators: [
-                    {
-                        id: userId,
-                        name: `${name.first} ${name.last}`,
-                    },
-                ],
-                subscriber: { id: depMate._id },
-                type: constants_2.postNotificationType.createdPostNotification,
-                phrase: constants_2.notificationPhrase.created,
-                payload: (0, functions_1.getNotificationPayload)(post.title),
-                image: { thumbnail: { url: profileImage.original.url } },
-            });
-            await notification.save();
-            const fcmPayload = {
-                data: { msg: "PostCreated", status: "0", picture: "" },
-            };
-            // firebase
-            //   .messaging()
-            //   .sendToDevice(user.messagingToken, fcmPayload, messagingOptions);
+            if (depMate._id.toHexString() !== user._id.toHexString()) {
+                const notification = new notification_1.default({
+                    creators: [
+                        {
+                            id: userId,
+                            name: `${name.first} ${name.last}`,
+                        },
+                    ],
+                    subscriber: { id: depMate._id },
+                    type: constants_2.postNotificationType.createdPostNotification,
+                    phrase: constants_2.notificationPhrase.created,
+                    payload: (0, functions_1.getNotificationPayload)(post.title),
+                    image: { thumbnail: { url: profileImage.original.url } },
+                });
+                await notification.save();
+                const fcmPayload = {
+                    data: { msg: "PostCreated", status: "0", picture: "" },
+                };
+                // firebase
+                //   .messaging()
+                //   .sendToDevice(user.messagingToken, fcmPayload, messagingOptions);
+            }
         }
         res.status(201).send({ msg: "Post created successfully" });
     }

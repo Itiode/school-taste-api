@@ -98,29 +98,31 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
     }).select("_id name messagingToken profileImage");
 
     for (let depMate of depMates) {
-      const notification = new NotificationModel({
-        creators: [
-          {
-            id: userId,
-            name: `${name.first} ${name.last}`,
-          },
-        ],
-        subscriber: { id: depMate._id },
-        type: postNotificationType.createdPostNotification,
-        phrase: notificationPhrase.created,
-        payload: getNotificationPayload(post.title),
-        image: { thumbnail: { url: profileImage.original.url } },
-      });
+      if (depMate._id.toHexString() !== user._id.toHexString()) {
+        const notification = new NotificationModel({
+          creators: [
+            {
+              id: userId,
+              name: `${name.first} ${name.last}`,
+            },
+          ],
+          subscriber: { id: depMate._id },
+          type: postNotificationType.createdPostNotification,
+          phrase: notificationPhrase.created,
+          payload: getNotificationPayload(post.title),
+          image: { thumbnail: { url: profileImage.original.url } },
+        });
 
-      await notification.save();
+        await notification.save();
 
-      const fcmPayload = {
-        data: { msg: "PostCreated", status: "0", picture: "" },
-      };
+        const fcmPayload = {
+          data: { msg: "PostCreated", status: "0", picture: "" },
+        };
 
-      // firebase
-      //   .messaging()
-      //   .sendToDevice(user.messagingToken, fcmPayload, messagingOptions);
+        // firebase
+        //   .messaging()
+        //   .sendToDevice(user.messagingToken, fcmPayload, messagingOptions);
+      }
     }
 
     res.status(201).send({ msg: "Post created successfully" });
