@@ -29,9 +29,10 @@ const upload = (0, multer_1.default)({ storage: (0, s3_1.getStorageConfig)("post
 const pController = __importStar(require("../controllers/post"));
 const auth_1 = __importDefault(require("../middleware/auth"));
 const router = (0, express_1.default)();
-router.post("/", auth_1.default, upload.array("post-images", 6), pController.createPost);
+router.post("/", auth_1.default, upload.array("post-images", 10), pController.createPost);
+router.get("/my", auth_1.default, pController.getMyPosts);
 router.get("/:postId", auth_1.default, pController.getPost);
-router.get("/", auth_1.default, pController.getPosts);
+router.get("/", auth_1.default, pController.getAllPosts);
 router.put("/react-to-post/:postId", auth_1.default, pController.reactToPost);
 router.put("/view-post/:postId", auth_1.default, pController.viewPost);
 router.get("/images/:filename", pController.getPostImage);

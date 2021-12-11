@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.viewPost = exports.reactToPost = exports.getPostImage = exports.getPosts = exports.getPost = exports.createPost = void 0;
+exports.viewPost = exports.reactToPost = exports.getPostImage = exports.getMyPosts = exports.getAllPosts = exports.getPost = exports.createPost = void 0;
 const config_1 = __importDefault(require("config"));
 const post_1 = __importStar(require("../models/post"));
 const notification_1 = __importDefault(require("../models/notification"));
@@ -162,7 +162,7 @@ const getPost = async (req, res, next) => {
 };
 exports.getPost = getPost;
 // TODO: Create a reusable function for creating a mod post and sub posts
-const getPosts = async (req, res, next) => {
+const getAllPosts = async (req, res, next) => {
     const userId = req["user"].id;
     const pageNumber = +req.query.pageNumber;
     const pageSize = +req.query.pageSize;
@@ -183,51 +183,31 @@ const getPosts = async (req, res, next) => {
             // .limit(pageSize)
             .select("-__v -searchText -tags")
             .sort({ _id: -1 });
-        const modifiedPosts = [];
-        for (const p of posts) {
-            const subPosts = await sub_post_1.default.find({ ppid: p._id }).select("-__v -views -ppid -dUrl");
-            const modifiedSubPosts = [];
-            for (const sP of subPosts) {
-                const sPReaction = sP.reactions.find((r) => r.userId.toHexString() === userId);
-                modifiedSubPosts.push({
-                    id: sP._id,
-                    type: sP.type,
-                    url: sP.url,
-                    reaction: sPReaction ? sPReaction : { type: "", userId: "" },
-                    reactionCount: sP.reactionCount ? sP.reactionCount : 0,
-                    subCommentCount: sP.subCommentCount,
-                    viewCount: sP.viewCount,
-                });
-            }
-            const postReaction = p.reactions.find((r) => r.userId.toHexString() === userId);
-            const modPost = {
-                id: p._id,
-                creator: p.creator,
-                title: p.title,
-                body: p.body,
-                subPosts: modifiedSubPosts,
-                school: p.school,
-                studentData: p.studentData,
-                date: p.date,
-                formattedDate: (0, date_format_1.formatDate)(p.date),
-                reactionCount: p.reactionCount ? p.reactionCount : 0,
-                reaction: postReaction ? postReaction : { type: "", userId: "" },
-                viewCount: p.viewCount,
-                commentCount: p.commentCount,
-            };
-            modifiedPosts.push(modPost);
-        }
-        res.send({
-            msg: "Posts fetched successfully",
-            postCount: modifiedPosts.length,
-            data: modifiedPosts,
-        });
+        await (0, post_1.getPosts)(userId, posts, res);
     }
     catch (e) {
-        next(new Error("Error in getting posts: " + e));
+        next(new Error("Error in getting all posts: " + e));
     }
 };
-exports.getPosts = getPosts;
+exports.getAllPosts = getAllPosts;
+// TODO: Create a reusable function for creating a mod post and sub posts
+const getMyPosts = async (req, res, next) => {
+    const userId = req["user"].id;
+    const pageNumber = +req.query.pageNumber;
+    const pageSize = +req.query.pageSize;
+    try {
+        const posts = await post_1.default.findById(userId)
+            // .skip((pageNumber - 1) * pageSize)
+            // .limit(pageSize)
+            .select("-__v -searchText -tags")
+            .sort({ _id: -1 });
+        await (0, post_1.getPosts)(userId, posts, res);
+    }
+    catch (e) {
+        next(new Error("Error in getting user's posts: " + e));
+    }
+};
+exports.getMyPosts = getMyPosts;
 const getPostImage = async (req, res, next) => {
     try {
         const readStream = (0, s3_1.getFileFromS3)("post-images", req.params.filename);

@@ -27,10 +27,10 @@ exports.validReactionTypes = [
 ];
 exports.validSubPostTypes = ["Image", "Video", "Gif", "Sticker"];
 exports.notificationPhrase = {
-    created: 'created',
-    liked: 'liked',
-    reacted: 'reacted',
-    commentedOn: 'commented on'
+    created: "created",
+    liked: "liked",
+    reacted: "reacted",
+    commented: "commented",
 };
 // POST NOTIFICATION TYPES
 exports.postNotificationType = {

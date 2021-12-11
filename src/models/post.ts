@@ -1,12 +1,17 @@
 import mongoose, { Schema } from "mongoose";
 import Joi from "joi";
+import { Request, Response, NextFunction } from "express";
 
 import {
   Post,
   CreatePostReq,
   ReactToPostParams,
   ViewPostParams,
+  PostRes,
 } from "../types/post";
+import { SubPostRes } from "../types/sub-post";
+import SubPostModel from "../models/sub-post";
+import { formatDate } from "../shared/utils/date-format";
 
 import reactionSchema from "./schemas/reaction";
 import schoolSchema from "./schemas/school";
@@ -62,4 +67,59 @@ export function validateViewPostReq(data: ViewPostParams) {
       .regex(new RegExp("^[0-9a-fA-F]{24}$"))
       .required(),
   }).validate(data);
+}
+
+export async function getPosts(userId: string, posts: Post[], res: Response) {
+  const modifiedPosts: PostRes[] = [];
+
+  for (const p of posts) {
+    const subPosts = await SubPostModel.find({ ppid: p._id }).select(
+      "-__v -views -ppid -dUrl"
+    );
+
+    const modifiedSubPosts: SubPostRes[] = [];
+    for (const sP of subPosts) {
+      const sPReaction = sP.reactions.find(
+        (r: any) => r.userId.toHexString() === userId
+      );
+
+      modifiedSubPosts.push({
+        id: sP._id,
+        type: sP.type,
+        url: sP.url,
+        reaction: sPReaction ? sPReaction : { type: "", userId: "" },
+        reactionCount: sP.reactionCount ? sP.reactionCount : 0,
+        subCommentCount: sP.subCommentCount,
+        viewCount: sP.viewCount,
+      });
+    }
+
+    const postReaction = p.reactions.find(
+      (r: any) => r.userId.toHexString() === userId
+    );
+
+    const modPost = {
+      id: p._id,
+      creator: p.creator,
+      title: p.title,
+      body: p.body,
+      subPosts: modifiedSubPosts,
+      school: p.school,
+      studentData: p.studentData,
+      date: p.date,
+      formattedDate: formatDate(p.date.toString()),
+      reactionCount: p.reactionCount ? p.reactionCount : 0,
+      reaction: postReaction ? postReaction : { type: "", userId: "" },
+      viewCount: p.viewCount,
+      commentCount: p.commentCount,
+    };
+
+    modifiedPosts.push(modPost);
+  }
+
+  res.send({
+    msg: "Posts gotten successfully",
+    postCount: modifiedPosts.length,
+    data: modifiedPosts,
+  });
 }

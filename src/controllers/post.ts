@@ -6,6 +6,7 @@ import PostModel, {
   validateCreatePostReq,
   validateReactToPostParams,
   validateViewPostReq,
+  getPosts,
 } from "../models/post";
 import NotificationModel from "../models/notification";
 import SubPostModel from "../models/sub-post";
@@ -200,7 +201,7 @@ export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
 };
 
 // TODO: Create a reusable function for creating a mod post and sub posts
-export const getPosts: RequestHandler<any, GetPostsRes, any, GetPostsQuery> =
+export const getAllPosts: RequestHandler<any, GetPostsRes, any, GetPostsQuery> =
   async (req, res, next) => {
     const userId = req["user"].id;
     const pageNumber = +req.query.pageNumber;
@@ -226,60 +227,29 @@ export const getPosts: RequestHandler<any, GetPostsRes, any, GetPostsQuery> =
         .select("-__v -searchText -tags")
         .sort({ _id: -1 });
 
-      const modifiedPosts: PostRes[] = [];
-
-      for (const p of posts) {
-        const subPosts = await SubPostModel.find({ ppid: p._id }).select(
-          "-__v -views -ppid -dUrl"
-        );
-
-        const modifiedSubPosts: SubPostRes[] = [];
-        for (const sP of subPosts) {
-          const sPReaction = sP.reactions.find(
-            (r: any) => r.userId.toHexString() === userId
-          );
-
-          modifiedSubPosts.push({
-            id: sP._id,
-            type: sP.type,
-            url: sP.url,
-            reaction: sPReaction ? sPReaction : { type: "", userId: "" },
-            reactionCount: sP.reactionCount ? sP.reactionCount : 0,
-            subCommentCount: sP.subCommentCount,
-            viewCount: sP.viewCount,
-          });
-        }
-
-        const postReaction = p.reactions.find(
-          (r: any) => r.userId.toHexString() === userId
-        );
-
-        const modPost = {
-          id: p._id,
-          creator: p.creator,
-          title: p.title,
-          body: p.body,
-          subPosts: modifiedSubPosts,
-          school: p.school,
-          studentData: p.studentData,
-          date: p.date,
-          formattedDate: formatDate(p.date),
-          reactionCount: p.reactionCount ? p.reactionCount : 0,
-          reaction: postReaction ? postReaction : { type: "", userId: "" },
-          viewCount: p.viewCount,
-          commentCount: p.commentCount,
-        };
-
-        modifiedPosts.push(modPost);
-      }
-
-      res.send({
-        msg: "Posts fetched successfully",
-        postCount: modifiedPosts.length,
-        data: modifiedPosts,
-      });
+      await getPosts(userId, posts, res);
     } catch (e) {
-      next(new Error("Error in getting posts: " + e));
+      next(new Error("Error in getting all posts: " + e));
+    }
+  };
+
+// TODO: Create a reusable function for creating a mod post and sub posts
+export const getMyPosts: RequestHandler<any, GetPostsRes, any, GetPostsQuery> =
+  async (req, res, next) => {
+    const userId = req["user"].id;
+    const pageNumber = +req.query.pageNumber;
+    const pageSize = +req.query.pageSize;
+
+    try {
+      const posts = await PostModel.findById(userId)
+        // .skip((pageNumber - 1) * pageSize)
+        // .limit(pageSize)
+        .select("-__v -searchText -tags")
+        .sort({ _id: -1 });
+
+      await getPosts(userId, posts, res);
+    } catch (e) {
+      next(new Error("Error in getting user's posts: " + e));
     }
   };
 

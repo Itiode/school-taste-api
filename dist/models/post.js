@@ -22,9 +22,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateViewPostReq = exports.validateReactToPostParams = exports.validateCreatePostReq = void 0;
+exports.getPosts = exports.validateViewPostReq = exports.validateReactToPostParams = exports.validateCreatePostReq = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const joi_1 = __importDefault(require("joi"));
+const sub_post_1 = __importDefault(require("../models/sub-post"));
+const date_format_1 = require("../shared/utils/date-format");
 const reaction_1 = __importDefault(require("./schemas/reaction"));
 const school_1 = __importDefault(require("./schemas/school"));
 const student_data_1 = __importDefault(require("./schemas/student-data"));
@@ -78,3 +80,45 @@ function validateViewPostReq(data) {
     }).validate(data);
 }
 exports.validateViewPostReq = validateViewPostReq;
+async function getPosts(userId, posts, res) {
+    const modifiedPosts = [];
+    for (const p of posts) {
+        const subPosts = await sub_post_1.default.find({ ppid: p._id }).select("-__v -views -ppid -dUrl");
+        const modifiedSubPosts = [];
+        for (const sP of subPosts) {
+            const sPReaction = sP.reactions.find((r) => r.userId.toHexString() === userId);
+            modifiedSubPosts.push({
+                id: sP._id,
+                type: sP.type,
+                url: sP.url,
+                reaction: sPReaction ? sPReaction : { type: "", userId: "" },
+                reactionCount: sP.reactionCount ? sP.reactionCount : 0,
+                subCommentCount: sP.subCommentCount,
+                viewCount: sP.viewCount,
+            });
+        }
+        const postReaction = p.reactions.find((r) => r.userId.toHexString() === userId);
+        const modPost = {
+            id: p._id,
+            creator: p.creator,
+            title: p.title,
+            body: p.body,
+            subPosts: modifiedSubPosts,
+            school: p.school,
+            studentData: p.studentData,
+            date: p.date,
+            formattedDate: (0, date_format_1.formatDate)(p.date.toString()),
+            reactionCount: p.reactionCount ? p.reactionCount : 0,
+            reaction: postReaction ? postReaction : { type: "", userId: "" },
+            viewCount: p.viewCount,
+            commentCount: p.commentCount,
+        };
+        modifiedPosts.push(modPost);
+    }
+    res.send({
+        msg: "Posts gotten successfully",
+        postCount: modifiedPosts.length,
+        data: modifiedPosts,
+    });
+}
+exports.getPosts = getPosts;

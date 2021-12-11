@@ -10,8 +10,9 @@ import auth from "../middleware/auth";
 const router = Router();
 
 router.post("/", auth, upload.array("post-images", 10), pController.createPost);
+router.get("/my", auth, pController.getMyPosts);
 router.get("/:postId", auth, pController.getPost);
-router.get("/", auth, pController.getPosts);
+router.get("/", auth, pController.getAllPosts);
 router.put("/react-to-post/:postId", auth, pController.reactToPost);
 router.put("/view-post/:postId", auth, pController.viewPost);
 router.get("/images/:filename", pController.getPostImage);
