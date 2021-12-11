@@ -30,11 +30,11 @@ export const validReactionTypes: string[] = [
 export const validSubPostTypes: string[] = ["Image", "Video", "Gif", "Sticker"];
 
 export const notificationPhrase = {
-  created: 'created',
-  liked: 'liked',
-  reacted: 'reacted',
-  commentedOn: 'commented on'
-}
+  created: "created",
+  liked: "liked",
+  reacted: "reacted",
+  commented: "commented",
+};
 
 // POST NOTIFICATION TYPES
 export const postNotificationType = {

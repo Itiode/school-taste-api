@@ -9,7 +9,7 @@ import auth from "../middleware/auth";
 
 const router = Router();
 
-router.post("/", auth, upload.array("post-images", 6), pController.createPost);
+router.post("/", auth, upload.array("post-images", 10), pController.createPost);
 router.get("/:postId", auth, pController.getPost);
 router.get("/", auth, pController.getPosts);
 router.put("/react-to-post/:postId", auth, pController.reactToPost);

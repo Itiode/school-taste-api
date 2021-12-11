@@ -1,5 +1,7 @@
 # TODO
-- Use "liked" for LikedPostNotifications and 'reacted to' for other reactions.
+- Create a notification when a comment is made
+
+
 - Add Location field which should be an object with the following properties
 1. street
 2. city
