@@ -107,7 +107,7 @@ async function getPosts(userId, posts, res) {
             school: p.school,
             studentData: p.studentData,
             date: p.date,
-            formattedDate: (0, date_format_1.formatDate)(p.date.toString()),
+            formattedDate: (0, date_format_1.formatDate)(p.date),
             reactionCount: p.reactionCount ? p.reactionCount : 0,
             reaction: postReaction ? postReaction : { type: "", userId: "" },
             viewCount: p.viewCount,

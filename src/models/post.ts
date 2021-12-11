@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import Joi from "joi";
-import { Request, Response, NextFunction } from "express";
+import { Response } from "express";
 
 import {
   Post,
@@ -69,7 +69,7 @@ export function validateViewPostReq(data: ViewPostParams) {
   }).validate(data);
 }
 
-export async function getPosts(userId: string, posts: Post[], res: Response) {
+export async function getPosts(userId: string, posts: any[], res: Response) {
   const modifiedPosts: PostRes[] = [];
 
   for (const p of posts) {
@@ -107,7 +107,7 @@ export async function getPosts(userId: string, posts: Post[], res: Response) {
       school: p.school,
       studentData: p.studentData,
       date: p.date,
-      formattedDate: formatDate(p.date.toString()),
+      formattedDate: formatDate(p.date),
       reactionCount: p.reactionCount ? p.reactionCount : 0,
       reaction: postReaction ? postReaction : { type: "", userId: "" },
       viewCount: p.viewCount,

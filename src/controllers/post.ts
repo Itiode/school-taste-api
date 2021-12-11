@@ -241,7 +241,7 @@ export const getMyPosts: RequestHandler<any, GetPostsRes, any, GetPostsQuery> =
     const pageSize = +req.query.pageSize;
 
     try {
-      const posts = await PostModel.findById(userId)
+      const posts = await PostModel.find({ "creator.id": userId })
         // .skip((pageNumber - 1) * pageSize)
         // .limit(pageSize)
         .select("-__v -searchText -tags")

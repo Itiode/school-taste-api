@@ -1,5 +1,5 @@
 {
-  "port": "8080",
+  "port": "3200",
   "dbUrl": "mongodb://localhost:27017/school-taste",
   "serverAddress": "http://192.168.43.39:3200",
   "jwtAuthPrivateKey": "unsecureJwtAuthPrivateKey",

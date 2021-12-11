@@ -196,7 +196,7 @@ const getMyPosts = async (req, res, next) => {
     const pageNumber = +req.query.pageNumber;
     const pageSize = +req.query.pageSize;
     try {
-        const posts = await post_1.default.findById(userId)
+        const posts = await post_1.default.find({ "creator.id": userId })
             // .skip((pageNumber - 1) * pageSize)
             // .limit(pageSize)
             .select("-__v -searchText -tags")
