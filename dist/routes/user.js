@@ -12,6 +12,7 @@ const auth_1 = __importDefault(require("../middleware/auth"));
 const router = (0, express_1.default)();
 router.post("/", user_1.addUser);
 router.get("/me", auth_1.default, user_1.getUser);
+router.get("/:userId", auth_1.default, user_1.getUser);
 router.put("/update-profile-image", auth_1.default, upload.single("profile-image"), user_1.updateProfileImage);
 router.get("/profile-images/:filename", auth_1.default, user_1.getProfileImage);
 router.put("/update-about", auth_1.default, user_1.updateAbout);

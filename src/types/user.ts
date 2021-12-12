@@ -13,7 +13,7 @@ export interface User {
   interests: string[];
   hobbies: string[];
   roles: string[];
-  rubies: number;
+  rubyBalance: number;
   messagingToken: string;
 }
 

@@ -76,7 +76,7 @@ const schema = new mongoose_1.Schema({
     interests: [String],
     hobbies: [String],
     roles: [String],
-    rubies: { type: Number, min: 0, max: 1000, default: 1 },
+    rubyBalance: { type: Number, min: 0, max: 1000, default: 1 },
     messagingToken: String,
 }, { timestamps: true });
 schema.methods.genAuthToken = function () {

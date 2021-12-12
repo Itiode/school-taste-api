@@ -15,7 +15,7 @@ import {
   UpdateStudentDataReq,
   UpdateMessagingTokenReq,
 } from "../types/user";
-import { SimpleRes, GetImageParams } from "../types/shared";
+import { SimpleParams, SimpleRes, GetImageParams } from "../types/shared";
 import { getFileFromS3 } from "../shared/utils/s3";
 
 // TODO: Create a Transaction doc for the 1 free ruby signup bonus
@@ -71,17 +71,22 @@ export const addUser: RequestHandler<any, AuthRes, AddUserReq> = async (
   }
 };
 
-export const getUser: RequestHandler<any, GetUserRes> = async (
+// Get the currently logged in user or the user whose ID was 
+// provided.
+export const getUser: RequestHandler<SimpleParams, GetUserRes> = async (
   req,
   res,
   next
 ) => {
-  const userId = req["user"].id;
+  let userId = req["user"].id;
+
+  if (req.params.userId) userId = req.params.userId;
 
   try {
     const user = await UserModel.findById(userId).select(
       "-password -__v -createdAt -updatedAt"
     );
+    
     if (!user) return res.status(404).send({ msg: "User not found" });
 
     const {
@@ -113,7 +118,7 @@ export const getUser: RequestHandler<any, GetUserRes> = async (
         about,
         school,
         studentData,
-        rubyBalance,
+        rubyBalance: req.params.userId ? 0 : rubyBalance,
       },
     });
   } catch (e) {

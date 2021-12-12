@@ -19,6 +19,7 @@ const router = Router();
 
 router.post("/", addUser);
 router.get("/me", auth, getUser);
+router.get("/:userId", auth, getUser);
 router.put(
   "/update-profile-image",
   auth,

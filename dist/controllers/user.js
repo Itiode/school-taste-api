@@ -62,8 +62,12 @@ const addUser = async (req, res, next) => {
     }
 };
 exports.addUser = addUser;
+// Get the currently logged in user or the user whose ID was 
+// provided.
 const getUser = async (req, res, next) => {
-    const userId = req["user"].id;
+    let userId = req["user"].id;
+    if (req.params.userId)
+        userId = req.params.userId;
     try {
         const user = await user_1.default.findById(userId).select("-password -__v -createdAt -updatedAt");
         if (!user)
@@ -83,7 +87,7 @@ const getUser = async (req, res, next) => {
                 about,
                 school,
                 studentData,
-                rubyBalance,
+                rubyBalance: req.params.userId ? 0 : rubyBalance,
             },
         });
     }

@@ -56,7 +56,7 @@ const schema = new Schema<User>(
     interests: [String],
     hobbies: [String],
     roles: [String],
-    rubies: { type: Number, min: 0, max: 1000, default: 1 },
+    rubyBalance: { type: Number, min: 0, max: 1000, default: 1 },
     messagingToken: String,
   },
   { timestamps: true }
