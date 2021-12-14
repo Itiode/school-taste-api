@@ -35,17 +35,10 @@ const schema = new mongoose_1.Schema({
         id: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
         name: { type: String, trim: true, maxLength: 250, required: true },
     },
-    shortText: {
-        type: String,
-        trim: true,
-        minLength: 1,
-        maxLength: 100,
-        required: true,
-    },
-    longText: { type: String, trim: true, maxLength: 10000 },
+    text: { type: String, trim: true, maxLength: 10000, required: true },
     school: school_1.default,
     studentData: student_data_1.default,
-    searchText: { type: String, trim: true, maxLength: 500, required: true },
+    tagsString: { type: String, trim: true, required: true },
     tags: { type: [String] },
     date: { type: Date, default: Date.now },
     reactions: [reaction_1.default],
@@ -57,8 +50,7 @@ const schema = new mongoose_1.Schema({
 exports.default = mongoose_1.default.model("Post", schema);
 function validateCreatePostReq(data) {
     return joi_1.default.object({
-        shortText: joi_1.default.string().trim().max(250).required(),
-        longText: joi_1.default.string().trim().max(10000),
+        text: joi_1.default.string().trim().max(10000).required(),
     }).validate(data);
 }
 exports.validateCreatePostReq = validateCreatePostReq;
@@ -101,8 +93,7 @@ async function getPosts(userId, posts, res) {
         const modPost = {
             id: p._id,
             creator: p.creator,
-            shortText: p.shortText,
-            longText: p.longText,
+            text: p.text,
             subPosts: modifiedSubPosts,
             school: p.school,
             studentData: p.studentData,

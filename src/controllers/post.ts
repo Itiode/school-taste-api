@@ -56,25 +56,24 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
         .status(404)
         .send({ msg: "Cant't create post, user not found" });
 
-    const { shortText, longText } = req.body;
+    const { text } = req.body;
 
     const { name, studentData, school, profileImage } = user;
 
-    const userFullName = name.first + " " + name.last;
+    const fullName = name.first + " " + name.last;
     const { department, faculty, level } = studentData;
 
-    const searchText = `${shortText} ${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department} ${faculty} ${level}`;
+    const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department} ${faculty} ${level}`;
 
     const post = await new PostModel({
       creator: {
         id: creatorId,
-        name: userFullName,
+        name: fullName,
       },
-      shortText,
-      longText,
+      text,
       school,
       studentData,
-      searchText,
+      tagsString,
     }).save();
 
     if (req["files"]) {
@@ -113,7 +112,7 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
           type: postNotificationType.createdPostNotification,
           phrase: notificationPhrase.created,
           contentId: post._id,
-          payload: getNotificationPayload(post.shortText),
+          payload: getNotificationPayload(post.text),
           image: { thumbnail: { url: profileImage.original.url } },
         });
 
@@ -148,7 +147,7 @@ export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
       return res.status(404).send({ msg: "No user with the given ID" });
 
     const post = await PostModel.findById(req.params.postId).select(
-      "-__v -searchText -tags"
+      "-__v -tagsString -tags"
     );
 
     if (!post) res.status(404).send({ msg: "No post with the given ID" });
@@ -181,8 +180,7 @@ export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
     const modPost = {
       id: post._id,
       creator: post.creator,
-      shortText: post.shortText,
-      longText: post.longText,
+      text: post.text,
       subPosts: modifiedSubPosts,
       school: post.school,
       studentData: post.studentData,
@@ -206,25 +204,15 @@ export const getAllPosts: RequestHandler<any, GetPostsRes, any, GetPostsQuery> =
     const userId = req["user"].id;
     const pageNumber = +req.query.pageNumber;
     const pageSize = +req.query.pageSize;
-    const { searchQuery } = req.query;
+    const { searchQuery, schoolFullName } = req.query;
 
     try {
-      const searchWords = searchQuery.split(" ");
-      const schoolShortName = searchWords[0].toUpperCase();
-      const remainingWords =
-        searchWords.length == 1
-          ? schoolShortName
-          : searchWords.slice(1).join(" ");
-
       const posts = await PostModel.find({
-        $and: [
-          { "school.shortName": schoolShortName },
-          { $text: { $search: `${remainingWords}` } },
-        ],
+        $tagsString: { $search: `${searchQuery}` },
       })
         // .skip((pageNumber - 1) * pageSize)
         // .limit(pageSize)
-        .select("-__v -searchText -tags")
+        .select("-__v -tagsString -tags")
         .sort({ _id: -1 });
 
       await getPosts(userId, posts, res);
@@ -244,7 +232,7 @@ export const getMyPosts: RequestHandler<any, GetPostsRes, any, GetPostsQuery> =
       const posts = await PostModel.find({ "creator.id": userId })
         // .skip((pageNumber - 1) * pageSize)
         // .limit(pageSize)
-        .select("-__v -searchText -tags")
+        .select("-__v -tagsString -tags")
         .sort({ _id: -1 });
 
       await getPosts(userId, posts, res);
@@ -293,7 +281,7 @@ export const reactToPost: RequestHandler<
     const { postId } = req.params;
 
     const post = await PostModel.findById(postId).select(
-      "_id reactions creator shortText"
+      "_id reactions creator text"
     );
 
     if (!post)
@@ -357,7 +345,7 @@ export const reactToPost: RequestHandler<
 
       const notifType = postNotificationType.reactedToPostNotification;
       const phrase = notificationPhrase.liked;
-      const payload = getNotificationPayload(post.shortText);
+      const payload = getNotificationPayload(post.text);
       const image = {
         thumbnail: { url: reactingUser.profileImage.original.url },
       };

@@ -22,17 +22,10 @@ const schema = new Schema<Post>({
     id: { type: Schema.Types.ObjectId, ref: "User", required: true },
     name: { type: String, trim: true, maxLength: 250, required: true },
   },
-  shortText: {
-    type: String,
-    trim: true,
-    minLength: 1,
-    maxLength: 100,
-    required: true,
-  },
-  longText: { type: String, trim: true, maxLength: 10000 },
+  text: { type: String, trim: true, maxLength: 10000, required: true },
   school: schoolSchema,
   studentData: studentDataSchema,
-  searchText: { type: String, trim: true, maxLength: 500, required: true },
+  tagsString: { type: String, trim: true, required: true },
   tags: { type: [String] },
   date: { type: Date, default: Date.now },
   reactions: [reactionSchema],
@@ -46,8 +39,7 @@ export default mongoose.model("Post", schema);
 
 export function validateCreatePostReq(data: CreatePostReq) {
   return Joi.object({
-    shortText: Joi.string().trim().max(250).required(),
-    longText: Joi.string().trim().max(10000),
+    text: Joi.string().trim().max(10000).required(),
   }).validate(data);
 }
 
@@ -101,8 +93,7 @@ export async function getPosts(userId: string, posts: any[], res: Response) {
     const modPost = {
       id: p._id,
       creator: p.creator,
-      shortText: p.shortText,
-      longText: p.longText,
+      text: p.text,
       subPosts: modifiedSubPosts,
       school: p.school,
       studentData: p.studentData,

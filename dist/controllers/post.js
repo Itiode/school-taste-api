@@ -46,21 +46,20 @@ const createPost = async (req, res, next) => {
             return res
                 .status(404)
                 .send({ msg: "Cant't create post, user not found" });
-        const { shortText, longText } = req.body;
+        const { text } = req.body;
         const { name, studentData, school, profileImage } = user;
-        const userFullName = name.first + " " + name.last;
+        const fullName = name.first + " " + name.last;
         const { department, faculty, level } = studentData;
-        const searchText = `${shortText} ${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department} ${faculty} ${level}`;
+        const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department} ${faculty} ${level}`;
         const post = await new post_1.default({
             creator: {
                 id: creatorId,
-                name: userFullName,
+                name: fullName,
             },
-            shortText,
-            longText,
+            text,
             school,
             studentData,
-            searchText,
+            tagsString,
         }).save();
         if (req["files"]) {
             for (let i = 0; i < req["files"].length; i++) {
@@ -95,7 +94,7 @@ const createPost = async (req, res, next) => {
                     type: constants_2.postNotificationType.createdPostNotification,
                     phrase: constants_2.notificationPhrase.created,
                     contentId: post._id,
-                    payload: (0, functions_1.getNotificationPayload)(post.shortText),
+                    payload: (0, functions_1.getNotificationPayload)(post.text),
                     image: { thumbnail: { url: profileImage.original.url } },
                 });
                 await notification.save();
@@ -121,7 +120,7 @@ const getPost = async (req, res, next) => {
         const user = await user_1.default.findById(userId).select("_id");
         if (!user)
             return res.status(404).send({ msg: "No user with the given ID" });
-        const post = await post_1.default.findById(req.params.postId).select("-__v -searchText -tags");
+        const post = await post_1.default.findById(req.params.postId).select("-__v -tagsString -tags");
         if (!post)
             res.status(404).send({ msg: "No post with the given ID" });
         const subPosts = await sub_post_1.default.find({ ppid: post._id }).select("-__v -views -ppid -dUrl");
@@ -142,8 +141,7 @@ const getPost = async (req, res, next) => {
         const modPost = {
             id: post._id,
             creator: post.creator,
-            shortText: post.shortText,
-            longText: post.longText,
+            text: post.text,
             subPosts: modifiedSubPosts,
             school: post.school,
             studentData: post.studentData,
@@ -166,22 +164,14 @@ const getAllPosts = async (req, res, next) => {
     const userId = req["user"].id;
     const pageNumber = +req.query.pageNumber;
     const pageSize = +req.query.pageSize;
-    const { searchQuery } = req.query;
+    const { searchQuery, schoolFullName } = req.query;
     try {
-        const searchWords = searchQuery.split(" ");
-        const schoolShortName = searchWords[0].toUpperCase();
-        const remainingWords = searchWords.length == 1
-            ? schoolShortName
-            : searchWords.slice(1).join(" ");
         const posts = await post_1.default.find({
-            $and: [
-                { "school.shortName": schoolShortName },
-                { $text: { $search: `${remainingWords}` } },
-            ],
+            $tagsString: { $search: `${searchQuery}` },
         })
             // .skip((pageNumber - 1) * pageSize)
             // .limit(pageSize)
-            .select("-__v -searchText -tags")
+            .select("-__v -tagsString -tags")
             .sort({ _id: -1 });
         await (0, post_1.getPosts)(userId, posts, res);
     }
@@ -199,7 +189,7 @@ const getMyPosts = async (req, res, next) => {
         const posts = await post_1.default.find({ "creator.id": userId })
             // .skip((pageNumber - 1) * pageSize)
             // .limit(pageSize)
-            .select("-__v -searchText -tags")
+            .select("-__v -tagsString -tags")
             .sort({ _id: -1 });
         await (0, post_1.getPosts)(userId, posts, res);
     }
@@ -232,7 +222,7 @@ const reactToPost = async (req, res, next) => {
         if (!reactingUser)
             return res.status(404).send({ msg: "No user with the given ID" });
         const { postId } = req.params;
-        const post = await post_1.default.findById(postId).select("_id reactions creator shortText");
+        const post = await post_1.default.findById(postId).select("_id reactions creator text");
         if (!post)
             return res.status(404).send({ msg: "No post with the given ID" });
         const reaction = post.reactions.find((reaction) => reaction.userId.toHexString() === reactingUserId);
@@ -268,7 +258,7 @@ const reactToPost = async (req, res, next) => {
             ];
             const notifType = constants_2.postNotificationType.reactedToPostNotification;
             const phrase = constants_2.notificationPhrase.liked;
-            const payload = (0, functions_1.getNotificationPayload)(post.shortText);
+            const payload = (0, functions_1.getNotificationPayload)(post.text);
             const image = {
                 thumbnail: { url: reactingUser.profileImage.original.url },
             };
