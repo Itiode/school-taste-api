@@ -7,8 +7,8 @@ export interface Post {
     name: string;
     id: string;
   };
-  title: string;
-  body: string;
+  shortText: string;
+  longText: string;
   school: { fullName: string; shortName: string };
   studentData: { department: string; faculty: string; level: string };
   searchText: string;
@@ -28,8 +28,8 @@ export interface PostRes {
     name: string;
     id: string;
   };
-  title: string;
-  body: string;
+  shortText: string;
+  longText: string;
   subPosts: SubPostRes[];
   school: { fullName: string; shortName: string };
   studentData: { department: string; faculty: string; level: string };
@@ -42,8 +42,8 @@ export interface PostRes {
 }
 
 export interface CreatePostReq {
-  title: string;
-  body: string;
+  shortText: string;
+  longText: string;
 }
 
 export interface GetPostsQuery {

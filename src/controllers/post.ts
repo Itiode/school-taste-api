@@ -56,22 +56,22 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
         .status(404)
         .send({ msg: "Cant't create post, user not found" });
 
-    const { title, body } = req.body;
+    const { shortText, longText } = req.body;
 
     const { name, studentData, school, profileImage } = user;
 
     const userFullName = name.first + " " + name.last;
     const { department, faculty, level } = studentData;
 
-    const searchText = `${title} ${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department} ${faculty} ${level}`;
+    const searchText = `${shortText} ${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department} ${faculty} ${level}`;
 
     const post = await new PostModel({
       creator: {
         id: creatorId,
         name: userFullName,
       },
-      title,
-      body,
+      shortText,
+      longText,
       school,
       studentData,
       searchText,
@@ -113,7 +113,7 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
           type: postNotificationType.createdPostNotification,
           phrase: notificationPhrase.created,
           contentId: post._id,
-          payload: getNotificationPayload(post.title),
+          payload: getNotificationPayload(post.shortText),
           image: { thumbnail: { url: profileImage.original.url } },
         });
 
@@ -181,8 +181,8 @@ export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
     const modPost = {
       id: post._id,
       creator: post.creator,
-      title: post.title,
-      body: post.body,
+      shortText: post.shortText,
+      longText: post.longText,
       subPosts: modifiedSubPosts,
       school: post.school,
       studentData: post.studentData,
@@ -293,7 +293,7 @@ export const reactToPost: RequestHandler<
     const { postId } = req.params;
 
     const post = await PostModel.findById(postId).select(
-      "_id reactions creator title"
+      "_id reactions creator shortText"
     );
 
     if (!post)
@@ -357,7 +357,7 @@ export const reactToPost: RequestHandler<
 
       const notifType = postNotificationType.reactedToPostNotification;
       const phrase = notificationPhrase.liked;
-      const payload = getNotificationPayload(post.title);
+      const payload = getNotificationPayload(post.shortText);
       const image = {
         thumbnail: { url: reactingUser.profileImage.original.url },
       };

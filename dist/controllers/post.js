@@ -46,18 +46,18 @@ const createPost = async (req, res, next) => {
             return res
                 .status(404)
                 .send({ msg: "Cant't create post, user not found" });
-        const { title, body } = req.body;
+        const { shortText, longText } = req.body;
         const { name, studentData, school, profileImage } = user;
         const userFullName = name.first + " " + name.last;
         const { department, faculty, level } = studentData;
-        const searchText = `${title} ${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department} ${faculty} ${level}`;
+        const searchText = `${shortText} ${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department} ${faculty} ${level}`;
         const post = await new post_1.default({
             creator: {
                 id: creatorId,
                 name: userFullName,
             },
-            title,
-            body,
+            shortText,
+            longText,
             school,
             studentData,
             searchText,
@@ -95,7 +95,7 @@ const createPost = async (req, res, next) => {
                     type: constants_2.postNotificationType.createdPostNotification,
                     phrase: constants_2.notificationPhrase.created,
                     contentId: post._id,
-                    payload: (0, functions_1.getNotificationPayload)(post.title),
+                    payload: (0, functions_1.getNotificationPayload)(post.shortText),
                     image: { thumbnail: { url: profileImage.original.url } },
                 });
                 await notification.save();
@@ -142,8 +142,8 @@ const getPost = async (req, res, next) => {
         const modPost = {
             id: post._id,
             creator: post.creator,
-            title: post.title,
-            body: post.body,
+            shortText: post.shortText,
+            longText: post.longText,
             subPosts: modifiedSubPosts,
             school: post.school,
             studentData: post.studentData,
@@ -232,7 +232,7 @@ const reactToPost = async (req, res, next) => {
         if (!reactingUser)
             return res.status(404).send({ msg: "No user with the given ID" });
         const { postId } = req.params;
-        const post = await post_1.default.findById(postId).select("_id reactions creator title");
+        const post = await post_1.default.findById(postId).select("_id reactions creator shortText");
         if (!post)
             return res.status(404).send({ msg: "No post with the given ID" });
         const reaction = post.reactions.find((reaction) => reaction.userId.toHexString() === reactingUserId);
@@ -268,7 +268,7 @@ const reactToPost = async (req, res, next) => {
             ];
             const notifType = constants_2.postNotificationType.reactedToPostNotification;
             const phrase = constants_2.notificationPhrase.liked;
-            const payload = (0, functions_1.getNotificationPayload)(post.title);
+            const payload = (0, functions_1.getNotificationPayload)(post.shortText);
             const image = {
                 thumbnail: { url: reactingUser.profileImage.original.url },
             };
