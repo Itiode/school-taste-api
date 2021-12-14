@@ -208,7 +208,7 @@ export const getAllPosts: RequestHandler<any, GetPostsRes, any, GetPostsQuery> =
 
     try {
       const posts = await PostModel.find({
-        $tagsString: { $search: `${searchQuery}` },
+        $text: { $search: `${searchQuery}` },
       })
         // .skip((pageNumber - 1) * pageSize)
         // .limit(pageSize)

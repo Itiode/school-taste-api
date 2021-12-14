@@ -167,7 +167,7 @@ const getAllPosts = async (req, res, next) => {
     const { searchQuery, schoolFullName } = req.query;
     try {
         const posts = await post_1.default.find({
-            $tagsString: { $search: `${searchQuery}` },
+            $text: { $search: `${searchQuery}` },
         })
             // .skip((pageNumber - 1) * pageSize)
             // .limit(pageSize)
