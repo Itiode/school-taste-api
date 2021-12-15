@@ -40,8 +40,8 @@ const addComment = async (req, res, next) => {
         const post = await post_1.default.findById(postId).select("_id creator");
         if (!post)
             return res.status(404).send({ msg: "No post with the given ID" });
-        const user = await user_1.default.findById(userId).select("name");
-        const { name } = user;
+        const user = await user_1.default.findById(userId).select("name profileImage");
+        const { name, profileImage } = user;
         if (!user)
             return res.status(404).send({ msg: "No user with the given ID" });
         await new comment_1.default({
@@ -53,30 +53,41 @@ const addComment = async (req, res, next) => {
             },
         }).save();
         await post_1.default.updateOne({ _id: postId }, { $inc: { commentCount: 1 } });
-        await new notification_1.default({
-            creators: [
+        if (userId !== post.creator.id.toHexString()) {
+            const creators = [
                 {
                     id: userId,
                     name: `${name.first} ${name.last}`,
                 },
-            ],
-            subscriber: { id: post.creator.id },
-            type: constants_1.postNotificationType.commentedOnPostNotification,
-            phrase: "commented on",
-            payload: (0, functions_1.getNotificationPayload)(text),
-        }).save();
-        if (userId !== post.creator.id.toHexString()) {
+            ];
+            const owners = [
+                {
+                    id: post.creator.id,
+                    name: `${user.name.first} ${user.name.last}`,
+                },
+            ];
+            const phrase = constants_1.notificationPhrase.commented;
+            const payload = (0, functions_1.getNotificationPayload)(text);
+            const image = { thumbnail: { url: profileImage.original.url } };
             await new notification_1.default({
-                creators: [
-                    {
-                        id: userId,
-                        name: `${name.first} ${name.last}`,
-                    },
-                ],
-                subscriber: { id: userId },
+                creators,
+                owners,
+                subscriber: { id: post.creator.id },
+                contentId: post._id,
                 type: constants_1.postNotificationType.commentedOnPostNotification,
-                phrase: "commented on",
-                payload: (0, functions_1.getNotificationPayload)(text),
+                phrase,
+                payload,
+                image,
+            }).save();
+            await new notification_1.default({
+                creators,
+                owners,
+                subscriber: { id: userId },
+                contentId: post._id,
+                type: constants_1.postNotificationType.commentedOnPostNotification,
+                phrase,
+                payload,
+                image,
             }).save();
         }
         res.status(201).send({ msg: "Comment added successfully" });

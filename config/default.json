@@ -1,7 +1,7 @@
 {
   "port": "3200",
   "dbUrl": "mongodb://localhost:27017/school-taste",
-  "serverAddress": "http://192.168.43.39:3200",
+  "serverAddress": "http://192.168.43.120:3200",
   "jwtAuthPrivateKey": "unsecureJwtAuthPrivateKey",
   "awsBucketName": "school-taste-bucket",
   "awsBucketRegion": "us-east-1",

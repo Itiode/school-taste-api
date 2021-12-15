@@ -296,7 +296,7 @@ export const reactToPost: RequestHandler<
       if (reaction.type === reactionType) {
         await PostModel.updateOne(
           { _id: postId },
-          { $pull: { reactions: { reactingUserId } } }
+          { $pull: { reactions: { userId: reactingUserId } } }
         );
         await PostModel.updateOne(
           { _id: postId },
@@ -306,12 +306,12 @@ export const reactToPost: RequestHandler<
       } else {
         await PostModel.updateOne(
           { _id: postId },
-          { $pull: { reactions: { reactingUserId } } }
+          { $pull: { reactions: { userId: reactingUserId } } }
         );
 
         await PostModel.updateOne(
           { _id: postId },
-          { $push: { reactions: { reactingUserId, type: reactionType } } }
+          { $push: { reactions: { userId: reactingUserId, type: reactionType } } }
         );
       }
 

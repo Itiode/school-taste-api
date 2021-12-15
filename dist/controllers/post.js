@@ -229,13 +229,13 @@ const reactToPost = async (req, res, next) => {
         if (reaction) {
             // If the user doesn't want to react anymore
             if (reaction.type === reactionType) {
-                await post_1.default.updateOne({ _id: postId }, { $pull: { reactions: { reactingUserId } } });
+                await post_1.default.updateOne({ _id: postId }, { $pull: { reactions: { userId: reactingUserId } } });
                 await post_1.default.updateOne({ _id: postId }, { $inc: { reactionCount: -1 } });
                 // If the user changes their reaction.
             }
             else {
-                await post_1.default.updateOne({ _id: postId }, { $pull: { reactions: { reactingUserId } } });
-                await post_1.default.updateOne({ _id: postId }, { $push: { reactions: { reactingUserId, type: reactionType } } });
+                await post_1.default.updateOne({ _id: postId }, { $pull: { reactions: { userId: reactingUserId } } });
+                await post_1.default.updateOne({ _id: postId }, { $push: { reactions: { userId: reactingUserId, type: reactionType } } });
             }
             return res.send({ msg: "Reacted to post successfully" });
         }

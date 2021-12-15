@@ -16,7 +16,7 @@ import UserModel from "../models/user";
 import NotificationModel from "../models/notification";
 import { validateReactionType } from "../shared/utils/validators";
 import { SimpleRes } from "../types/shared";
-import { postNotificationType } from "../shared/constants";
+import { postNotificationType, notificationPhrase } from "../shared/constants";
 import { getNotificationPayload } from "../shared/utils/functions";
 
 export const addComment: RequestHandler<any, SimpleRes, AddCommentData> =
@@ -33,8 +33,8 @@ export const addComment: RequestHandler<any, SimpleRes, AddCommentData> =
       if (!post)
         return res.status(404).send({ msg: "No post with the given ID" });
 
-      const user = await UserModel.findById(userId).select("name");
-      const { name } = user;
+      const user = await UserModel.findById(userId).select("name profileImage");
+      const { name, profileImage } = user;
 
       if (!user)
         return res.status(404).send({ msg: "No user with the given ID" });
@@ -50,31 +50,45 @@ export const addComment: RequestHandler<any, SimpleRes, AddCommentData> =
 
       await PostModel.updateOne({ _id: postId }, { $inc: { commentCount: 1 } });
 
-      await new NotificationModel({
-        creators: [
+      if (userId !== post.creator.id.toHexString()) {
+        const creators = [
           {
             id: userId,
             name: `${name.first} ${name.last}`,
           },
-        ],
-        subscriber: { id: post.creator.id },
-        type: postNotificationType.commentedOnPostNotification,
-        phrase: "commented on",
-        payload: getNotificationPayload(text),
-      }).save();
+        ];
 
-      if (userId !== post.creator.id.toHexString()) {
+        const owners = [
+          {
+            id: post.creator.id,
+            name: `${user.name.first} ${user.name.last}`,
+          },
+        ];
+
+        const phrase = notificationPhrase.commented;
+        const payload = getNotificationPayload(text);
+        const image = { thumbnail: { url: profileImage.original.url } };
+
         await new NotificationModel({
-          creators: [
-            {
-              id: userId,
-              name: `${name.first} ${name.last}`,
-            },
-          ],
-          subscriber: { id: userId },
+          creators,
+          owners,
+          subscriber: { id: post.creator.id },
+          contentId: post._id,
           type: postNotificationType.commentedOnPostNotification,
-          phrase: "commented on",
-          payload: getNotificationPayload(text),
+          phrase,
+          payload,
+          image,
+        }).save();
+
+        await new NotificationModel({
+          creators,
+          owners,
+          subscriber: { id: userId },
+          contentId: post._id,
+          type: postNotificationType.commentedOnPostNotification,
+          phrase,
+          payload,
+          image,
         }).save();
       }
 
