@@ -27,6 +27,7 @@ const sub_post_comment_1 = __importStar(require("../../models/comment/sub-post-c
 const sub_post_1 = __importDefault(require("../../models/sub-post"));
 const user_1 = __importDefault(require("../../models/user"));
 const validators_1 = require("../../shared/utils/validators");
+const date_format_1 = require("../../shared/utils/date-format");
 const addSubPostComment = async (req, res, next) => {
     const { error } = (0, sub_post_comment_1.validateAddSubPostCommentData)(req.body);
     if (error)
@@ -111,15 +112,16 @@ const getSubPostComments = async (req, res, next) => {
             // .limit(pageSize)
             .select("-__v")
             .sort({ _id: -1 });
-        const transformedComments = comments.map((sC) => {
-            const reaction = sC.reactions.find((r) => r.userId.toHexString() === userId);
+        const transformedComments = comments.map((c) => {
+            const reaction = c.reactions.find((r) => r.userId.toHexString() === userId);
             return {
-                id: sC._id,
-                text: sC.text,
-                creator: sC.creator,
-                subPostId: sC.subPostId,
-                date: sC.date,
-                reactionCount: sC.reactionCount ? sC.reactionCount : 0,
+                id: c._id,
+                text: c.text,
+                creator: c.creator,
+                subPostId: c.subPostId,
+                date: c.date,
+                formattedDate: (0, date_format_1.formatDate)(c.date.toString()),
+                reactionCount: c.reactionCount ? c.reactionCount : 0,
                 reaction: reaction ? reaction : { type: "", userId: "" },
             };
         });

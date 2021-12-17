@@ -4,6 +4,7 @@ import {
   SubPostComment,
   AddSubPostCommentData,
   ReactToSubPostCommentParams,
+  SubPostCommentRes,
   GetSubPostCommentsQuery,
   GetSubPostCommentsRes,
 } from "../../types/comment/sub-post-comment";
@@ -15,6 +16,7 @@ import SubPostModel from "../../models/sub-post";
 import UserModel from "../../models/user";
 import { validateReactionType } from "../../shared/utils/validators";
 import { SimpleRes } from "../../types/shared";
+import { formatDate } from "../../shared/utils/date-format";
 
 export const addSubPostComment: RequestHandler<
   any,
@@ -150,21 +152,24 @@ export const getSubPostComments: RequestHandler<
       .select("-__v")
       .sort({ _id: -1 });
 
-    const transformedComments = comments.map((sC: SubPostComment) => {
-      const reaction = sC.reactions.find(
-        (r: any) => r.userId.toHexString() === userId
-      );
+    const transformedComments: SubPostCommentRes[] = comments.map(
+      (c: SubPostComment) => {
+        const reaction = c.reactions.find(
+          (r: any) => r.userId.toHexString() === userId
+        );
 
-      return {
-        id: sC._id,
-        text: sC.text,
-        creator: sC.creator,
-        subPostId: sC.subPostId,
-        date: sC.date,
-        reactionCount: sC.reactionCount ? sC.reactionCount : 0,
-        reaction: reaction ? reaction : { type: "", userId: "" },
-      };
-    });
+        return {
+          id: c._id,
+          text: c.text,
+          creator: c.creator,
+          subPostId: c.subPostId,
+          date: c.date,
+          formattedDate: formatDate(c.date.toString()),
+          reactionCount: c.reactionCount ? c.reactionCount : 0,
+          reaction: reaction ? reaction : { type: "", userId: "" },
+        };
+      }
+    );
 
     res.send({
       msg: "Sub post comments gotten successfully",

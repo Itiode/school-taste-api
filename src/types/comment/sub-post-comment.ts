@@ -14,6 +14,21 @@ export interface SubPostComment {
   reaction: Reaction;
 }
 
+export interface SubPostCommentRes {
+  id: string;
+  text: string;
+  subPostId: string;
+  creator: {
+    id: string;
+    name: string;
+  };
+  date: Date;
+  formattedDate: String;
+  reactions: Reaction[];
+  reactionCount: number;
+  reaction: Reaction;
+}
+
 export interface AddSubPostCommentData {
   text: string;
   subPostId: string;
@@ -31,7 +46,7 @@ export interface GetSubPostCommentsQuery {
 export interface GetSubPostCommentsRes {
   msg: string;
   commentCount: number;
-  data: SubPostComment[];
+  data: SubPostCommentRes[];
 }
 
 export interface GetSubPostCommentCountRes {

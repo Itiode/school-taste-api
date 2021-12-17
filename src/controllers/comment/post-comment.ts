@@ -6,6 +6,7 @@ import {
   ReactToPostCommentParams,
   GetPostCommentsQuery,
   GetPostCommentsRes,
+  PostCommentRes,
 } from "../../types/comment/post-comment";
 import PostCommentModel, {
   validateAddPostCommentData,
@@ -21,6 +22,7 @@ import {
   notificationPhrase,
 } from "../../shared/constants";
 import { getNotificationPayload } from "../../shared/utils/functions";
+import { formatDate } from "../../shared/utils/date-format";
 
 export const addPostComment: RequestHandler<
   any,
@@ -193,21 +195,24 @@ export const getPostComments: RequestHandler<
       .select("-__v")
       .sort({ _id: -1 });
 
-    const transformedComments = comments.map((c: PostComment) => {
-      const reaction = c.reactions.find(
-        (r: any) => r.userId.toHexString() === userId
-      );
+    const transformedComments: PostCommentRes[] = comments.map(
+      (c: PostComment) => {
+        const reaction = c.reactions.find(
+          (r: any) => r.userId.toHexString() === userId
+        );
 
-      return {
-        id: c._id,
-        text: c.text,
-        creator: c.creator,
-        postId: c.postId,
-        date: c.date,
-        reactionCount: c.reactionCount ? c.reactionCount : 0,
-        reaction: reaction ? reaction : { type: "", userId: "" },
-      };
-    });
+        return {
+          id: c._id,
+          text: c.text,
+          creator: c.creator,
+          postId: c.postId,
+          date: c.date,
+          formattedDate: formatDate(c.date.toString()),
+          reactionCount: c.reactionCount ? c.reactionCount : 0,
+          reaction: reaction ? reaction : { type: "", userId: "" },
+        };
+      }
+    );
 
     res.send({
       msg: "Post comments gotten successfully",

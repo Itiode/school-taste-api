@@ -14,6 +14,21 @@ export interface PostComment {
   reaction: Reaction;
 }
 
+export interface PostCommentRes {
+  id: string;
+  text: string;
+  postId: string;
+  creator: {
+    id: string;
+    name: string;
+  };
+  date: Date;
+  formattedDate: string;
+  reactions: Reaction[];
+  reactionCount: number;
+  reaction: Reaction;
+}
+
 export interface AddPostCommentData {
   text: string;
   postId: string;
@@ -31,7 +46,7 @@ export interface GetPostCommentsQuery {
 export interface GetPostCommentsRes {
   msg: string;
   commentCount: number;
-  data: PostComment[];
+  data: PostCommentRes[];
 }
 
 export interface GetPostCommentCountRes {
