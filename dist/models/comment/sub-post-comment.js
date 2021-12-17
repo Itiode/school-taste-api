@@ -22,10 +22,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateReactToSubCommentParams = exports.validateAddSubCommentData = void 0;
+exports.validateReactToSubPostCommentParams = exports.validateAddSubPostCommentData = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const joi_1 = __importDefault(require("joi"));
-const reaction_1 = __importDefault(require("./schemas/reaction"));
+const reaction_1 = __importDefault(require("../schemas/reaction"));
 const schema = new mongoose_1.Schema({
     text: {
         type: String,
@@ -49,8 +49,8 @@ const schema = new mongoose_1.Schema({
     reactions: [reaction_1.default],
     reactionCount: Number,
 });
-exports.default = mongoose_1.default.model("Sub-Comment", schema);
-function validateAddSubCommentData(data) {
+exports.default = mongoose_1.default.model("Sub-Post-Comment", schema);
+function validateAddSubPostCommentData(data) {
     return joi_1.default.object({
         text: joi_1.default.string().trim().min(1).max(250).required(),
         subPostId: joi_1.default.string()
@@ -59,13 +59,13 @@ function validateAddSubCommentData(data) {
             .required(),
     }).validate(data);
 }
-exports.validateAddSubCommentData = validateAddSubCommentData;
-function validateReactToSubCommentParams(data) {
+exports.validateAddSubPostCommentData = validateAddSubPostCommentData;
+function validateReactToSubPostCommentParams(data) {
     return joi_1.default.object({
-        subCommentId: joi_1.default.string()
+        commentId: joi_1.default.string()
             .trim()
             .regex(new RegExp("^[0-9a-fA-F]{24}$"))
             .required(),
     }).validate(data);
 }
-exports.validateReactToSubCommentParams = validateReactToSubCommentParams;
+exports.validateReactToSubPostCommentParams = validateReactToSubPostCommentParams;

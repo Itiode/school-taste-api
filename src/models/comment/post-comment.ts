@@ -1,10 +1,10 @@
 import mongoose, { Schema } from 'mongoose';
 import Joi from 'joi';
 
-import { Comment, AddCommentData, ReactToCommentParams } from '../types/comment';
-import ReactionSchema from './schemas/reaction';
+import { PostComment, AddPostCommentData, ReactToPostCommentParams } from '../../types/comment/post-comment';
+import ReactionSchema from '../schemas/reaction';
 
-const schema = new Schema<Comment>({
+const schema = new Schema<PostComment>({
   text: {
     type: String,
     trim: true,
@@ -28,9 +28,9 @@ const schema = new Schema<Comment>({
   reactionCount: Number,
 });
 
-export default mongoose.model('Comment', schema);
+export default mongoose.model('Post-Comment', schema);
 
-export function validateAddCommentData(data: AddCommentData) {
+export function validateAddPostCommentData(data: AddPostCommentData) {
   return Joi.object({
     text: Joi.string().trim().min(1).max(1000).required(),
     postId: Joi.string()
@@ -40,7 +40,7 @@ export function validateAddCommentData(data: AddCommentData) {
   }).validate(data);
 }
 
-export function validateReactToCommentParams(data: ReactToCommentParams) {
+export function validateReactToPostCommentParams(data: ReactToPostCommentParams) {
   return Joi.object({
     commentId: Joi.string()
       .trim()

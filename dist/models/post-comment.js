@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateReactToCommentParams = exports.validateAddCommentData = void 0;
+exports.validateReactToPostCommentParams = exports.validateAddPostCommentData = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const joi_1 = __importDefault(require("joi"));
 const reaction_1 = __importDefault(require("./schemas/reaction"));
@@ -49,8 +49,8 @@ const schema = new mongoose_1.Schema({
     reactions: [reaction_1.default],
     reactionCount: Number,
 });
-exports.default = mongoose_1.default.model('Comment', schema);
-function validateAddCommentData(data) {
+exports.default = mongoose_1.default.model('Post-Comment', schema);
+function validateAddPostCommentData(data) {
     return joi_1.default.object({
         text: joi_1.default.string().trim().min(1).max(1000).required(),
         postId: joi_1.default.string()
@@ -59,8 +59,8 @@ function validateAddCommentData(data) {
             .required(),
     }).validate(data);
 }
-exports.validateAddCommentData = validateAddCommentData;
-function validateReactToCommentParams(data) {
+exports.validateAddPostCommentData = validateAddPostCommentData;
+function validateReactToPostCommentParams(data) {
     return joi_1.default.object({
         commentId: joi_1.default.string()
             .trim()
@@ -68,4 +68,4 @@ function validateReactToCommentParams(data) {
             .required(),
     }).validate(data);
 }
-exports.validateReactToCommentParams = validateReactToCommentParams;
+exports.validateReactToPostCommentParams = validateReactToPostCommentParams;

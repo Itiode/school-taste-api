@@ -18,7 +18,7 @@ const schema = new Schema<SubPost>({
   reactionCount: Number,
   views: [String],
   viewCount: Number,
-  subCommentCount: Number,
+  commentCount: Number,
 });
 
 export default mongoose.model("Sub-Post", schema);

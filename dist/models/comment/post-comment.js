@@ -22,33 +22,50 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateReactToSubPostParams = void 0;
+exports.validateReactToPostCommentParams = exports.validateAddPostCommentData = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const joi_1 = __importDefault(require("joi"));
-const reaction_1 = __importDefault(require("../models/schemas/reaction"));
+const reaction_1 = __importDefault(require("../schemas/reaction"));
 const schema = new mongoose_1.Schema({
-    type: {
+    text: {
         type: String,
         trim: true,
-        enum: ["Image", "Video", "Gif", "Sticker"],
+        minLength: 1,
+        maxLength: 1000,
         required: true,
     },
-    ppid: { type: mongoose_1.Schema.Types.ObjectId, required: true },
-    url: { type: String, required: true },
-    dUrl: { type: String, required: true },
+    postId: { type: mongoose_1.Schema.Types.ObjectId, required: true },
+    creator: {
+        id: { type: mongoose_1.Schema.Types.ObjectId, required: true, ref: 'User' },
+        name: {
+            type: String,
+            trim: true,
+            minLength: 5,
+            maxLength: 50,
+            required: true,
+        },
+    },
+    date: { type: Date, default: Date.now },
     reactions: [reaction_1.default],
     reactionCount: Number,
-    views: [String],
-    viewCount: Number,
-    commentCount: Number,
 });
-exports.default = mongoose_1.default.model("Sub-Post", schema);
-function validateReactToSubPostParams(data) {
+exports.default = mongoose_1.default.model('Post-Comment', schema);
+function validateAddPostCommentData(data) {
     return joi_1.default.object({
-        subPostId: joi_1.default.string()
+        text: joi_1.default.string().trim().min(1).max(1000).required(),
+        postId: joi_1.default.string()
             .trim()
-            .regex(new RegExp("^[0-9a-fA-F]{24}$"))
+            .regex(new RegExp('^[0-9a-fA-F]{24}$'))
             .required(),
     }).validate(data);
 }
-exports.validateReactToSubPostParams = validateReactToSubPostParams;
+exports.validateAddPostCommentData = validateAddPostCommentData;
+function validateReactToPostCommentParams(data) {
+    return joi_1.default.object({
+        commentId: joi_1.default.string()
+            .trim()
+            .regex(new RegExp('^[0-9a-fA-F]{24}$'))
+            .required(),
+    }).validate(data);
+}
+exports.validateReactToPostCommentParams = validateReactToPostCommentParams;

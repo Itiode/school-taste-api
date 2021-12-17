@@ -1,6 +1,6 @@
-import { Reaction } from "./shared";
+import { Reaction } from "../shared";
 
-export interface Comment {
+export interface PostComment {
   _id: string;
   text: string;
   postId: string;
@@ -14,27 +14,27 @@ export interface Comment {
   reaction: Reaction;
 }
 
-export interface AddCommentData {
+export interface AddPostCommentData {
   text: string;
   postId: string;
 }
 
-export interface ReactToCommentParams {
+export interface ReactToPostCommentParams {
   commentId: string;
 }
 
-export interface GetCommentsQuery {
+export interface GetPostCommentsQuery {
   pageNumber: string;
   pageSize: string;
 }
 
-export interface GetCommentsRes {
+export interface GetPostCommentsRes {
   msg: string;
   commentCount: number;
-  data: Comment[];
+  data: PostComment[];
 }
 
-export interface GetCommentCountRes {
+export interface GetPostCommentCountRes {
   msg: string;
   count?: number;
 }

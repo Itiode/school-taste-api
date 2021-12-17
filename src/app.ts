@@ -10,9 +10,9 @@ import initializeFirebase from "./main/firebase";
 import userRoutes from "./routes/user";
 import authRoutes from "./routes/auth";
 import postRoutes from "./routes/post";
-import commentRoutes from "./routes/comment";
+import postCommentRoutes from "./routes/comment/post-comment";
 import subPostRoutes from "./routes/sub-post";
-import subCommentRoutes from "./routes/sub-comment";
+import subPostCommentRoutes from "./routes/comment/sub-post-comment";
 import notificationRoutes from "./routes/notification";
 
 const app = express();
@@ -24,9 +24,9 @@ app.use(express.static("public"));
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
-app.use("/api/comments", commentRoutes);
+app.use("/api/post-comments", postCommentRoutes);
 app.use("/api/sub-posts", subPostRoutes);
-app.use("/api/sub-comments", subCommentRoutes);
+app.use("/api/sub-post-comments", subPostCommentRoutes);
 app.use("/api/notifications", notificationRoutes);
 
 app.use(error);

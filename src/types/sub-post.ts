@@ -10,7 +10,7 @@ export default interface SubPost {
   reactionCount: number;
   reaction: Reaction;
   views: string[];
-  subCommentCount: number;
+  commentCount: number;
   viewCount: number;
 }
 
@@ -24,7 +24,7 @@ export default interface SubPost {
 //   reactionCount: number;
 //   reaction: Reaction;
 //   views: string[];
-//   subCommentCount: number;
+//   commentCount: number;
 //   viewCount: number;
 //   metadata: {
 //     width: number;
@@ -39,7 +39,7 @@ export interface SubPostRes {
   dUrl?: string;
   reaction: Reaction;
   reactionCount: number;
-  subCommentCount: number;
+  commentCount: number;
   viewCount: number;
 }
 

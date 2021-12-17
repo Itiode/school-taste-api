@@ -168,7 +168,7 @@ export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
         url: sP.url,
         reaction: sPReaction ? sPReaction : { type: "", userId: "" },
         reactionCount: sP.reactionCount ? sP.reactionCount : 0,
-        subCommentCount: sP.subCommentCount,
+        commentCount: sP.commentCount,
         viewCount: sP.viewCount,
       });
     }

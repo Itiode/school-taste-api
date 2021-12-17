@@ -5,6 +5,6 @@ import { reactToSubPost } from "../controllers/sub-post";
 
 const router = Router();
 
-router.put("/react-to-sub-post/:subPostId", auth, reactToSubPost);
+router.put("/react/:subPostId", auth, reactToSubPost);
 
 export default router;

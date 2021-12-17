@@ -2,13 +2,13 @@ import mongoose, { Schema } from "mongoose";
 import Joi from "joi";
 
 import {
-  SubComment,
-  AddSubCommentData,
-  ReactToSubCommentParams,
-} from "../types/sub-comment";
-import ReactionSchema from "./schemas/reaction";
+  SubPostComment,
+  AddSubPostCommentData,
+  ReactToSubPostCommentParams,
+} from "../../types/comment/sub-post-comment";
+import ReactionSchema from "../schemas/reaction";
 
-const schema = new Schema<SubComment>({
+const schema = new Schema<SubPostComment>({
   text: {
     type: String,
     trim: true,
@@ -32,9 +32,9 @@ const schema = new Schema<SubComment>({
   reactionCount: Number,
 });
 
-export default mongoose.model("Sub-Comment", schema);
+export default mongoose.model("Sub-Post-Comment", schema);
 
-export function validateAddSubCommentData(data: AddSubCommentData) {
+export function validateAddSubPostCommentData(data: AddSubPostCommentData) {
   return Joi.object({
     text: Joi.string().trim().min(1).max(250).required(),
     subPostId: Joi.string()
@@ -44,9 +44,9 @@ export function validateAddSubCommentData(data: AddSubCommentData) {
   }).validate(data);
 }
 
-export function validateReactToSubCommentParams(data: ReactToSubCommentParams) {
+export function validateReactToSubPostCommentParams(data: ReactToSubPostCommentParams) {
   return Joi.object({
-    subCommentId: Joi.string()
+    commentId: Joi.string()
       .trim()
       .regex(new RegExp("^[0-9a-fA-F]{24}$"))
       .required(),

@@ -81,7 +81,7 @@ export async function getPosts(userId: string, posts: any[], res: Response) {
         url: sP.url,
         reaction: sPReaction ? sPReaction : { type: "", userId: "" },
         reactionCount: sP.reactionCount ? sP.reactionCount : 0,
-        subCommentCount: sP.subCommentCount,
+        commentCount: sP.commentCount,
         viewCount: sP.viewCount,
       });
     }

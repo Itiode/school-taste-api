@@ -7,5 +7,5 @@ const express_1 = __importDefault(require("express"));
 const auth_1 = __importDefault(require("../middleware/auth"));
 const sub_post_1 = require("../controllers/sub-post");
 const router = (0, express_1.default)();
-router.put("/react-to-sub-post/:subPostId", auth_1.default, sub_post_1.reactToSubPost);
+router.put("/react/:subPostId", auth_1.default, sub_post_1.reactToSubPost);
 exports.default = router;

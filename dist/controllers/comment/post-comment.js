@@ -22,16 +22,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getComments = exports.reactToComment = exports.addComment = void 0;
-const comment_1 = __importStar(require("../models/comment"));
-const post_1 = __importDefault(require("../models/post"));
-const user_1 = __importDefault(require("../models/user"));
-const notification_1 = __importDefault(require("../models/notification"));
-const validators_1 = require("../shared/utils/validators");
-const constants_1 = require("../shared/constants");
-const functions_1 = require("../shared/utils/functions");
-const addComment = async (req, res, next) => {
-    const { error } = (0, comment_1.validateAddCommentData)(req.body);
+exports.getPostComments = exports.reactToPostComment = exports.addPostComment = void 0;
+const post_comment_1 = __importStar(require("../../models/comment/post-comment"));
+const post_1 = __importDefault(require("../../models/post"));
+const user_1 = __importDefault(require("../../models/user"));
+const notification_1 = __importDefault(require("../../models/notification"));
+const validators_1 = require("../../shared/utils/validators");
+const constants_1 = require("../../shared/constants");
+const functions_1 = require("../../shared/utils/functions");
+const addPostComment = async (req, res, next) => {
+    const { error } = (0, post_comment_1.validateAddPostCommentData)(req.body);
     if (error)
         return res.status(400).send({ msg: error.details[0].message });
     try {
@@ -44,7 +44,7 @@ const addComment = async (req, res, next) => {
         const { name, profileImage } = user;
         if (!user)
             return res.status(404).send({ msg: "No user with the given ID" });
-        await new comment_1.default({
+        await new post_comment_1.default({
             text,
             postId,
             creator: {
@@ -90,15 +90,15 @@ const addComment = async (req, res, next) => {
                 image,
             }).save();
         }
-        res.status(201).send({ msg: "Comment added successfully" });
+        res.status(201).send({ msg: "Post comment added successfully" });
     }
     catch (e) {
-        next(new Error("Error in adding comment: " + e));
+        next(new Error("Error in adding post comment: " + e));
     }
 };
-exports.addComment = addComment;
-const reactToComment = async (req, res, next) => {
-    const { error } = (0, comment_1.validateReactToCommentParams)(req.params);
+exports.addPostComment = addPostComment;
+const reactToPostComment = async (req, res, next) => {
+    const { error } = (0, post_comment_1.validateReactToPostCommentParams)(req.params);
     if (error)
         return res.status(400).send({ msg: error.details[0].message });
     try {
@@ -111,39 +111,39 @@ const reactToComment = async (req, res, next) => {
         if (!user)
             return res.status(404).send({ msg: "No user with the given ID" });
         const { commentId } = req.params;
-        const comment = await comment_1.default.findById(commentId);
+        const comment = await post_comment_1.default.findById(commentId);
         if (!comment)
-            return res.status(404).send({ msg: "No comment with the given ID" });
+            return res.status(404).send({ msg: "No post comment with the given ID" });
         const reaction = comment.reactions.find((reaction) => reaction.userId.toHexString() === userId);
         if (reaction) {
             // If the user doesn't want to react anymore
             if (reaction.type === reactionType) {
-                await comment_1.default.updateOne({ _id: commentId }, { $pull: { reactions: { userId } } });
-                await comment_1.default.updateOne({ _id: commentId }, { $inc: { reactionCount: -1 } });
+                await post_comment_1.default.updateOne({ _id: commentId }, { $pull: { reactions: { userId } } });
+                await post_comment_1.default.updateOne({ _id: commentId }, { $inc: { reactionCount: -1 } });
                 // If the user changes their reaction.
             }
             else {
-                await comment_1.default.updateOne({ _id: commentId }, { $pull: { reactions: { userId } } });
-                await comment_1.default.updateOne({ _id: commentId }, { $push: { reactions: { userId, type: reactionType } } });
+                await post_comment_1.default.updateOne({ _id: commentId }, { $pull: { reactions: { userId } } });
+                await post_comment_1.default.updateOne({ _id: commentId }, { $push: { reactions: { userId, type: reactionType } } });
             }
-            return res.send({ msg: "Reacted to comment successfully" });
+            return res.send({ msg: "Reacted to post comment successfully" });
         }
         // When the user reacts for the first time.
-        await comment_1.default.updateOne({ _id: commentId }, { $push: { reactions: { userId, type: reactionType } } });
-        await comment_1.default.updateOne({ _id: commentId }, { $inc: { reactionCount: 1 } });
-        res.send({ msg: "Reacted to comment successfully" });
+        await post_comment_1.default.updateOne({ _id: commentId }, { $push: { reactions: { userId, type: reactionType } } });
+        await post_comment_1.default.updateOne({ _id: commentId }, { $inc: { reactionCount: 1 } });
+        res.send({ msg: "Reacted to post comment successfully" });
     }
     catch (e) {
-        next(new Error("Error in reacting to comment: " + e));
+        next(new Error("Error in reacting to post comment: " + e));
     }
 };
-exports.reactToComment = reactToComment;
-const getComments = async (req, res, next) => {
+exports.reactToPostComment = reactToPostComment;
+const getPostComments = async (req, res, next) => {
     try {
         const userId = req["user"].id;
         const pageNumber = +req.query.pageNumber;
         const pageSize = +req.query.pageSize;
-        const comments = await comment_1.default.find({ postId: req.params.postId })
+        const comments = await post_comment_1.default.find({ postId: req.params.postId })
             // .skip((pageNumber - 1) * pageSize)
             // .limit(pageSize)
             .select("-__v")
@@ -161,13 +161,13 @@ const getComments = async (req, res, next) => {
             };
         });
         res.send({
-            msg: "Comments gotten successfully",
+            msg: "Post comments gotten successfully",
             commentCount: transformedComments.length,
             data: transformedComments,
         });
     }
     catch (e) {
-        next(new Error("Error in getting comments: " + e));
+        next(new Error("Error in getting post comments: " + e));
     }
 };
-exports.getComments = getComments;
+exports.getPostComments = getPostComments;
