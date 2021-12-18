@@ -153,7 +153,7 @@ export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
     if (!post) res.status(404).send({ msg: "No post with the given ID" });
 
     const subPosts = await SubPostModel.find({ ppid: post._id }).select(
-      "-__v -views -ppid -dUrl"
+      "-__v -views -dUrl"
     );
 
     const modifiedSubPosts: SubPostRes[] = [];
@@ -166,6 +166,7 @@ export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
         id: sP._id,
         type: sP.type,
         url: sP.url,
+        ppid: sP.ppid,
         reaction: sPReaction ? sPReaction : { type: "", userId: "" },
         reactionCount: sP.reactionCount ? sP.reactionCount : 0,
         commentCount: sP.commentCount,

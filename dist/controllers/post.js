@@ -123,7 +123,7 @@ const getPost = async (req, res, next) => {
         const post = await post_1.default.findById(req.params.postId).select("-__v -tagsString -tags");
         if (!post)
             res.status(404).send({ msg: "No post with the given ID" });
-        const subPosts = await sub_post_1.default.find({ ppid: post._id }).select("-__v -views -ppid -dUrl");
+        const subPosts = await sub_post_1.default.find({ ppid: post._id }).select("-__v -views -dUrl");
         const modifiedSubPosts = [];
         for (const sP of subPosts) {
             const sPReaction = sP.reactions.find((r) => r.userId.toHexString() === userId);
@@ -131,6 +131,7 @@ const getPost = async (req, res, next) => {
                 id: sP._id,
                 type: sP.type,
                 url: sP.url,
+                ppid: sP.ppid,
                 reaction: sPReaction ? sPReaction : { type: "", userId: "" },
                 reactionCount: sP.reactionCount ? sP.reactionCount : 0,
                 commentCount: sP.commentCount,

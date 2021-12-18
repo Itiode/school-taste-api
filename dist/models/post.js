@@ -75,7 +75,7 @@ exports.validateViewPostReq = validateViewPostReq;
 async function getPosts(userId, posts, res) {
     const modifiedPosts = [];
     for (const p of posts) {
-        const subPosts = await sub_post_1.default.find({ ppid: p._id }).select("-__v -views -ppid -dUrl");
+        const subPosts = await sub_post_1.default.find({ ppid: p._id }).select("-__v -views -dUrl");
         const modifiedSubPosts = [];
         for (const sP of subPosts) {
             const sPReaction = sP.reactions.find((r) => r.userId.toHexString() === userId);
@@ -83,6 +83,7 @@ async function getPosts(userId, posts, res) {
                 id: sP._id,
                 type: sP.type,
                 url: sP.url,
+                ppid: sP.ppid,
                 reaction: sPReaction ? sPReaction : { type: "", userId: "" },
                 reactionCount: sP.reactionCount ? sP.reactionCount : 0,
                 commentCount: sP.commentCount,

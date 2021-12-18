@@ -37,6 +37,7 @@ export interface SubPostRes {
   type: string;
   url: string;
   dUrl?: string;
+  ppid: string;
   reaction: Reaction;
   reactionCount: number;
   commentCount: number;

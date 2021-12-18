@@ -66,7 +66,7 @@ export async function getPosts(userId: string, posts: any[], res: Response) {
 
   for (const p of posts) {
     const subPosts = await SubPostModel.find({ ppid: p._id }).select(
-      "-__v -views -ppid -dUrl"
+      "-__v -views -dUrl"
     );
 
     const modifiedSubPosts: SubPostRes[] = [];
@@ -79,6 +79,7 @@ export async function getPosts(userId: string, posts: any[], res: Response) {
         id: sP._id,
         type: sP.type,
         url: sP.url,
+        ppid: sP.ppid,
         reaction: sPReaction ? sPReaction : { type: "", userId: "" },
         reactionCount: sP.reactionCount ? sP.reactionCount : 0,
         commentCount: sP.commentCount,
