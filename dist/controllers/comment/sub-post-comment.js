@@ -41,7 +41,7 @@ const addSubPostComment = async (req, res, next) => {
         const user = await user_1.default.findById(userId).select("name");
         if (!user)
             return res.status(404).send({ msg: "No user with the given ID" });
-        await new sub_post_comment_1.default({
+        const comment = await new sub_post_comment_1.default({
             text,
             subPostId,
             creator: {
@@ -49,8 +49,20 @@ const addSubPostComment = async (req, res, next) => {
                 name: `${user.name.first} ${user.name.last}`,
             },
         }).save();
+        const transformedC = {
+            id: comment._id,
+            text: comment.text,
+            creator: comment.creator,
+            subPostId: comment.subPostId,
+            date: comment.date,
+            formattedDate: (0, date_format_1.formatDate)(comment.date.toString()),
+            reactionCount: 0,
+            reaction: { type: "", userId: "" },
+        };
         await sub_post_1.default.updateOne({ _id: subPostId }, { $inc: { commentCount: 1 } });
-        res.status(201).send({ msg: "Sub post comment added successfully" });
+        res
+            .status(201)
+            .send({ msg: "Sub post comment added successfully", data: transformedC });
     }
     catch (e) {
         next(new Error("Error in adding sub post comment: " + e));

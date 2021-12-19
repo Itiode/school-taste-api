@@ -24,7 +24,6 @@ export interface PostCommentRes {
   };
   date: Date;
   formattedDate: string;
-  reactions: Reaction[];
   reactionCount: number;
   reaction: Reaction;
 }
@@ -32,6 +31,11 @@ export interface PostCommentRes {
 export interface AddPostCommentData {
   text: string;
   postId: string;
+}
+
+export interface AddPostCommentRes {
+  msg: string;
+  data?: PostCommentRes;
 }
 
 export interface ReactToPostCommentParams {

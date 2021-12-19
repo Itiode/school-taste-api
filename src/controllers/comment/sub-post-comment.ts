@@ -3,6 +3,7 @@ import { RequestHandler } from "express";
 import {
   SubPostComment,
   AddSubPostCommentData,
+  AddSubPostCommentRes,
   ReactToSubPostCommentParams,
   SubPostCommentRes,
   GetSubPostCommentsQuery,
@@ -20,7 +21,7 @@ import { formatDate } from "../../shared/utils/date-format";
 
 export const addSubPostComment: RequestHandler<
   any,
-  SimpleRes,
+  AddSubPostCommentRes,
   AddSubPostCommentData
 > = async (req, res, next) => {
   const { error } = validateAddSubPostCommentData(req.body);
@@ -39,7 +40,7 @@ export const addSubPostComment: RequestHandler<
     if (!user)
       return res.status(404).send({ msg: "No user with the given ID" });
 
-    await new SubPostCommentModel({
+    const comment = await new SubPostCommentModel({
       text,
       subPostId,
       creator: {
@@ -48,12 +49,25 @@ export const addSubPostComment: RequestHandler<
       },
     }).save();
 
+    const transformedC: SubPostCommentRes = {
+      id: comment._id,
+      text: comment.text,
+      creator: comment.creator,
+      subPostId: comment.subPostId,
+      date: comment.date,
+      formattedDate: formatDate(comment.date.toString()),
+      reactionCount: 0,
+      reaction: { type: "", userId: "" },
+    };
+
     await SubPostModel.updateOne(
       { _id: subPostId },
       { $inc: { commentCount: 1 } }
     );
 
-    res.status(201).send({ msg: "Sub post comment added successfully" });
+    res
+      .status(201)
+      .send({ msg: "Sub post comment added successfully", data: transformedC });
   } catch (e) {
     next(new Error("Error in adding sub post comment: " + e));
   }

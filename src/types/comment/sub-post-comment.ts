@@ -24,7 +24,6 @@ export interface SubPostCommentRes {
   };
   date: Date;
   formattedDate: String;
-  reactions: Reaction[];
   reactionCount: number;
   reaction: Reaction;
 }
@@ -32,6 +31,11 @@ export interface SubPostCommentRes {
 export interface AddSubPostCommentData {
   text: string;
   subPostId: string;
+}
+
+export interface AddSubPostCommentRes {
+  msg: string;
+  data?: SubPostCommentRes;
 }
 
 export interface ReactToSubPostCommentParams {

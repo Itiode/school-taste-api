@@ -45,7 +45,7 @@ const addPostComment = async (req, res, next) => {
         const { name, profileImage } = user;
         if (!user)
             return res.status(404).send({ msg: "No user with the given ID" });
-        await new post_comment_1.default({
+        const comment = await new post_comment_1.default({
             text,
             postId,
             creator: {
@@ -53,6 +53,16 @@ const addPostComment = async (req, res, next) => {
                 name: `${name.first} ${name.last}`,
             },
         }).save();
+        const transformedC = {
+            id: comment._id,
+            text: comment.text,
+            creator: comment.creator,
+            postId: comment.postId,
+            date: comment.date,
+            formattedDate: (0, date_format_1.formatDate)(comment.date.toString()),
+            reactionCount: comment.reactionCount ? comment.reactionCount : 0,
+            reaction: { type: "", userId: "" },
+        };
         await post_1.default.updateOne({ _id: postId }, { $inc: { commentCount: 1 } });
         if (userId !== post.creator.id.toHexString()) {
             const creators = [
@@ -91,7 +101,9 @@ const addPostComment = async (req, res, next) => {
                 image,
             }).save();
         }
-        res.status(201).send({ msg: "Post comment added successfully" });
+        res
+            .status(201)
+            .send({ msg: "Post comment added successfully", data: transformedC });
     }
     catch (e) {
         next(new Error("Error in adding post comment: " + e));

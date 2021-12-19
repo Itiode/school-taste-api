@@ -3,6 +3,7 @@ import { RequestHandler } from "express";
 import {
   PostComment,
   AddPostCommentData,
+  AddPostCommentRes,
   ReactToPostCommentParams,
   GetPostCommentsQuery,
   GetPostCommentsRes,
@@ -26,7 +27,7 @@ import { formatDate } from "../../shared/utils/date-format";
 
 export const addPostComment: RequestHandler<
   any,
-  SimpleRes,
+  AddPostCommentRes,
   AddPostCommentData
 > = async (req, res, next) => {
   const { error } = validateAddPostCommentData(req.body);
@@ -47,7 +48,7 @@ export const addPostComment: RequestHandler<
     if (!user)
       return res.status(404).send({ msg: "No user with the given ID" });
 
-    await new PostCommentModel({
+    const comment = await new PostCommentModel({
       text,
       postId,
       creator: {
@@ -55,6 +56,17 @@ export const addPostComment: RequestHandler<
         name: `${name.first} ${name.last}`,
       },
     }).save();
+
+    const transformedC: PostCommentRes = {
+      id: comment._id,
+      text: comment.text,
+      creator: comment.creator,
+      postId: comment.postId,
+      date: comment.date,
+      formattedDate: formatDate(comment.date.toString()),
+      reactionCount: comment.reactionCount ? comment.reactionCount : 0,
+      reaction: { type: "", userId: "" },
+    };
 
     await PostModel.updateOne({ _id: postId }, { $inc: { commentCount: 1 } });
 
@@ -100,7 +112,9 @@ export const addPostComment: RequestHandler<
       }).save();
     }
 
-    res.status(201).send({ msg: "Post comment added successfully" });
+    res
+      .status(201)
+      .send({ msg: "Post comment added successfully", data: transformedC });
   } catch (e) {
     next(new Error("Error in adding post comment: " + e));
   }
