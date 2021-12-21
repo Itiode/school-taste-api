@@ -4,16 +4,20 @@ import { RequestHandler } from "express";
 
 import UserModel, {
   validateAddUserReq,
-  validateUpdateStudentDataReq,
+  validateStudentData,
   validateAboutData,
+  validatePhoneData,
+  validatePaymentDetailsData,
 } from "../models/user";
 import {
   AddUserReq,
   AuthRes,
   GetUserRes,
   AboutData,
+  PhoneData,
   UpdateStudentDataReq,
   UpdateMessagingTokenReq,
+  PaymentDetails,
 } from "../types/user";
 import { SimpleParams, SimpleRes, GetImageParams } from "../types/shared";
 import { getFileFromS3 } from "../shared/utils/s3";
@@ -71,7 +75,7 @@ export const addUser: RequestHandler<any, AuthRes, AddUserReq> = async (
   }
 };
 
-// Get the currently logged in user or the user whose ID was 
+// Get the currently logged in user or the user whose ID was
 // provided.
 export const getUser: RequestHandler<SimpleParams, GetUserRes> = async (
   req,
@@ -86,7 +90,7 @@ export const getUser: RequestHandler<SimpleParams, GetUserRes> = async (
     const user = await UserModel.findById(userId).select(
       "-password -__v -createdAt -updatedAt"
     );
-    
+
     if (!user) return res.status(404).send({ msg: "User not found" });
 
     const {
@@ -97,6 +101,7 @@ export const getUser: RequestHandler<SimpleParams, GetUserRes> = async (
       phone,
       dob,
       profileImage,
+      coverImage,
       about,
       gender,
       school,
@@ -115,6 +120,7 @@ export const getUser: RequestHandler<SimpleParams, GetUserRes> = async (
         gender,
         dob,
         profileImage,
+        coverImage,
         about,
         school,
         studentData,
@@ -123,6 +129,44 @@ export const getUser: RequestHandler<SimpleParams, GetUserRes> = async (
     });
   } catch (e) {
     next(new Error("Error in getting user: " + e));
+  }
+};
+
+export const updateCoverImage: RequestHandler<any, SimpleRes> = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const userId = req["user"].id;
+
+    // Remove the folder name (cover-images), leaving just the file name
+    const filename = req["file"]!["key"].split("/")[1];
+
+    const coverImage = {
+      original: {
+        url: `${config.get("serverAddress")}api/users/cover-images/${filename}`,
+        dUrl: req["file"]!["location"],
+      },
+    };
+
+    await UserModel.updateOne({ _id: userId }, { $set: { coverImage } });
+  } catch (e) {
+    next(new Error("Error in updating cover image: " + e));
+  }
+};
+
+export const getCoverImage: RequestHandler<GetImageParams> = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const readStream = getFileFromS3("cover-images", req.params.filename);
+
+    readStream.pipe(res);
+  } catch (e) {
+    next(new Error("Error in getting cover image: " + e));
   }
 };
 
@@ -166,7 +210,7 @@ export const getProfileImage: RequestHandler<GetImageParams> = async (
 
     readStream.pipe(res);
   } catch (e) {
-    next(new Error("Error in getting image: " + e));
+    next(new Error("Error in getting profile image: " + e));
   }
 };
 
@@ -191,21 +235,41 @@ export const updateAbout: RequestHandler<any, SimpleRes, AboutData> = async (
   }
 };
 
+export const updatePhone: RequestHandler<any, SimpleRes, PhoneData> = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { error } = validatePhoneData(req.body);
+    if (error) return res.status(400).send({ msg: error.details[0].message });
+
+    const userId = req["user"].id;
+    await UserModel.updateOne(
+      { _id: userId },
+      { $set: { phone: req.body.phone } }
+    );
+
+    res.send({ msg: "Phone number updated successfully" });
+  } catch (e) {
+    next(new Error("Error in updating phone number: " + e));
+  }
+};
+
 export const updateStudentData: RequestHandler<
   any,
   SimpleRes,
   UpdateStudentDataReq
 > = async (req, res, next) => {
-  const { error } = validateUpdateStudentDataReq(req.body);
-  if (error) return { msg: error.details[0].message };
-
-  const { department, faculty, level } = req.body;
+  const { error } = validateStudentData(req.body);
+  if (error) return res.status(400).send({ msg: error.details[0].message });
 
   try {
+    const { department, faculty, level } = req.body;
     const userId = req["user"].id;
 
     const user = await UserModel.findById(userId).select("_id");
-    if (!user) return res.status(404).send({ msg: "No user found" });
+    if (!user) return res.status(404).send({ msg: "User not found" });
 
     await UserModel.updateOne(
       { _id: userId },
@@ -215,6 +279,49 @@ export const updateStudentData: RequestHandler<
     res.send({ msg: "Student data updated successfully" });
   } catch (e) {
     next(new Error("Error in updating student data: " + e));
+  }
+};
+
+export const updatePaymentDetails: RequestHandler<
+  any,
+  SimpleRes,
+  PaymentDetails
+> = async (req, res, next) => {
+  const { error } = validatePaymentDetailsData(req.body);
+  if (error) return res.status(400).send({ msg: error.details[0].message });
+
+  try {
+    const {
+      bankName,
+      bankSortCode,
+      accountType,
+      accountName,
+      accountNumber,
+      currency,
+    } = req.body;
+    const userId = req["user"].id;
+    const user = await UserModel.findById(userId).select("_id");
+    if (!user) return res.status(404).send({ msg: "User not found" });
+
+    await UserModel.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          paymentDetails: {
+            bankName,
+            bankSortCode,
+            accountType,
+            accountName,
+            accountNumber,
+            currency,
+          },
+        },
+      }
+    );
+
+    res.send({ msg: "Payment details updated successfully" });
+  } catch (e) {
+    next(new Error("Error in updating payment details: " + e));
   }
 };
 

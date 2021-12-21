@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateMessagingToken = exports.updateStudentData = exports.updateAbout = exports.getProfileImage = exports.updateProfileImage = exports.getUser = exports.addUser = void 0;
+exports.updateMessagingToken = exports.updatePaymentDetails = exports.updateStudentData = exports.updatePhone = exports.updateAbout = exports.getProfileImage = exports.updateProfileImage = exports.getCoverImage = exports.updateCoverImage = exports.getUser = exports.addUser = void 0;
 const config_1 = __importDefault(require("config"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_1 = __importStar(require("../models/user"));
@@ -62,7 +62,7 @@ const addUser = async (req, res, next) => {
     }
 };
 exports.addUser = addUser;
-// Get the currently logged in user or the user whose ID was 
+// Get the currently logged in user or the user whose ID was
 // provided.
 const getUser = async (req, res, next) => {
     let userId = req["user"].id;
@@ -72,7 +72,7 @@ const getUser = async (req, res, next) => {
         const user = await user_1.default.findById(userId).select("-password -__v -createdAt -updatedAt");
         if (!user)
             return res.status(404).send({ msg: "User not found" });
-        const { _id: id, name, username, email, phone, dob, profileImage, about, gender, school, studentData, rubyBalance, } = user;
+        const { _id: id, name, username, email, phone, dob, profileImage, coverImage, about, gender, school, studentData, rubyBalance, } = user;
         res.send({
             msg: "User's data fetched successfully",
             data: {
@@ -84,6 +84,7 @@ const getUser = async (req, res, next) => {
                 gender,
                 dob,
                 profileImage,
+                coverImage,
                 about,
                 school,
                 studentData,
@@ -96,6 +97,34 @@ const getUser = async (req, res, next) => {
     }
 };
 exports.getUser = getUser;
+const updateCoverImage = async (req, res, next) => {
+    try {
+        const userId = req["user"].id;
+        // Remove the folder name (cover-images), leaving just the file name
+        const filename = req["file"]["key"].split("/")[1];
+        const coverImage = {
+            original: {
+                url: `${config_1.default.get("serverAddress")}api/users/cover-images/${filename}`,
+                dUrl: req["file"]["location"],
+            },
+        };
+        await user_1.default.updateOne({ _id: userId }, { $set: { coverImage } });
+    }
+    catch (e) {
+        next(new Error("Error in updating cover image: " + e));
+    }
+};
+exports.updateCoverImage = updateCoverImage;
+const getCoverImage = async (req, res, next) => {
+    try {
+        const readStream = (0, s3_1.getFileFromS3)("cover-images", req.params.filename);
+        readStream.pipe(res);
+    }
+    catch (e) {
+        next(new Error("Error in getting cover image: " + e));
+    }
+};
+exports.getCoverImage = getCoverImage;
 const updateProfileImage = async (req, res, next) => {
     try {
         const userId = req["user"].id;
@@ -122,7 +151,7 @@ const getProfileImage = async (req, res, next) => {
         readStream.pipe(res);
     }
     catch (e) {
-        next(new Error("Error in getting image: " + e));
+        next(new Error("Error in getting profile image: " + e));
     }
 };
 exports.getProfileImage = getProfileImage;
@@ -140,16 +169,30 @@ const updateAbout = async (req, res, next) => {
     }
 };
 exports.updateAbout = updateAbout;
-const updateStudentData = async (req, res, next) => {
-    const { error } = (0, user_1.validateUpdateStudentDataReq)(req.body);
-    if (error)
-        return { msg: error.details[0].message };
-    const { department, faculty, level } = req.body;
+const updatePhone = async (req, res, next) => {
     try {
+        const { error } = (0, user_1.validatePhoneData)(req.body);
+        if (error)
+            return res.status(400).send({ msg: error.details[0].message });
+        const userId = req["user"].id;
+        await user_1.default.updateOne({ _id: userId }, { $set: { phone: req.body.phone } });
+        res.send({ msg: "Phone number updated successfully" });
+    }
+    catch (e) {
+        next(new Error("Error in updating phone number: " + e));
+    }
+};
+exports.updatePhone = updatePhone;
+const updateStudentData = async (req, res, next) => {
+    const { error } = (0, user_1.validateStudentData)(req.body);
+    if (error)
+        return res.status(400).send({ msg: error.details[0].message });
+    try {
+        const { department, faculty, level } = req.body;
         const userId = req["user"].id;
         const user = await user_1.default.findById(userId).select("_id");
         if (!user)
-            return res.status(404).send({ msg: "No user found" });
+            return res.status(404).send({ msg: "User not found" });
         await user_1.default.updateOne({ _id: userId }, { $set: { studentData: { department, faculty, level } } });
         res.send({ msg: "Student data updated successfully" });
     }
@@ -158,6 +201,35 @@ const updateStudentData = async (req, res, next) => {
     }
 };
 exports.updateStudentData = updateStudentData;
+const updatePaymentDetails = async (req, res, next) => {
+    const { error } = (0, user_1.validatePaymentDetailsData)(req.body);
+    if (error)
+        return res.status(400).send({ msg: error.details[0].message });
+    try {
+        const { bankName, bankSortCode, accountType, accountName, accountNumber, currency, } = req.body;
+        const userId = req["user"].id;
+        const user = await user_1.default.findById(userId).select("_id");
+        if (!user)
+            return res.status(404).send({ msg: "User not found" });
+        await user_1.default.updateOne({ _id: userId }, {
+            $set: {
+                paymentDetails: {
+                    bankName,
+                    bankSortCode,
+                    accountType,
+                    accountName,
+                    accountNumber,
+                    currency,
+                },
+            },
+        });
+        res.send({ msg: "Payment details updated successfully" });
+    }
+    catch (e) {
+        next(new Error("Error in updating payment details: " + e));
+    }
+};
+exports.updatePaymentDetails = updatePaymentDetails;
 const updateMessagingToken = async (req, res, next) => {
     try {
         const userId = req["user"].id;

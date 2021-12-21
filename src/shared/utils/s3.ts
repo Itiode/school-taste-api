@@ -14,7 +14,9 @@ const s3 = new S3({
   secretAccessKey,
 });
 
-export function getStorageConfig(folderName: "post-images" | "profile-images") {
+export function getStorageConfig(
+  folderName: "post-images" | "profile-images" | "cover-images"
+) {
   const config = multerS3({
     s3: s3,
     bucket: bucketName,
@@ -33,7 +35,7 @@ export function getStorageConfig(folderName: "post-images" | "profile-images") {
 
 // Download a file from S3
 export function getFileFromS3(
-  folderName: "post-images" | "profile-images",
+  folderName: "post-images" | "profile-images" | "cover-images",
   filename: string
 ) {
   const downloadParams: S3.GetObjectRequest = {

@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateUpdateStudentDataReq = exports.validateAboutData = exports.validateAuthReq = exports.validateAddUserReq = void 0;
+exports.validatePaymentDetailsData = exports.validateStudentData = exports.validatePhoneData = exports.validateAboutData = exports.validateAuthReq = exports.validateAddUserReq = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const config_1 = __importDefault(require("config"));
 const Jwt = __importStar(require("jsonwebtoken"));
@@ -31,6 +31,8 @@ const name_1 = __importDefault(require("./schemas/name"));
 const dob_1 = __importDefault(require("./schemas/dob"));
 const school_1 = __importDefault(require("./schemas/school"));
 const student_data_1 = __importDefault(require("./schemas/student-data"));
+const user_image_1 = __importDefault(require("./schemas/user-image"));
+const payment_details_1 = __importDefault(require("./schemas/payment-details"));
 const schema = new mongoose_1.Schema({
     name: name_1.default,
     username: {
@@ -59,17 +61,9 @@ const schema = new mongoose_1.Schema({
     },
     gender: { type: String, enum: ["Male", "Female", "Other"], required: true },
     dob: dob_1.default,
-    profileImage: {
-        original: {
-            url: { type: String, trim: true },
-            dUrl: { type: String, trim: true },
-        },
-        thumbnail: {
-            url: { type: String, trim: true },
-            dUrl: { type: String, trim: true },
-        },
-    },
-    about: { type: String, trim: true, minLength: 5, maxLength: 250 },
+    profileImage: user_image_1.default,
+    coverImage: user_image_1.default,
+    about: { type: String, trim: true, minLength: 1, maxLength: 250 },
     school: school_1.default,
     studentData: student_data_1.default,
     password: { type: String, trim: true, required: true },
@@ -78,6 +72,7 @@ const schema = new mongoose_1.Schema({
     roles: [String],
     rubyBalance: { type: Number, min: 0, max: 1000, default: 1 },
     messagingToken: String,
+    paymentDetails: payment_details_1.default,
 }, { timestamps: true });
 schema.methods.genAuthToken = function () {
     return Jwt.sign({
@@ -144,7 +139,18 @@ function validateAboutData(data) {
     }).validate(data);
 }
 exports.validateAboutData = validateAboutData;
-function validateUpdateStudentDataReq(data) {
+function validatePhoneData(data) {
+    return joi_1.default.object({
+        phone: joi_1.default.string()
+            .trim()
+            .min(11)
+            .max(11)
+            .regex(new RegExp("^[0-9]*$"))
+            .required(),
+    }).validate(data);
+}
+exports.validatePhoneData = validatePhoneData;
+function validateStudentData(data) {
     const schema = joi_1.default.object({
         department: joi_1.default.string().trim().max(250).required(),
         faculty: joi_1.default.string().trim().max(250).required(),
@@ -152,4 +158,16 @@ function validateUpdateStudentDataReq(data) {
     });
     return schema.validate(data);
 }
-exports.validateUpdateStudentDataReq = validateUpdateStudentDataReq;
+exports.validateStudentData = validateStudentData;
+function validatePaymentDetailsData(data) {
+    const schema = joi_1.default.object({
+        bankName: joi_1.default.string().trim().max(500).required(),
+        bankSortCode: joi_1.default.string().trim().max(5).required(),
+        accountType: joi_1.default.string().trim().max(25).required(),
+        accountName: joi_1.default.string().trim().max(250).required(),
+        accountNumber: joi_1.default.string().trim().min(10).max(10).required(),
+        currency: joi_1.default.string().min(2).max(5).required(),
+    });
+    return schema.validate(data);
+}
+exports.validatePaymentDetailsData = validatePaymentDetailsData;

@@ -1,4 +1,5 @@
 export interface User {
+  _id: string;
   name: Name;
   username: string;
   email: string;
@@ -6,7 +7,8 @@ export interface User {
   gender: string;
   dob: DOB;
   about: string;
-  profileImage: ProfileImage;
+  profileImage: UserImage;
+  coverImage: UserImage;
   school: School;
   studentData: StudentData;
   password: string;
@@ -15,6 +17,7 @@ export interface User {
   roles: string[];
   rubyBalance: number;
   messagingToken: string;
+  paymentDetails: PaymentDetails;
 }
 
 export interface Name {
@@ -39,7 +42,7 @@ export interface School {
   shortName: string;
 }
 
-export interface ProfileImage {
+export interface UserImage {
   thumbnail: { url: string; dUrl: string };
   original: { url: string; dUrl: string };
 }
@@ -75,24 +78,31 @@ export interface GetUserRes {
     email: string;
     phone: string;
     dob: { day: string; month: string; year: string };
-    profileImage: ProfileImage;
+    profileImage: UserImage;
+    coverImage: UserImage;
     about: string;
     gender: string;
-    school: {
-      shortName: string;
-      fullName: string;
-    };
-    studentData: {
-      department: string;
-      faculty: string;
-      lavel: string;
-    };
+    school: School;
+    studentData: StudentData;
     rubyBalance: number;
   };
 }
 
 export interface AboutData {
   about: string;
+}
+
+export interface PhoneData {
+  phone: string;
+}
+
+export interface PaymentDetails {
+  bankName: string;
+  bankSortCode: string;
+  accountType: string;
+  accountName: string;
+  accountNumber: string;
+  currency: string;
 }
 
 export interface UpdateStudentDataReq {

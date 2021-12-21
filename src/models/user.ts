@@ -3,12 +3,14 @@ import config from "config";
 import * as Jwt from "jsonwebtoken";
 import Joi from "joi";
 
-import { User, AddUserReq, AuthReq } from "../types/user";
-import { UpdateStudentDataReq, AboutData } from "./../types/user";
+import { User, AddUserReq, AuthReq, PaymentDetails } from "../types/user";
+import { UpdateStudentDataReq, AboutData, PhoneData } from "./../types/user";
 import nameSchema from "./schemas/name";
 import dobSchema from "./schemas/dob";
 import schoolSchema from "./schemas/school";
 import studentDataSchema from "./schemas/student-data";
+import userImageSchema from "./schemas/user-image";
+import paymentDetailsSchema from "./schemas/payment-details";
 
 const schema = new Schema<User>(
   {
@@ -39,17 +41,9 @@ const schema = new Schema<User>(
     },
     gender: { type: String, enum: ["Male", "Female", "Other"], required: true },
     dob: dobSchema,
-    profileImage: {
-      original: {
-        url: { type: String, trim: true },
-        dUrl: { type: String, trim: true },
-      },
-      thumbnail: {
-        url: { type: String, trim: true },
-        dUrl: { type: String, trim: true },
-      },
-    },
-    about: { type: String, trim: true, minLength: 5, maxLength: 250 },
+    profileImage: userImageSchema,
+    coverImage: userImageSchema,
+    about: { type: String, trim: true, minLength: 1, maxLength: 250 },
     school: schoolSchema,
     studentData: studentDataSchema,
     password: { type: String, trim: true, required: true },
@@ -58,6 +52,7 @@ const schema = new Schema<User>(
     roles: [String],
     rubyBalance: { type: Number, min: 0, max: 1000, default: 1 },
     messagingToken: String,
+    paymentDetails: paymentDetailsSchema,
   },
   { timestamps: true }
 );
@@ -134,11 +129,35 @@ export function validateAboutData(data: AboutData) {
   }).validate(data);
 }
 
-export function validateUpdateStudentDataReq(data: UpdateStudentDataReq) {
+export function validatePhoneData(data: PhoneData) {
+  return Joi.object({
+    phone: Joi.string()
+      .trim()
+      .min(11)
+      .max(11)
+      .regex(new RegExp("^[0-9]*$"))
+      .required(),
+  }).validate(data);
+}
+
+export function validateStudentData(data: UpdateStudentDataReq) {
   const schema = Joi.object({
     department: Joi.string().trim().max(250).required(),
     faculty: Joi.string().trim().max(250).required(),
     level: Joi.string().trim().required(),
+  });
+
+  return schema.validate(data);
+}
+
+export function validatePaymentDetailsData(data: PaymentDetails) {
+  const schema = Joi.object({
+    bankName: Joi.string().trim().max(500).required(),
+    bankSortCode: Joi.string().trim().max(5).required(),
+    accountType: Joi.string().trim().max(25).required(),
+    accountName: Joi.string().trim().max(250).required(),
+    accountNumber: Joi.string().trim().min(10).max(10).required(),
+    currency: Joi.string().min(2).max(5).required(),
   });
 
   return schema.validate(data);
