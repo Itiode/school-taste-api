@@ -158,6 +158,10 @@ export const updateCoverImage: RequestHandler<any, SimpleRes> = async (
     };
 
     await UserModel.updateOne({ _id: userId }, { $set: { coverImage } });
+
+    // TODO: Delete previous cover images from AWS
+
+    res.send({ msg: "Cover image updated successfully" });
   } catch (e) {
     next(new Error("Error in updating cover image: " + e));
   }
