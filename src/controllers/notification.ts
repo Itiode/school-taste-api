@@ -94,7 +94,7 @@ export const deleteNotification: RequestHandler<UpdateNotificationParams, Simple
     const userId = req["user"].id;
     const user = await UserModel.findById(userId).select("_id");
     if (!user)
-      return res.status(404).send({ msg: "No user with the given ID" });
+      return res.status(404).send({ msg: "User not found" });
 
     await NotificationModel.deleteOne({
       _id: req.params.notificationId,

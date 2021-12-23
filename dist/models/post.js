@@ -27,6 +27,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 const joi_1 = __importDefault(require("joi"));
 const sub_post_1 = __importDefault(require("../models/sub-post"));
 const date_format_1 = require("../shared/utils/date-format");
+const user_1 = __importDefault(require("../models/user"));
 const reaction_1 = __importDefault(require("./schemas/reaction"));
 const school_1 = __importDefault(require("./schemas/school"));
 const student_data_1 = __importDefault(require("./schemas/student-data"));
@@ -74,8 +75,23 @@ function validateViewPostReq(data) {
 exports.validateViewPostReq = validateViewPostReq;
 async function getPosts(userId, posts, res) {
     const modifiedPosts = [];
+    const tempUsers = [];
     for (const p of posts) {
         const subPosts = await sub_post_1.default.find({ ppid: p._id }).select("-__v -views -dUrl");
+        let tempUser;
+        const isFetched = tempUsers.find(tU => tU.id === p.creator.id);
+        if (!isFetched) {
+            const creator = await user_1.default.findById(p.creator.id).select("name profileImage");
+            tempUser = {
+                id: creator._id,
+                fullName: `${creator.name.first} ${creator.name.last}`,
+                userImage: creator.profileImage,
+            };
+            tempUsers.push(tempUser);
+        }
+        else {
+            tempUser = tempUsers.find(tU => tU.id === p.creator.id);
+        }
         const modifiedSubPosts = [];
         for (const sP of subPosts) {
             const sPReaction = sP.reactions.find((r) => r.userId.toHexString() === userId);
@@ -93,7 +109,11 @@ async function getPosts(userId, posts, res) {
         const postReaction = p.reactions.find((r) => r.userId.toHexString() === userId);
         const modPost = {
             id: p._id,
-            creator: p.creator,
+            creator: {
+                id: tempUser.id,
+                name: tempUser.fullName,
+                imageUrl: tempUser.userImage.original.url,
+            },
             text: p.text,
             subPosts: modifiedSubPosts,
             school: p.school,

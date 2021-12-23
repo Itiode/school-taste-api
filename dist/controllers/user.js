@@ -40,6 +40,10 @@ const addUser = async (req, res, next) => {
         if (fetchedUser)
             return res.status(400).send({ msg: "User already registered" });
         const hashedPw = await bcryptjs_1.default.hash(password, 12);
+        const userImage = {
+            original: { url: "", dUrl: "" },
+            thumbnail: { url: "", dUrl: "" },
+        };
         const user = await new user_1.default({
             name,
             username,
@@ -51,6 +55,8 @@ const addUser = async (req, res, next) => {
             school,
             studentData,
             password: hashedPw,
+            profileImage: userImage,
+            coverImage: userImage,
         }).save();
         res.status(201).send({
             msg: "User added successfully",

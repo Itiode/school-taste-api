@@ -53,6 +53,11 @@ export const addUser: RequestHandler<any, AuthRes, AddUserReq> = async (
 
     const hashedPw = await bcrypt.hash(password, 12);
 
+    const userImage = {
+      original: { url: "", dUrl: "" },
+      thumbnail: { url: "", dUrl: "" },
+    };
+
     const user = await new UserModel({
       name,
       username,
@@ -64,6 +69,8 @@ export const addUser: RequestHandler<any, AuthRes, AddUserReq> = async (
       school,
       studentData,
       password: hashedPw,
+      profileImage: userImage,
+      coverImage: userImage,
     }).save();
 
     res.status(201).send({

@@ -63,7 +63,7 @@ const schema = new mongoose_1.Schema({
     dob: dob_1.default,
     profileImage: user_image_1.default,
     coverImage: user_image_1.default,
-    about: { type: String, trim: true, minLength: 1, maxLength: 250 },
+    about: { type: String, trim: true, minLength: 1, maxLength: 200 },
     school: school_1.default,
     studentData: student_data_1.default,
     password: { type: String, trim: true, required: true },
@@ -103,9 +103,9 @@ function validateAddUserReq(data) {
             .required(),
         gender: joi_1.default.string().trim().min(2).max(25).required(),
         dob: joi_1.default.object({
-            day: joi_1.default.string().trim().max(2).required(),
-            month: joi_1.default.string().trim().max(2).required(),
-            year: joi_1.default.string().trim().min(4).max(4).required(),
+            day: joi_1.default.number().min(1).max(31).required(),
+            month: joi_1.default.number().min(1).max(12).required(),
+            year: joi_1.default.number().min(1980).max(2022).required(),
         }),
         studentData: joi_1.default.object({
             department: joi_1.default.string().trim().max(250).required(),
@@ -164,7 +164,7 @@ function validatePaymentDetailsData(data) {
         bankName: joi_1.default.string().trim().max(500).required(),
         bankSortCode: joi_1.default.string().trim().max(5).required(),
         accountType: joi_1.default.string().trim().max(25).required(),
-        accountName: joi_1.default.string().trim().max(250).required(),
+        accountName: joi_1.default.string().trim().max(200).required(),
         accountNumber: joi_1.default.string().trim().min(10).max(10).required(),
         currency: joi_1.default.string().min(2).max(5).required(),
     });

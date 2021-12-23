@@ -26,6 +26,7 @@ export interface PostRes {
   creator: {
     name: string;
     id: string;
+    imageUrl: string;
   };
   text: string;
   subPosts: SubPostRes[];

@@ -71,7 +71,7 @@ const deleteNotification = async (req, res, next) => {
         const userId = req["user"].id;
         const user = await user_1.default.findById(userId).select("_id");
         if (!user)
-            return res.status(404).send({ msg: "No user with the given ID" });
+            return res.status(404).send({ msg: "User not found" });
         await notification_1.default.deleteOne({
             _id: req.params.notificationId,
             "subscriber.id": userId,

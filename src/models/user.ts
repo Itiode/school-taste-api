@@ -43,7 +43,7 @@ const schema = new Schema<User>(
     dob: dobSchema,
     profileImage: userImageSchema,
     coverImage: userImageSchema,
-    about: { type: String, trim: true, minLength: 1, maxLength: 250 },
+    about: { type: String, trim: true, minLength: 1, maxLength: 200 },
     school: schoolSchema,
     studentData: studentDataSchema,
     password: { type: String, trim: true, required: true },
@@ -91,9 +91,9 @@ export function validateAddUserReq(data: AddUserReq) {
       .required(),
     gender: Joi.string().trim().min(2).max(25).required(),
     dob: Joi.object({
-      day: Joi.string().trim().max(2).required(),
-      month: Joi.string().trim().max(2).required(),
-      year: Joi.string().trim().min(4).max(4).required(),
+      day: Joi.number().min(1).max(31).required(),
+      month: Joi.number().min(1).max(12).required(),
+      year: Joi.number().min(1980).max(2022).required(),
     }),
     studentData: Joi.object({
       department: Joi.string().trim().max(250).required(),
@@ -155,7 +155,7 @@ export function validatePaymentDetailsData(data: PaymentDetails) {
     bankName: Joi.string().trim().max(500).required(),
     bankSortCode: Joi.string().trim().max(5).required(),
     accountType: Joi.string().trim().max(25).required(),
-    accountName: Joi.string().trim().max(250).required(),
+    accountName: Joi.string().trim().max(200).required(),
     accountNumber: Joi.string().trim().min(10).max(10).required(),
     currency: Joi.string().min(2).max(5).required(),
   });

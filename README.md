@@ -1,10 +1,14 @@
 # TODO
 
-- Change to using the complete SubPost type
-- Create a notification when a comment is made
-- Create a Transaction doc when a ruby is awarded, at signup and other times.
+- A post creator and notification owner fields should only hold an
+ object with the 'id' field. When fetched, a query is made to the 
+ user collection, to fill in the other properties like name and imageUrl.
 - Prevent creation of multiple similar notifications by leveraging
   notification type and contentId
+- Create a notification when a comment is made
+- Change to using the thumbnail image for a post notification, etc.
+- Create a Transaction doc when a ruby is awarded, at signup and other times.
+- Change to using the complete SubPost type
 - A notification can only be created if the resource isn't more than
   a day old. Notifications like likes, comments, etc.
 - Change to fetching posts using a unique school ID. Meaning

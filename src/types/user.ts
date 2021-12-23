@@ -20,6 +20,12 @@ export interface User {
   paymentDetails: PaymentDetails;
 }
 
+export interface TempUser {
+  id: string;
+  fullName: string;
+  userImage: UserImage;
+}
+
 export interface Name {
   first: string;
   last: string;

@@ -12,6 +12,8 @@ import {
 import { SubPostRes } from "../types/sub-post";
 import SubPostModel from "../models/sub-post";
 import { formatDate } from "../shared/utils/date-format";
+import UserModel from "../models/user";
+import { TempUser } from "../types/user";
 
 import reactionSchema from "./schemas/reaction";
 import schoolSchema from "./schemas/school";
@@ -63,11 +65,30 @@ export function validateViewPostReq(data: ViewPostParams) {
 
 export async function getPosts(userId: string, posts: any[], res: Response) {
   const modifiedPosts: PostRes[] = [];
+  const tempUsers: TempUser[] = [];
 
   for (const p of posts) {
     const subPosts = await SubPostModel.find({ ppid: p._id }).select(
       "-__v -views -dUrl"
     );
+
+    let tempUser: TempUser;
+
+    const isFetched = tempUsers.find(tU => tU.id === p.creator.id);
+    if (!isFetched) {
+      const creator = await UserModel.findById(p.creator.id).select(
+        "name profileImage"
+      );
+
+      tempUser = {
+        id: creator._id,
+        fullName: `${creator.name.first} ${creator.name.last}`,
+        userImage: creator.profileImage,
+      };
+      tempUsers.push(tempUser);
+    } else {
+      tempUser = tempUsers.find(tU => tU.id === p.creator.id)!;
+    }
 
     const modifiedSubPosts: SubPostRes[] = [];
     for (const sP of subPosts) {
@@ -91,9 +112,13 @@ export async function getPosts(userId: string, posts: any[], res: Response) {
       (r: any) => r.userId.toHexString() === userId
     );
 
-    const modPost = {
+    const modPost: PostRes = {
       id: p._id,
-      creator: p.creator,
+      creator: {
+        id: tempUser.id,
+        name: tempUser.fullName,
+        imageUrl: tempUser.userImage.original.url,
+      },
       text: p.text,
       subPosts: modifiedSubPosts,
       school: p.school,

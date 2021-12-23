@@ -3,24 +3,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 exports.default = new mongoose_1.Schema({
     day: {
-        type: String,
-        trim: true,
+        type: Number,
         minLength: 1,
-        maxLength: 2,
+        maxLength: 31,
         required: true,
     },
     month: {
-        type: String,
-        trim: true,
-        minLength: 1,
-        maxLength: 2,
+        type: Number,
+        min: 1,
+        max: 12,
         required: true,
     },
     year: {
-        type: String,
-        trim: true,
-        minLength: 4,
-        maxLength: 4,
+        type: Number,
+        min: 1980,
+        max: 2022,
         required: true,
     },
 }, { _id: false });
