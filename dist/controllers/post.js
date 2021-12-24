@@ -41,20 +41,16 @@ const createPost = async (req, res, next) => {
         return res.status(400).send({ msg: error.details[0].message });
     try {
         const creatorId = req["user"].id;
-        const user = await user_1.default.findById(creatorId);
+        const user = await user_1.default.findById(creatorId).select("name studentData school profileImage");
         if (!user)
-            return res
-                .status(404)
-                .send({ msg: "Cant't create post, user not found" });
+            return res.status(404).send({ msg: "Can't create post, user not found" });
         const { text } = req.body;
         const { name, studentData, school, profileImage } = user;
-        const fullName = name.first + " " + name.last;
         const { department, faculty, level } = studentData;
         const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department} ${faculty} ${level}`;
         const post = await new post_1.default({
             creator: {
                 id: creatorId,
-                name: fullName,
             },
             text,
             school,
@@ -81,9 +77,10 @@ const createPost = async (req, res, next) => {
             "studentData.department": department,
             "studentData.level": level,
         }).select("_id name messagingToken profileImage");
+        const notifs = [];
         for (let depMate of depMates) {
             if (depMate._id.toHexString() !== creatorId) {
-                const notification = new notification_1.default({
+                const notif = new notification_1.default({
                     creators: [
                         {
                             id: creatorId,
@@ -95,9 +92,8 @@ const createPost = async (req, res, next) => {
                     phrase: constants_2.notificationPhrase.created,
                     contentId: post._id,
                     payload: (0, functions_1.getNotificationPayload)(post.text),
-                    image: { thumbnail: { url: profileImage.original.url } },
                 });
-                await notification.save();
+                notifs.push(notif);
                 const fcmPayload = {
                     data: { msg: "PostCreated", status: "0", picture: "" },
                 };
@@ -106,6 +102,7 @@ const createPost = async (req, res, next) => {
                 //   .sendToDevice(user.messagingToken, fcmPayload, messagingOptions);
             }
         }
+        await notification_1.default.insertMany(notifs);
         res.status(201).send({ msg: "Post created successfully" });
     }
     catch (e) {
@@ -119,10 +116,10 @@ const getPost = async (req, res, next) => {
         const userId = req["user"].id;
         const user = await user_1.default.findById(userId).select("_id");
         if (!user)
-            return res.status(404).send({ msg: "No user with the given ID" });
+            return res.status(404).send({ msg: "User not found" });
         const post = await post_1.default.findById(req.params.postId).select("-__v -tagsString -tags");
         if (!post)
-            res.status(404).send({ msg: "No post with the given ID" });
+            res.status(404).send({ msg: "Post not found" });
         const subPosts = await sub_post_1.default.find({ ppid: post._id }).select("-__v -views -dUrl");
         const modifiedSubPosts = [];
         for (const sP of subPosts) {
@@ -139,9 +136,14 @@ const getPost = async (req, res, next) => {
             });
         }
         const postReaction = post.reactions.find((r) => r.userId.toHexString() === userId);
+        const creator = await user_1.default.findById(post.creator.id).select("name profileImage");
         const modPost = {
             id: post._id,
-            creator: post.creator,
+            creator: {
+                id: post.creator.id,
+                name: creator.name.first + " " + creator.name.last,
+                imageUrl: creator.profileImage.original.url,
+            },
             text: post.text,
             subPosts: modifiedSubPosts,
             school: post.school,
@@ -221,7 +223,7 @@ const reactToPost = async (req, res, next) => {
         const reactingUserId = req["user"].id;
         const reactingUser = await user_1.default.findById(reactingUserId).select("_id name profileImage");
         if (!reactingUser)
-            return res.status(404).send({ msg: "No user with the given ID" });
+            return res.status(404).send({ msg: "User not found" });
         const { postId } = req.params;
         const post = await post_1.default.findById(postId).select("_id reactions creator text");
         if (!post)
@@ -236,7 +238,11 @@ const reactToPost = async (req, res, next) => {
             }
             else {
                 await post_1.default.updateOne({ _id: postId }, { $pull: { reactions: { userId: reactingUserId } } });
-                await post_1.default.updateOne({ _id: postId }, { $push: { reactions: { userId: reactingUserId, type: reactionType } } });
+                await post_1.default.updateOne({ _id: postId }, {
+                    $push: {
+                        reactions: { userId: reactingUserId, type: reactionType },
+                    },
+                });
             }
             return res.send({ msg: "Reacted to post successfully" });
         }
@@ -260,29 +266,32 @@ const reactToPost = async (req, res, next) => {
             const notifType = constants_2.postNotificationType.reactedToPostNotification;
             const phrase = constants_2.notificationPhrase.liked;
             const payload = (0, functions_1.getNotificationPayload)(post.text);
-            const image = {
-                thumbnail: { url: reactingUser.profileImage.original.url },
-            };
-            await new notification_1.default({
-                creators,
-                owners,
-                subscriber: { id: reactingUserId },
-                type: notifType,
-                phrase,
-                payload,
+            const existingNotif = await notification_1.default.findOne({
                 contentId: postId,
-                image,
-            }).save();
-            await new notification_1.default({
-                creators,
-                owners,
-                subscriber: { id: post.creator.id },
                 type: notifType,
-                phrase,
-                payload,
-                contentId: postId,
-                image,
-            }).save();
+            }).select("_id");
+            if (!existingNotif) {
+                await notification_1.default.insertMany([
+                    new notification_1.default({
+                        creators,
+                        owners,
+                        subscriber: { id: reactingUserId },
+                        type: notifType,
+                        phrase,
+                        payload,
+                        contentId: postId,
+                    }),
+                    new notification_1.default({
+                        creators,
+                        owners,
+                        subscriber: { id: post.creator.id },
+                        type: notifType,
+                        phrase,
+                        payload,
+                        contentId: postId,
+                    }),
+                ]);
+            }
         }
         res.send({ msg: "Reacted to post successfully" });
     }

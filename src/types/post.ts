@@ -1,10 +1,9 @@
 import { SubPostRes } from "./sub-post";
-import { Reaction } from "./shared";
+import { Creator, Reaction } from "./shared";
 
 export interface Post {
   _id: string;
   creator: {
-    name: string;
     id: string;
   };
   text: string;
@@ -23,11 +22,7 @@ export interface Post {
 
 export interface PostRes {
   id: string;
-  creator: {
-    name: string;
-    id: string;
-    imageUrl: string;
-  };
+  creator: Creator;
   text: string;
   subPosts: SubPostRes[];
   school: { fullName: string; shortName: string };

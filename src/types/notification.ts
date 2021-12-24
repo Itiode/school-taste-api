@@ -1,4 +1,4 @@
-import {Creator, Owner} from "./shared";
+import { Creator, Owner } from "./shared";
 
 export default interface Notification {
   _id: string;
@@ -13,12 +13,6 @@ export default interface Notification {
   contentId: string;
   payload?: string;
   seen: boolean;
-  image?: {
-    thumbnail: {
-      url: string;
-      dUrl: string;
-    };
-  };
 }
 
 export interface GetNotificationsQuery {
@@ -52,4 +46,8 @@ export interface GetNotificationsRes {
   msg: string;
   count?: number;
   data?: NotificationRes[];
+}
+
+export interface NotificationImage {
+  thumbnail: { url: string; dUrl: string };
 }

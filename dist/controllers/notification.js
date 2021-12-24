@@ -22,11 +22,34 @@ const getNotifications = async (req, res, next) => {
             // .limit(pageSize)
             .select("-__v")
             .sort({ _id: -1 });
-        const transformedNotifs = notifs.map((n) => {
-            return {
+        let notifImage = { thumbnail: { url: "", dUrl: "" } };
+        const transformedNotifs = [];
+        let tempUsers = [];
+        for (let n of notifs) {
+            if (n.creators.length === 1) {
+                const fetchedUser = tempUsers.find((tU) => tU.id === n.creator.id);
+                let image;
+                if (fetchedUser) {
+                    image = fetchedUser.image;
+                }
+                else {
+                    const creator = await user_1.default.findById(n.creators[0].id).select("profileImage");
+                    image = {
+                        thumbnail: {
+                            url: creator.profileImage.original.url,
+                            dUrl: creator.profileImage.original.dUrl,
+                        },
+                    };
+                    tempUsers.push({
+                        id: creator._id,
+                        image,
+                    });
+                }
+                notifImage = image;
+            }
+            transformedNotifs.push({
                 id: n._id,
                 creators: n.creators,
-                subscriber: n.subscriber,
                 owners: n.owners,
                 type: n.type,
                 phrase: n.phrase,
@@ -35,9 +58,9 @@ const getNotifications = async (req, res, next) => {
                 date: n.date,
                 formattedDate: (0, date_format_1.formatDate)(n.date.toString()),
                 seen: n.seen,
-                image: n.image,
-            };
-        });
+                image: notifImage,
+            });
+        }
         res.send({
             msg: "Notifications fetched successfully",
             count: notifs.length,

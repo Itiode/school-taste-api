@@ -22,7 +22,6 @@ import studentDataSchema from "./schemas/student-data";
 const schema = new Schema<Post>({
   creator: {
     id: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    name: { type: String, trim: true, maxLength: 250, required: true },
   },
   text: { type: String, trim: true, maxLength: 10000, required: true },
   school: schoolSchema,
@@ -74,7 +73,7 @@ export async function getPosts(userId: string, posts: any[], res: Response) {
 
     let tempUser: TempUser;
 
-    const isFetched = tempUsers.find(tU => tU.id === p.creator.id);
+    const isFetched = tempUsers.find((tU) => tU.id === p.creator.id);
     if (!isFetched) {
       const creator = await UserModel.findById(p.creator.id).select(
         "name profileImage"
@@ -87,7 +86,7 @@ export async function getPosts(userId: string, posts: any[], res: Response) {
       };
       tempUsers.push(tempUser);
     } else {
-      tempUser = tempUsers.find(tU => tU.id === p.creator.id)!;
+      tempUser = tempUsers.find((tU) => tU.id === p.creator.id)!;
     }
 
     const modifiedSubPosts: SubPostRes[] = [];

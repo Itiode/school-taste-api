@@ -9,6 +9,7 @@ export interface SimpleRes {
 export interface Creator {
   id: string;
   name: string;
+  imageUrl: string;
 }
 
 export interface Owner {

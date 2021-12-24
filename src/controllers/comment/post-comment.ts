@@ -40,13 +40,13 @@ export const addPostComment: RequestHandler<
 
     const post = await PostModel.findById(postId).select("_id creator");
     if (!post)
-      return res.status(404).send({ msg: "No post with the given ID" });
+      return res.status(404).send({ msg: "Post not found" });
 
-    const user = await UserModel.findById(userId).select("name profileImage");
-    const { name, profileImage } = user;
+    const user = await UserModel.findById(userId).select("name");
+    const { name } = user;
 
     if (!user)
-      return res.status(404).send({ msg: "No user with the given ID" });
+      return res.status(404).send({ msg: "User not found" });
 
     const comment = await new PostCommentModel({
       text,
@@ -87,29 +87,27 @@ export const addPostComment: RequestHandler<
 
       const phrase = notificationPhrase.commented;
       const payload = getNotificationPayload(text);
-      const image = { thumbnail: { url: profileImage.original.url } };
 
-      await new NotificationModel({
-        creators,
-        owners,
-        subscriber: { id: post.creator.id },
-        contentId: post._id,
-        type: postNotificationType.commentedOnPostNotification,
-        phrase,
-        payload,
-        image,
-      }).save();
-
-      await new NotificationModel({
-        creators,
-        owners,
-        subscriber: { id: userId },
-        contentId: post._id,
-        type: postNotificationType.commentedOnPostNotification,
-        phrase,
-        payload,
-        image,
-      }).save();
+      await NotificationModel.insertMany([
+        new NotificationModel({
+          creators,
+          owners,
+          subscriber: { id: post.creator.id },
+          contentId: post._id,
+          type: postNotificationType.commentedOnPostNotification,
+          phrase,
+          payload,
+        }),
+        new NotificationModel({
+          creators,
+          owners,
+          subscriber: { id: userId },
+          contentId: post._id,
+          type: postNotificationType.commentedOnPostNotification,
+          phrase,
+          payload,
+        }),
+      ]);
     }
 
     res
@@ -137,13 +135,13 @@ export const reactToPostComment: RequestHandler<
 
     const user = await UserModel.findById(userId).select("_id");
     if (!user)
-      return res.status(404).send({ msg: "No user with the given ID" });
+      return res.status(404).send({ msg: "User not found" });
 
     const { commentId } = req.params;
 
     const comment = await PostCommentModel.findById(commentId);
     if (!comment)
-      return res.status(404).send({ msg: "No post comment with the given ID" });
+      return res.status(404).send({ msg: "Post comment not found" });
 
     const reaction = comment.reactions.find(
       (reaction: any) => reaction.userId.toHexString() === userId

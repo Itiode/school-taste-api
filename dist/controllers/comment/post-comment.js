@@ -40,11 +40,11 @@ const addPostComment = async (req, res, next) => {
         const { text, postId } = req.body;
         const post = await post_1.default.findById(postId).select("_id creator");
         if (!post)
-            return res.status(404).send({ msg: "No post with the given ID" });
-        const user = await user_1.default.findById(userId).select("name profileImage");
-        const { name, profileImage } = user;
+            return res.status(404).send({ msg: "Post not found" });
+        const user = await user_1.default.findById(userId).select("name");
+        const { name } = user;
         if (!user)
-            return res.status(404).send({ msg: "No user with the given ID" });
+            return res.status(404).send({ msg: "User not found" });
         const comment = await new post_comment_1.default({
             text,
             postId,
@@ -79,27 +79,26 @@ const addPostComment = async (req, res, next) => {
             ];
             const phrase = constants_1.notificationPhrase.commented;
             const payload = (0, functions_1.getNotificationPayload)(text);
-            const image = { thumbnail: { url: profileImage.original.url } };
-            await new notification_1.default({
-                creators,
-                owners,
-                subscriber: { id: post.creator.id },
-                contentId: post._id,
-                type: constants_1.postNotificationType.commentedOnPostNotification,
-                phrase,
-                payload,
-                image,
-            }).save();
-            await new notification_1.default({
-                creators,
-                owners,
-                subscriber: { id: userId },
-                contentId: post._id,
-                type: constants_1.postNotificationType.commentedOnPostNotification,
-                phrase,
-                payload,
-                image,
-            }).save();
+            await notification_1.default.insertMany([
+                new notification_1.default({
+                    creators,
+                    owners,
+                    subscriber: { id: post.creator.id },
+                    contentId: post._id,
+                    type: constants_1.postNotificationType.commentedOnPostNotification,
+                    phrase,
+                    payload,
+                }),
+                new notification_1.default({
+                    creators,
+                    owners,
+                    subscriber: { id: userId },
+                    contentId: post._id,
+                    type: constants_1.postNotificationType.commentedOnPostNotification,
+                    phrase,
+                    payload,
+                }),
+            ]);
         }
         res
             .status(201)
@@ -122,11 +121,11 @@ const reactToPostComment = async (req, res, next) => {
         const userId = req["user"].id;
         const user = await user_1.default.findById(userId).select("_id");
         if (!user)
-            return res.status(404).send({ msg: "No user with the given ID" });
+            return res.status(404).send({ msg: "User not found" });
         const { commentId } = req.params;
         const comment = await post_comment_1.default.findById(commentId);
         if (!comment)
-            return res.status(404).send({ msg: "No post comment with the given ID" });
+            return res.status(404).send({ msg: "Post comment not found" });
         const reaction = comment.reactions.find((reaction) => reaction.userId.toHexString() === userId);
         if (reaction) {
             // If the user doesn't want to react anymore

@@ -34,7 +34,6 @@ const student_data_1 = __importDefault(require("./schemas/student-data"));
 const schema = new mongoose_1.Schema({
     creator: {
         id: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
-        name: { type: String, trim: true, maxLength: 250, required: true },
     },
     text: { type: String, trim: true, maxLength: 10000, required: true },
     school: school_1.default,
@@ -79,7 +78,7 @@ async function getPosts(userId, posts, res) {
     for (const p of posts) {
         const subPosts = await sub_post_1.default.find({ ppid: p._id }).select("-__v -views -dUrl");
         let tempUser;
-        const isFetched = tempUsers.find(tU => tU.id === p.creator.id);
+        const isFetched = tempUsers.find((tU) => tU.id === p.creator.id);
         if (!isFetched) {
             const creator = await user_1.default.findById(p.creator.id).select("name profileImage");
             tempUser = {
@@ -90,7 +89,7 @@ async function getPosts(userId, posts, res) {
             tempUsers.push(tempUser);
         }
         else {
-            tempUser = tempUsers.find(tU => tU.id === p.creator.id);
+            tempUser = tempUsers.find((tU) => tU.id === p.creator.id);
         }
         const modifiedSubPosts = [];
         for (const sP of subPosts) {

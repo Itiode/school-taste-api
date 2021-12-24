@@ -37,11 +37,5 @@ const schema = new mongoose_1.Schema({
     contentId: { type: mongoose_1.Schema.Types.ObjectId, required: true },
     payload: { type: String, trim: true, maxLength: 100 },
     seen: { type: Boolean, default: false },
-    image: {
-        thumbnail: {
-            url: { type: String, trim: true },
-            dUrl: { type: String, trim: true },
-        },
-    },
 });
 exports.default = mongoose_1.default.model("Notification", schema);

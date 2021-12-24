@@ -50,17 +50,16 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
   try {
     const creatorId = req["user"].id;
 
-    const user = await UserModel.findById(creatorId);
+    const user = await UserModel.findById(creatorId).select(
+      "name studentData school profileImage"
+    );
     if (!user)
-      return res
-        .status(404)
-        .send({ msg: "Cant't create post, user not found" });
+      return res.status(404).send({ msg: "Can't create post, user not found" });
 
     const { text } = req.body;
 
     const { name, studentData, school, profileImage } = user;
 
-    const fullName = name.first + " " + name.last;
     const { department, faculty, level } = studentData;
 
     const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department} ${faculty} ${level}`;
@@ -68,7 +67,6 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
     const post = await new PostModel({
       creator: {
         id: creatorId,
-        name: fullName,
       },
       text,
       school,
@@ -99,9 +97,11 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
       "studentData.level": level,
     }).select("_id name messagingToken profileImage");
 
+    const notifs: any[] = [];
+
     for (let depMate of depMates) {
       if (depMate._id.toHexString() !== creatorId) {
-        const notification = new NotificationModel({
+        const notif = new NotificationModel({
           creators: [
             {
               id: creatorId,
@@ -113,10 +113,9 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
           phrase: notificationPhrase.created,
           contentId: post._id,
           payload: getNotificationPayload(post.text),
-          image: { thumbnail: { url: profileImage.original.url } },
         });
 
-        await notification.save();
+        notifs.push(notif);
 
         const fcmPayload = {
           data: { msg: "PostCreated", status: "0", picture: "" },
@@ -127,6 +126,8 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
         //   .sendToDevice(user.messagingToken, fcmPayload, messagingOptions);
       }
     }
+
+    await NotificationModel.insertMany(notifs);
 
     res.status(201).send({ msg: "Post created successfully" });
   } catch (e) {
@@ -143,14 +144,13 @@ export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
   try {
     const userId = req["user"].id;
     const user = await UserModel.findById(userId).select("_id");
-    if (!user)
-      return res.status(404).send({ msg: "No user with the given ID" });
+    if (!user) return res.status(404).send({ msg: "User not found" });
 
     const post = await PostModel.findById(req.params.postId).select(
       "-__v -tagsString -tags"
     );
 
-    if (!post) res.status(404).send({ msg: "No post with the given ID" });
+    if (!post) res.status(404).send({ msg: "Post not found" });
 
     const subPosts = await SubPostModel.find({ ppid: post._id }).select(
       "-__v -views -dUrl"
@@ -178,9 +178,17 @@ export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
       (r: any) => r.userId.toHexString() === userId
     );
 
-    const modPost = {
+    const creator = await UserModel.findById(post.creator.id).select(
+      "name profileImage"
+    );
+
+    const modPost: PostRes = {
       id: post._id,
-      creator: post.creator,
+      creator: {
+        id: post.creator.id,
+        name: creator.name.first + " " + creator.name.last,
+        imageUrl: creator.profileImage.original.url,
+      },
       text: post.text,
       subPosts: modifiedSubPosts,
       school: post.school,
@@ -276,8 +284,7 @@ export const reactToPost: RequestHandler<
       "_id name profileImage"
     );
 
-    if (!reactingUser)
-      return res.status(404).send({ msg: "No user with the given ID" });
+    if (!reactingUser) return res.status(404).send({ msg: "User not found" });
 
     const { postId } = req.params;
 
@@ -312,7 +319,11 @@ export const reactToPost: RequestHandler<
 
         await PostModel.updateOne(
           { _id: postId },
-          { $push: { reactions: { userId: reactingUserId, type: reactionType } } }
+          {
+            $push: {
+              reactions: { userId: reactingUserId, type: reactionType },
+            },
+          }
         );
       }
 
@@ -347,31 +358,34 @@ export const reactToPost: RequestHandler<
       const notifType = postNotificationType.reactedToPostNotification;
       const phrase = notificationPhrase.liked;
       const payload = getNotificationPayload(post.text);
-      const image = {
-        thumbnail: { url: reactingUser.profileImage.original.url },
-      };
 
-      await new NotificationModel({
-        creators,
-        owners,
-        subscriber: { id: reactingUserId },
-        type: notifType,
-        phrase,
-        payload,
+      const existingNotif = await NotificationModel.findOne({
         contentId: postId,
-        image,
-      }).save();
+        type: notifType,
+      }).select("_id");
 
-      await new NotificationModel({
-        creators,
-        owners,
-        subscriber: { id: post.creator.id },
-        type: notifType,
-        phrase,
-        payload,
-        contentId: postId,
-        image,
-      }).save();
+      if (!existingNotif) {
+        await NotificationModel.insertMany([
+          new NotificationModel({
+            creators,
+            owners,
+            subscriber: { id: reactingUserId },
+            type: notifType,
+            phrase,
+            payload,
+            contentId: postId,
+          }),
+          new NotificationModel({
+            creators,
+            owners,
+            subscriber: { id: post.creator.id },
+            type: notifType,
+            phrase,
+            payload,
+            contentId: postId,
+          }),
+        ]);
+      }
     }
 
     res.send({ msg: "Reacted to post successfully" });
