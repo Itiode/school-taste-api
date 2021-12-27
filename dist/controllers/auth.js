@@ -26,23 +26,23 @@ exports.auth = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_1 = __importStar(require("../models/user"));
 const auth = async (req, res, next) => {
-    const { error } = (0, user_1.validateAuthReq)(req.body);
+    const { error } = (0, user_1.validateAuthData)(req.body);
     if (error)
         return res.status(400).send({ msg: error.details[0].message });
     try {
         const user = await user_1.default.findOne({ email: req.body.email });
         if (!user)
-            return res.status(404).send({ msg: 'User not registered!' });
+            return res.status(404).send({ msg: "User not registered!" });
         const isPw = await bcryptjs_1.default.compare(req.body.password, user.password);
         if (!isPw)
-            return res.status(400).send({ msg: 'Invalid email or password.' });
+            return res.status(400).send({ msg: "Invalid email or password." });
         res.send({
-            msg: 'Authentication successful',
+            msg: "Authentication successful",
             token: user.genAuthToken(),
         });
     }
     catch (e) {
-        next(new Error('Error in authenticating user: ' + e));
+        next(new Error("Error in authenticating user: " + e));
     }
 };
 exports.auth = auth;

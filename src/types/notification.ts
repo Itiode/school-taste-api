@@ -2,7 +2,7 @@ import { Creator, Owner } from "./shared";
 
 export default interface Notification {
   _id: string;
-  creators: Creator[];
+  creators: { id: string; name: string }[];
   subscriber: {
     id: string;
   };
@@ -35,11 +35,7 @@ export interface NotificationRes {
   contentId: string;
   payload?: string;
   seen: boolean;
-  image?: {
-    thumbnail: {
-      url: string;
-    };
-  };
+  image?: NotificationImage;
 }
 
 export interface GetNotificationsRes {

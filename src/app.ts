@@ -14,6 +14,7 @@ import postCommentRoutes from "./routes/comment/post-comment";
 import subPostRoutes from "./routes/sub-post";
 import subPostCommentRoutes from "./routes/comment/sub-post-comment";
 import notificationRoutes from "./routes/notification";
+import schoolRoutes from "./routes/school";
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/api/post-comments", postCommentRoutes);
 app.use("/api/sub-posts", subPostRoutes);
 app.use("/api/sub-post-comments", subPostCommentRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/schools", schoolRoutes);
 
 app.use(error);
 

@@ -8,7 +8,6 @@ const schema = new Schema<Transaction>({
   description: {
     type: String,
     trim: true,
-    minLength: 5,
     maxLength: 250,
     required: true,
   },

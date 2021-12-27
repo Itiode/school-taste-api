@@ -1,3 +1,5 @@
+import { School } from "./school";
+
 export interface User {
   _id: string;
   name: Name;
@@ -43,17 +45,12 @@ export interface StudentData {
   level: string;
 }
 
-export interface School {
-  fullName: string;
-  shortName: string;
-}
-
 export interface UserImage {
   thumbnail: { url: string; dUrl: string };
   original: { url: string; dUrl: string };
 }
 
-export interface AddUserReq {
+export interface AddUserData {
   name: { first: string; last: string };
   username: string;
   email: string;
@@ -61,7 +58,7 @@ export interface AddUserReq {
   dob: { day: string; month: string; year: string };
   gender: string;
   studentData: { department: string; faculty: string; level: string };
-  school: { fullName: string; shortName: string };
+  schoolId: string;
   password: string;
 }
 

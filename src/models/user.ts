@@ -7,10 +7,10 @@ import { User, AddUserReq, AuthReq, PaymentDetails } from "../types/user";
 import { UpdateStudentDataReq, AboutData, PhoneData } from "./../types/user";
 import nameSchema from "./schemas/name";
 import dobSchema from "./schemas/dob";
-import schoolSchema from "./schemas/school";
 import studentDataSchema from "./schemas/student-data";
 import userImageSchema from "./schemas/user-image";
 import paymentDetailsSchema from "./schemas/payment-details";
+import schoolSchema from "./schemas/school";
 
 const schema = new Schema<User>(
   {
@@ -44,8 +44,8 @@ const schema = new Schema<User>(
     profileImage: userImageSchema,
     coverImage: userImageSchema,
     about: { type: String, trim: true, minLength: 1, maxLength: 200 },
-    school: schoolSchema,
-    studentData: studentDataSchema,
+    school: { type: schoolSchema, required: true },
+    studentData: { type: studentDataSchema, required: true },
     password: { type: String, trim: true, required: true },
     interests: [String],
     hobbies: [String],
@@ -71,7 +71,7 @@ schema.methods.genAuthToken = function () {
 
 export default mongoose.model("User", schema);
 
-export function validateAddUserReq(data: AddUserReq) {
+export function validateAddUserData(data: AddUserReq) {
   const schema = Joi.object({
     name: Joi.object({
       first: Joi.string().trim().min(2).max(25).required(),
@@ -95,14 +95,14 @@ export function validateAddUserReq(data: AddUserReq) {
       month: Joi.number().min(1).max(12).required(),
       year: Joi.number().min(1980).max(2022).required(),
     }),
+    schoolId: Joi.string()
+      .trim()
+      .regex(new RegExp("^[0-9a-fA-F]{24}$"))
+      .required(),
     studentData: Joi.object({
       department: Joi.string().trim().max(250).required(),
       faculty: Joi.string().trim().max(250).required(),
       level: Joi.string().trim().required(),
-    }),
-    school: Joi.object({
-      fullName: Joi.string().trim().max(250).required(),
-      shortName: Joi.string().trim().uppercase().max(25).required(),
     }),
     password: Joi.string().trim().min(6).max(50).required(),
   });
@@ -110,7 +110,7 @@ export function validateAddUserReq(data: AddUserReq) {
   return schema.validate(data);
 }
 
-export function validateAuthReq(data: AuthReq) {
+export function validateAuthData(data: AuthReq) {
   const schema = Joi.object({
     email: Joi.string()
       .max(250)

@@ -24,19 +24,14 @@ import {
   ViewPostParams,
 } from "../types/post";
 import { SubPostRes } from "../types/sub-post";
-import { Reaction } from "../types/shared";
 import { SimpleRes, GetImageParams } from "../types/shared";
 import TransactionModel from "../models/transaction";
-import {
-  txDescription,
-  rubyCredit,
-  maxViewsForRubyCredit,
-} from "../shared/constants";
+import { txDesc, rubyCredit, maxViewsForRubyCredit } from "../shared/constants";
 import { validateReactionType } from "../shared/utils/validators";
 import { messagingOptions } from "../main/firebase";
 import { getFileFromS3 } from "../shared/utils/s3";
 import { getNotificationPayload } from "../shared/utils/functions";
-import { formatDate } from "../shared/utils/date-format";
+import { formatDate } from "../shared/utils/functions";
 import { postNotificationType, notificationPhrase } from "../shared/constants";
 
 export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
@@ -438,7 +433,7 @@ export const viewPost: RequestHandler<ViewPostParams, SimpleRes> = async (
 
         await new TransactionModel({
           receiver: post.creator.id,
-          description: txDescription.contentCreation,
+          description: txDesc.contentCreation,
           amount: rubyCredit.contentCreation,
         }).save();
       }

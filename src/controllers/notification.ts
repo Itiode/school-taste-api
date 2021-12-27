@@ -9,7 +9,7 @@ import Notification, {
 } from "../types/notification";
 import UserModel from "../models/user";
 import NotificationModel from "../models/notification";
-import { formatDate } from "../shared/utils/date-format";
+import { formatDate } from "../shared/utils/functions";
 import { SimpleRes } from "../types/shared";
 import { TempUser } from "../types/user";
 
@@ -93,7 +93,7 @@ export const getNotifications: RequestHandler<
       data: transformedNotifs,
     });
   } catch (e) {
-    next(new Error("Error in adding sub comment: " + e));
+    next(new Error("Error in fetching notifications: " + e));
   }
 };
 

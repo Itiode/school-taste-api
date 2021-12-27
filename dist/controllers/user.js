@@ -26,13 +26,16 @@ exports.updateMessagingToken = exports.updatePaymentDetails = exports.updateStud
 const config_1 = __importDefault(require("config"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_1 = __importStar(require("../models/user"));
+const transaction_1 = __importDefault(require("../models/transaction"));
+const notification_1 = __importDefault(require("../models/notification"));
+const school_1 = __importDefault(require("../models/school"));
 const s3_1 = require("../shared/utils/s3");
-// TODO: Create a Transaction doc for the 1 free ruby signup bonus
+const constants_1 = require("../shared/constants");
 const addUser = async (req, res, next) => {
-    const { error } = (0, user_1.validateAddUserReq)(req.body);
+    const { error } = (0, user_1.validateAddUserData)(req.body);
     if (error)
         return res.status(400).send({ msg: error.details[0].message });
-    const { name, username, email, phone, dob, gender, school, studentData, password, } = req.body;
+    const { name, username, email, phone, dob, gender, schoolId, studentData, password, } = req.body;
     try {
         const fetchedUser = await user_1.default.findOne({
             $or: [{ phone }, { email }, { username }],
@@ -44,6 +47,9 @@ const addUser = async (req, res, next) => {
             original: { url: "", dUrl: "" },
             thumbnail: { url: "", dUrl: "" },
         };
+        const school = await school_1.default.findById(schoolId);
+        if (!school)
+            return res.status(404).send({ msg: "School not found" });
         const user = await new user_1.default({
             name,
             username,
@@ -52,11 +58,29 @@ const addUser = async (req, res, next) => {
             dob,
             gender,
             about: `I'm a student of ${school.fullName}`,
-            school,
+            school: {
+                id: school._id,
+                fullName: school.fullName,
+                shortName: school.shortName,
+            },
             studentData,
             password: hashedPw,
             profileImage: userImage,
             coverImage: userImage,
+        }).save();
+        const tx = new transaction_1.default({
+            receiver: user._id,
+            description: constants_1.txDesc.signupBonus,
+            amount: 1,
+        });
+        await tx.save();
+        const creators = [{ id: user._id, name: `${name.first} ${name.last}` }];
+        await new notification_1.default({
+            creators,
+            subscriber: { id: user._id },
+            type: constants_1.rubyNotificationType.awardedRubyNotification,
+            phrase: constants_1.notificationPhrase.awarded,
+            contentId: tx._id,
         }).save();
         res.status(201).send({
             msg: "User added successfully",

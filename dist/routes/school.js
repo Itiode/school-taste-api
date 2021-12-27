@@ -18,18 +18,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = __importStar(require("mongoose"));
-const schema = new mongoose_1.Schema({
-    sender: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
-    receiver: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
-    description: {
-        type: String,
-        trim: true,
-        maxLength: 250,
-        required: true,
-    },
-    amount: { type: Number, min: 1, max: 10, required: true },
-    date: { type: Date, default: Date.now },
-});
-exports.default = mongoose_1.default.model('Transaction', schema);
+const express_1 = __importDefault(require("express"));
+const router = (0, express_1.default)();
+const schoolC = __importStar(require("../controllers/school"));
+const auth_1 = __importDefault(require("../middleware/auth"));
+router.post("/", auth_1.default, schoolC.addSchool);
+router.get("/", auth_1.default, schoolC.getSchools);
+exports.default = router;

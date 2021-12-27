@@ -27,7 +27,7 @@ const sub_post_comment_1 = __importStar(require("../../models/comment/sub-post-c
 const sub_post_1 = __importDefault(require("../../models/sub-post"));
 const user_1 = __importDefault(require("../../models/user"));
 const validators_1 = require("../../shared/utils/validators");
-const date_format_1 = require("../../shared/utils/date-format");
+const functions_1 = require("../../shared/utils/functions");
 const addSubPostComment = async (req, res, next) => {
     const { error } = (0, sub_post_comment_1.validateAddSubPostCommentData)(req.body);
     if (error)
@@ -55,7 +55,7 @@ const addSubPostComment = async (req, res, next) => {
             creator: comment.creator,
             subPostId: comment.subPostId,
             date: comment.date,
-            formattedDate: (0, date_format_1.formatDate)(comment.date.toString()),
+            formattedDate: (0, functions_1.formatDate)(comment.date.toString()),
             reactionCount: 0,
             reaction: { type: "", userId: "" },
         };
@@ -132,7 +132,7 @@ const getSubPostComments = async (req, res, next) => {
                 creator: c.creator,
                 subPostId: c.subPostId,
                 date: c.date,
-                formattedDate: (0, date_format_1.formatDate)(c.date.toString()),
+                formattedDate: (0, functions_1.formatDate)(c.date.toString()),
                 reactionCount: c.reactionCount ? c.reactionCount : 0,
                 reaction: reaction ? reaction : { type: "", userId: "" },
             };

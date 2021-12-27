@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteNotification = exports.markAsSeen = exports.getNotifications = void 0;
 const user_1 = __importDefault(require("../models/user"));
 const notification_1 = __importDefault(require("../models/notification"));
-const date_format_1 = require("../shared/utils/date-format");
+const functions_1 = require("../shared/utils/functions");
 const getNotifications = async (req, res, next) => {
     try {
         const pageNumber = +req.query.pageNumber;
@@ -56,7 +56,7 @@ const getNotifications = async (req, res, next) => {
                 payload: n.payload,
                 contentId: n.contentId,
                 date: n.date,
-                formattedDate: (0, date_format_1.formatDate)(n.date.toString()),
+                formattedDate: (0, functions_1.formatDate)(n.date.toString()),
                 seen: n.seen,
                 image: notifImage,
             });
@@ -68,7 +68,7 @@ const getNotifications = async (req, res, next) => {
         });
     }
     catch (e) {
-        next(new Error("Error in adding sub comment: " + e));
+        next(new Error("Error in fetching notifications: " + e));
     }
 };
 exports.getNotifications = getNotifications;

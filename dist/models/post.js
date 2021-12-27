@@ -26,7 +26,7 @@ exports.getPosts = exports.validateViewPostReq = exports.validateReactToPostPara
 const mongoose_1 = __importStar(require("mongoose"));
 const joi_1 = __importDefault(require("joi"));
 const sub_post_1 = __importDefault(require("../models/sub-post"));
-const date_format_1 = require("../shared/utils/date-format");
+const functions_1 = require("../shared/utils/functions");
 const user_1 = __importDefault(require("../models/user"));
 const reaction_1 = __importDefault(require("./schemas/reaction"));
 const school_1 = __importDefault(require("./schemas/school"));
@@ -36,8 +36,8 @@ const schema = new mongoose_1.Schema({
         id: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
     },
     text: { type: String, trim: true, maxLength: 10000, required: true },
-    school: school_1.default,
-    studentData: student_data_1.default,
+    school: { type: school_1.default, required: true },
+    studentData: { type: student_data_1.default, required: true },
     tagsString: { type: String, trim: true, required: true },
     tags: { type: [String] },
     date: { type: Date, default: Date.now },
@@ -118,7 +118,7 @@ async function getPosts(userId, posts, res) {
             school: p.school,
             studentData: p.studentData,
             date: p.date,
-            formattedDate: (0, date_format_1.formatDate)(p.date),
+            formattedDate: (0, functions_1.formatDate)(p.date),
             reactionCount: p.reactionCount ? p.reactionCount : 0,
             reaction: postReaction ? postReaction : { type: "", userId: "" },
             viewCount: p.viewCount,

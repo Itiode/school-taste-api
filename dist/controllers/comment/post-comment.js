@@ -30,7 +30,6 @@ const notification_1 = __importDefault(require("../../models/notification"));
 const validators_1 = require("../../shared/utils/validators");
 const constants_1 = require("../../shared/constants");
 const functions_1 = require("../../shared/utils/functions");
-const date_format_1 = require("../../shared/utils/date-format");
 const addPostComment = async (req, res, next) => {
     const { error } = (0, post_comment_1.validateAddPostCommentData)(req.body);
     if (error)
@@ -59,7 +58,7 @@ const addPostComment = async (req, res, next) => {
             creator: comment.creator,
             postId: comment.postId,
             date: comment.date,
-            formattedDate: (0, date_format_1.formatDate)(comment.date.toString()),
+            formattedDate: (0, functions_1.formatDate)(comment.date.toString()),
             reactionCount: comment.reactionCount ? comment.reactionCount : 0,
             reaction: { type: "", userId: "" },
         };
@@ -168,7 +167,7 @@ const getPostComments = async (req, res, next) => {
                 creator: c.creator,
                 postId: c.postId,
                 date: c.date,
-                formattedDate: (0, date_format_1.formatDate)(c.date.toString()),
+                formattedDate: (0, functions_1.formatDate)(c.date.toString()),
                 reactionCount: c.reactionCount ? c.reactionCount : 0,
                 reaction: reaction ? reaction : { type: "", userId: "" },
             };

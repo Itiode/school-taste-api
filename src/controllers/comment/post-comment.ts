@@ -22,8 +22,7 @@ import {
   postNotificationType,
   notificationPhrase,
 } from "../../shared/constants";
-import { getNotificationPayload } from "../../shared/utils/functions";
-import { formatDate } from "../../shared/utils/date-format";
+import { getNotificationPayload, formatDate } from "../../shared/utils/functions";
 
 export const addPostComment: RequestHandler<
   any,

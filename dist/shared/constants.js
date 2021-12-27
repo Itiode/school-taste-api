@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.birthdayNotificationType = exports.commentNotificationType = exports.postNotificationType = exports.notificationPhrase = exports.validSubPostTypes = exports.validReactionTypes = exports.maxViewsForRubyCredit = exports.rubyDebit = exports.rubyCredit = exports.txDescription = void 0;
-exports.txDescription = {
+exports.rubyNotificationType = exports.birthdayNotificationType = exports.commentNotificationType = exports.postNotificationType = exports.notificationPhrase = exports.validSubPostTypes = exports.validReactionTypes = exports.maxViewsForRubyCredit = exports.rubyCredit = exports.txDesc = void 0;
+exports.txDesc = {
+    signupBonus: "Welcome bonus",
     contentCreation: "SchoolTaste content creation",
     whatsPoolWinner: "WhatsPool winner",
     whatsPoolSportsWinner: "WhatsPool winner (Sports competition)",
@@ -10,10 +11,7 @@ exports.txDescription = {
 };
 exports.rubyCredit = {
     contentCreation: 1,
-    whatsPoolWinner: 2,
-};
-exports.rubyDebit = {
-    whatsPoolReg: 1,
+    whatsPoolWinner: 1,
 };
 exports.maxViewsForRubyCredit = 10;
 exports.validReactionTypes = [
@@ -27,6 +25,7 @@ exports.validReactionTypes = [
 ];
 exports.validSubPostTypes = ["Image", "Video", "Gif", "Sticker"];
 exports.notificationPhrase = {
+    awarded: "awarded",
     created: "created",
     liked: "liked",
     reacted: "reacted",
@@ -39,10 +38,16 @@ exports.postNotificationType = {
     reactedToPostNotification: "ReactedToPostNotification",
     commentedOnPostNotification: "CommentedOnPostNotification",
 };
+// COMMENT NOTIFICATION TYPES
 exports.commentNotificationType = {
     likedCommentNotification: "LikedCommentNotification",
     reactedToCommentNotification: "ReactedToCommentNotification",
 };
+// BIRTHDAY NOTIFICATION TYPES
 exports.birthdayNotificationType = {
     birthdayNotification: "BirthdayNotification",
+};
+// RUBY NOTIFICATION TYPES
+exports.rubyNotificationType = {
+    awardedRubyNotification: "AwardedRubyNotification",
 };

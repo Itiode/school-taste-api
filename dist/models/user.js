@@ -22,17 +22,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validatePaymentDetailsData = exports.validateStudentData = exports.validatePhoneData = exports.validateAboutData = exports.validateAuthReq = exports.validateAddUserReq = void 0;
+exports.validatePaymentDetailsData = exports.validateStudentData = exports.validatePhoneData = exports.validateAboutData = exports.validateAuthData = exports.validateAddUserData = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const config_1 = __importDefault(require("config"));
 const Jwt = __importStar(require("jsonwebtoken"));
 const joi_1 = __importDefault(require("joi"));
 const name_1 = __importDefault(require("./schemas/name"));
 const dob_1 = __importDefault(require("./schemas/dob"));
-const school_1 = __importDefault(require("./schemas/school"));
 const student_data_1 = __importDefault(require("./schemas/student-data"));
 const user_image_1 = __importDefault(require("./schemas/user-image"));
 const payment_details_1 = __importDefault(require("./schemas/payment-details"));
+const school_1 = __importDefault(require("./schemas/school"));
 const schema = new mongoose_1.Schema({
     name: name_1.default,
     username: {
@@ -64,8 +64,8 @@ const schema = new mongoose_1.Schema({
     profileImage: user_image_1.default,
     coverImage: user_image_1.default,
     about: { type: String, trim: true, minLength: 1, maxLength: 200 },
-    school: school_1.default,
-    studentData: student_data_1.default,
+    school: { type: school_1.default, required: true },
+    studentData: { type: student_data_1.default, required: true },
     password: { type: String, trim: true, required: true },
     interests: [String],
     hobbies: [String],
@@ -83,7 +83,7 @@ schema.methods.genAuthToken = function () {
     }, config_1.default.get("jwtAuthPrivateKey"));
 };
 exports.default = mongoose_1.default.model("User", schema);
-function validateAddUserReq(data) {
+function validateAddUserData(data) {
     const schema = joi_1.default.object({
         name: joi_1.default.object({
             first: joi_1.default.string().trim().min(2).max(25).required(),
@@ -107,21 +107,21 @@ function validateAddUserReq(data) {
             month: joi_1.default.number().min(1).max(12).required(),
             year: joi_1.default.number().min(1980).max(2022).required(),
         }),
+        schoolId: joi_1.default.string()
+            .trim()
+            .regex(new RegExp("^[0-9a-fA-F]{24}$"))
+            .required(),
         studentData: joi_1.default.object({
             department: joi_1.default.string().trim().max(250).required(),
             faculty: joi_1.default.string().trim().max(250).required(),
             level: joi_1.default.string().trim().required(),
         }),
-        school: joi_1.default.object({
-            fullName: joi_1.default.string().trim().max(250).required(),
-            shortName: joi_1.default.string().trim().uppercase().max(25).required(),
-        }),
         password: joi_1.default.string().trim().min(6).max(50).required(),
     });
     return schema.validate(data);
 }
-exports.validateAddUserReq = validateAddUserReq;
-function validateAuthReq(data) {
+exports.validateAddUserData = validateAddUserData;
+function validateAuthData(data) {
     const schema = joi_1.default.object({
         email: joi_1.default.string()
             .max(250)
@@ -132,7 +132,7 @@ function validateAuthReq(data) {
     });
     return schema.validate(data);
 }
-exports.validateAuthReq = validateAuthReq;
+exports.validateAuthData = validateAuthData;
 function validateAboutData(data) {
     return joi_1.default.object({
         about: joi_1.default.string().trim().max(250).required(),

@@ -17,7 +17,7 @@ import SubPostModel from "../../models/sub-post";
 import UserModel from "../../models/user";
 import { validateReactionType } from "../../shared/utils/validators";
 import { SimpleRes } from "../../types/shared";
-import { formatDate } from "../../shared/utils/date-format";
+import { formatDate } from "../../shared/utils/functions";
 
 export const addSubPostComment: RequestHandler<
   any,

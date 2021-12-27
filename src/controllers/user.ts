@@ -3,14 +3,16 @@ import bcrypt from "bcryptjs";
 import { RequestHandler } from "express";
 
 import UserModel, {
-  validateAddUserReq,
+  validateAddUserData,
   validateStudentData,
   validateAboutData,
   validatePhoneData,
   validatePaymentDetailsData,
 } from "../models/user";
+import TransactionModel from "../models/transaction";
+import NotificationModel from "../models/notification";
 import {
-  AddUserReq,
+  AddUserData,
   AuthRes,
   GetUserRes,
   AboutData,
@@ -19,16 +21,21 @@ import {
   UpdateMessagingTokenReq,
   PaymentDetails,
 } from "../types/user";
+import SchoolModel from "../models/school";
 import { SimpleParams, SimpleRes, GetImageParams } from "../types/shared";
 import { getFileFromS3 } from "../shared/utils/s3";
+import {
+  txDesc,
+  rubyNotificationType,
+  notificationPhrase,
+} from "../shared/constants";
 
-// TODO: Create a Transaction doc for the 1 free ruby signup bonus
-export const addUser: RequestHandler<any, AuthRes, AddUserReq> = async (
+export const addUser: RequestHandler<any, AuthRes, AddUserData> = async (
   req,
   res,
   next
 ) => {
-  const { error } = validateAddUserReq(req.body);
+  const { error } = validateAddUserData(req.body);
   if (error) return res.status(400).send({ msg: error.details[0].message });
 
   const {
@@ -38,7 +45,7 @@ export const addUser: RequestHandler<any, AuthRes, AddUserReq> = async (
     phone,
     dob,
     gender,
-    school,
+    schoolId,
     studentData,
     password,
   } = req.body;
@@ -58,6 +65,9 @@ export const addUser: RequestHandler<any, AuthRes, AddUserReq> = async (
       thumbnail: { url: "", dUrl: "" },
     };
 
+    const school = await SchoolModel.findById(schoolId);
+    if (!school) return res.status(404).send({ msg: "School not found" });
+
     const user = await new UserModel({
       name,
       username,
@@ -66,11 +76,33 @@ export const addUser: RequestHandler<any, AuthRes, AddUserReq> = async (
       dob,
       gender,
       about: `I'm a student of ${school.fullName}`,
-      school,
+      school: {
+        id: school._id,
+        fullName: school.fullName,
+        shortName: school.shortName,
+      },
       studentData,
       password: hashedPw,
       profileImage: userImage,
       coverImage: userImage,
+    }).save();
+
+    const tx = new TransactionModel({
+      receiver: user._id,
+      description: txDesc.signupBonus,
+      amount: 1,
+    });
+
+    await tx.save();
+
+    const creators = [{ id: user._id, name: `${name.first} ${name.last}` }];
+
+    await new NotificationModel({
+      creators,
+      subscriber: { id: user._id },
+      type: rubyNotificationType.awardedRubyNotification,
+      phrase: notificationPhrase.awarded,
+      contentId: tx._id,
     }).save();
 
     res.status(201).send({

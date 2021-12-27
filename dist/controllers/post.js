@@ -33,7 +33,7 @@ const constants_1 = require("../shared/constants");
 const validators_1 = require("../shared/utils/validators");
 const s3_1 = require("../shared/utils/s3");
 const functions_1 = require("../shared/utils/functions");
-const date_format_1 = require("../shared/utils/date-format");
+const functions_2 = require("../shared/utils/functions");
 const constants_2 = require("../shared/constants");
 const createPost = async (req, res, next) => {
     const { error } = (0, post_1.validateCreatePostReq)(req.body);
@@ -149,7 +149,7 @@ const getPost = async (req, res, next) => {
             school: post.school,
             studentData: post.studentData,
             date: post.date,
-            formattedDate: (0, date_format_1.formatDate)(post.date),
+            formattedDate: (0, functions_2.formatDate)(post.date),
             reactionCount: post.reactionCount ? post.reactionCount : 0,
             reaction: postReaction ? postReaction : { type: "", userId: "" },
             viewCount: post.viewCount,
@@ -324,7 +324,7 @@ const viewPost = async (req, res, next) => {
                 });
                 await new transaction_1.default({
                     receiver: post.creator.id,
-                    description: constants_1.txDescription.contentCreation,
+                    description: constants_1.txDesc.contentCreation,
                     amount: constants_1.rubyCredit.contentCreation,
                 }).save();
             }

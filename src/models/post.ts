@@ -11,7 +11,7 @@ import {
 } from "../types/post";
 import { SubPostRes } from "../types/sub-post";
 import SubPostModel from "../models/sub-post";
-import { formatDate } from "../shared/utils/date-format";
+import { formatDate } from "../shared/utils/functions";
 import UserModel from "../models/user";
 import { TempUser } from "../types/user";
 
@@ -24,8 +24,8 @@ const schema = new Schema<Post>({
     id: { type: Schema.Types.ObjectId, ref: "User", required: true },
   },
   text: { type: String, trim: true, maxLength: 10000, required: true },
-  school: schoolSchema,
-  studentData: studentDataSchema,
+  school: { type: schoolSchema, required: true },
+  studentData: { type: studentDataSchema, required: true },
   tagsString: { type: String, trim: true, required: true },
   tags: { type: [String] },
   date: { type: Date, default: Date.now },

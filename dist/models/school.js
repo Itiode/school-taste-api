@@ -18,18 +18,28 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.validateAddSchoolData = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+const joi_1 = __importDefault(require("joi"));
 const schema = new mongoose_1.Schema({
-    sender: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
-    receiver: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
-    description: {
+    fullName: { type: String, trim: true, maxLength: 250, required: true },
+    shortName: {
         type: String,
         trim: true,
-        maxLength: 250,
+        uppercase: true,
+        maxLength: 25,
         required: true,
     },
-    amount: { type: Number, min: 1, max: 10, required: true },
-    date: { type: Date, default: Date.now },
-});
-exports.default = mongoose_1.default.model('Transaction', schema);
+}, { timestamps: false });
+exports.default = mongoose_1.default.model("School", schema);
+function validateAddSchoolData(data) {
+    return joi_1.default.object({
+        fullName: joi_1.default.string().trim().max(250).required(),
+        shortName: joi_1.default.string().trim().uppercase().max(25).required(),
+    }).validate(data);
+}
+exports.validateAddSchoolData = validateAddSchoolData;
