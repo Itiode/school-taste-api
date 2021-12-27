@@ -12,14 +12,15 @@ import UserModel, {
 import TransactionModel from "../models/transaction";
 import NotificationModel from "../models/notification";
 import {
-  AddUserData,
-  AuthRes,
-  GetUserRes,
+  AddUserReqBody,
+  AuthResBody,
+  GetUserResBody,
   AboutData,
   PhoneData,
-  UpdateStudentDataReq,
-  UpdateMessagingTokenReq,
+  UpdateStudentDataReqBody,
+  UpdateMessagingTokenReqBody,
   PaymentDetails,
+  GetRubyBalanceResBody,
 } from "../types/user";
 import SchoolModel from "../models/school";
 import { SimpleParams, SimpleRes, GetImageParams } from "../types/shared";
@@ -30,7 +31,7 @@ import {
   notificationPhrase,
 } from "../shared/constants";
 
-export const addUser: RequestHandler<any, AuthRes, AddUserData> = async (
+export const addUser: RequestHandler<any, AuthResBody, AddUserReqBody> = async (
   req,
   res,
   next
@@ -116,7 +117,7 @@ export const addUser: RequestHandler<any, AuthRes, AddUserData> = async (
 
 // Get the currently logged in user or the user whose ID was
 // provided.
-export const getUser: RequestHandler<SimpleParams, GetUserRes> = async (
+export const getUser: RequestHandler<SimpleParams, GetUserResBody> = async (
   req,
   res,
   next
@@ -302,7 +303,7 @@ export const updatePhone: RequestHandler<any, SimpleRes, PhoneData> = async (
 export const updateStudentData: RequestHandler<
   any,
   SimpleRes,
-  UpdateStudentDataReq
+  UpdateStudentDataReqBody
 > = async (req, res, next) => {
   const { error } = validateStudentData(req.body);
   if (error) return res.status(400).send({ msg: error.details[0].message });
@@ -371,7 +372,7 @@ export const updatePaymentDetails: RequestHandler<
 export const updateMessagingToken: RequestHandler<
   any,
   SimpleRes,
-  UpdateMessagingTokenReq
+  UpdateMessagingTokenReqBody
 > = async (req, res, next) => {
   try {
     const userId = req["user"].id;
@@ -385,6 +386,20 @@ export const updateMessagingToken: RequestHandler<
 
     res.send({ msg: "Messaging token saved successfully" });
   } catch (e) {
-    next(new Error("Error in saving messaging token"));
+    next(new Error("Error in saving messaging token: " + e));
+  }
+};
+
+export const getRubyBalance: RequestHandler<
+  any,
+  GetRubyBalanceResBody | SimpleRes
+> = async (req, res, next) => {
+  try {
+    const user = await UserModel.findById(req["user"].id).select("rubyBalance");
+    if (!user) return res.status(404).send({ msg: "User not found" });
+
+    res.send({ msg: "Success", data: { balance: user.rubyBalance } });
+  } catch (e) {
+    next(new Error("Error in getting ruby balance: " + e));
   }
 };

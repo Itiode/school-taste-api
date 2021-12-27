@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateMessagingToken = exports.updatePaymentDetails = exports.updateStudentData = exports.updatePhone = exports.updateAbout = exports.getProfileImage = exports.updateProfileImage = exports.getCoverImage = exports.updateCoverImage = exports.getUser = exports.addUser = void 0;
+exports.getRubyBalance = exports.updateMessagingToken = exports.updatePaymentDetails = exports.updateStudentData = exports.updatePhone = exports.updateAbout = exports.getProfileImage = exports.updateProfileImage = exports.getCoverImage = exports.updateCoverImage = exports.getUser = exports.addUser = void 0;
 const config_1 = __importDefault(require("config"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_1 = __importStar(require("../models/user"));
@@ -272,7 +272,19 @@ const updateMessagingToken = async (req, res, next) => {
         res.send({ msg: "Messaging token saved successfully" });
     }
     catch (e) {
-        next(new Error("Error in saving messaging token"));
+        next(new Error("Error in saving messaging token: " + e));
     }
 };
 exports.updateMessagingToken = updateMessagingToken;
+const getRubyBalance = async (req, res, next) => {
+    try {
+        const user = await user_1.default.findById(req["user"].id).select("rubyBalance");
+        if (!user)
+            return res.status(404).send({ msg: "User not found" });
+        res.send({ msg: "Success", data: { balance: user.rubyBalance } });
+    }
+    catch (e) {
+        next(new Error("Error in getting ruby balance: " + e));
+    }
+};
+exports.getRubyBalance = getRubyBalance;

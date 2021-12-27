@@ -1,10 +1,10 @@
 import { RequestHandler } from "express";
 import bcrypt from "bcryptjs";
 
-import { AuthRes } from "../types/user";
+import { AuthResBody } from "../types/user";
 import UserModel, { validateAuthData } from "../models/user";
 
-export const auth: RequestHandler<any, AuthRes> = async (req, res, next) => {
+export const auth: RequestHandler<any, AuthResBody> = async (req, res, next) => {
   const { error } = validateAuthData(req.body);
   if (error) return res.status(400).send({ msg: error.details[0].message });
 

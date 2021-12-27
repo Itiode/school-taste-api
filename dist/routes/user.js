@@ -39,6 +39,7 @@ router.put("/update-profile-image", auth_1.default, profileImgUpload.single("pro
 router.put("/update-cover-image", auth_1.default, coverImgUpload.single("cover-image"), userC.updateCoverImage);
 router.get("/profile-images/:filename", auth_1.default, userC.getProfileImage);
 router.get("/cover-images/:filename", auth_1.default, userC.getCoverImage);
+router.get("/ruby-balance/me", auth_1.default, userC.getRubyBalance);
 router.put("/update-about", auth_1.default, userC.updateAbout);
 router.put("/update-phone", auth_1.default, userC.updatePhone);
 router.put("/update-student-data", auth_1.default, userC.updateStudentData);

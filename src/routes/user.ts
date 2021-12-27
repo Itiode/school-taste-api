@@ -26,13 +26,14 @@ router.put(
   auth,
   coverImgUpload.single("cover-image"),
   userC.updateCoverImage
-);
-router.get("/profile-images/:filename", auth, userC.getProfileImage);
-router.get("/cover-images/:filename", auth, userC.getCoverImage);
-router.put("/update-about", auth, userC.updateAbout);
-router.put("/update-phone", auth, userC.updatePhone);
-router.put("/update-student-data", auth, userC.updateStudentData);
-router.put("/update-messaging-token", auth, userC.updateMessagingToken);
-router.put("/update-payment-details", auth, userC.updatePaymentDetails);
+  );
+  router.get("/profile-images/:filename", auth, userC.getProfileImage);
+  router.get("/cover-images/:filename", auth, userC.getCoverImage);
+  router.get("/ruby-balance/me", auth, userC.getRubyBalance);
+  router.put("/update-about", auth, userC.updateAbout);
+  router.put("/update-phone", auth, userC.updatePhone);
+  router.put("/update-student-data", auth, userC.updateStudentData);
+  router.put("/update-messaging-token", auth, userC.updateMessagingToken);
+  router.put("/update-payment-details", auth, userC.updatePaymentDetails);
 
 export default router;

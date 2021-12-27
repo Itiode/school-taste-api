@@ -3,8 +3,8 @@ import config from "config";
 import * as Jwt from "jsonwebtoken";
 import Joi from "joi";
 
-import { User, AddUserReq, AuthReq, PaymentDetails } from "../types/user";
-import { UpdateStudentDataReq, AboutData, PhoneData } from "./../types/user";
+import { User, AddUserReqBody, AuthReqBody, PaymentDetails } from "../types/user";
+import { UpdateStudentDataReqBody, AboutData, PhoneData } from "./../types/user";
 import nameSchema from "./schemas/name";
 import dobSchema from "./schemas/dob";
 import studentDataSchema from "./schemas/student-data";
@@ -71,7 +71,7 @@ schema.methods.genAuthToken = function () {
 
 export default mongoose.model("User", schema);
 
-export function validateAddUserData(data: AddUserReq) {
+export function validateAddUserData(data: AddUserReqBody) {
   const schema = Joi.object({
     name: Joi.object({
       first: Joi.string().trim().min(2).max(25).required(),
@@ -110,7 +110,7 @@ export function validateAddUserData(data: AddUserReq) {
   return schema.validate(data);
 }
 
-export function validateAuthData(data: AuthReq) {
+export function validateAuthData(data: AuthReqBody) {
   const schema = Joi.object({
     email: Joi.string()
       .max(250)
@@ -140,7 +140,7 @@ export function validatePhoneData(data: PhoneData) {
   }).validate(data);
 }
 
-export function validateStudentData(data: UpdateStudentDataReq) {
+export function validateStudentData(data: UpdateStudentDataReqBody) {
   const schema = Joi.object({
     department: Joi.string().trim().max(250).required(),
     faculty: Joi.string().trim().max(250).required(),

@@ -7,14 +7,20 @@
 - Change to using the complete SubPost type
 - Change name of transaction description for a ruby award gained via
   number of views (content creation)
+- Post visibility (School, Faculty or Departmental mates) - PostModel.find(
+  'schoolId: post.school.id' and ['visibility.school': true or 'visibility.faculty': 'true' or 'visibility.department': true]
+  )
 
 ## After MVP
+
 - Add Location field which should be an object with the following properties
+
 1. street
 2. city
 3. state
 4. coordinates: {latitude, longitude}
 
 - Add a login field which should be an object with the following properties
+
 1. id
 2. username"

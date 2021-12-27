@@ -50,7 +50,7 @@ export interface UserImage {
   original: { url: string; dUrl: string };
 }
 
-export interface AddUserData {
+export interface AddUserReqBody {
   name: { first: string; last: string };
   username: string;
   email: string;
@@ -62,17 +62,17 @@ export interface AddUserData {
   password: string;
 }
 
-export interface AuthRes {
+export interface AuthResBody {
   msg: string;
   token?: string;
 }
 
-export interface AuthReq {
+export interface AuthReqBody {
   email: string;
   password: string;
 }
 
-export interface GetUserRes {
+export interface GetUserResBody {
   msg: string;
   data?: {
     id: string;
@@ -108,12 +108,19 @@ export interface PaymentDetails {
   currency: string;
 }
 
-export interface UpdateStudentDataReq {
+export interface UpdateStudentDataReqBody {
   department: string;
   faculty: string;
   level: string;
 }
 
-export interface UpdateMessagingTokenReq {
+export interface UpdateMessagingTokenReqBody {
   messagingToken: string;
+}
+
+export interface GetRubyBalanceResBody {
+  msg: string;
+  data: {
+    balance: number;
+  };
 }
