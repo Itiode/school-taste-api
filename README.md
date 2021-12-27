@@ -1,7 +1,7 @@
 # TODO
 
-- A notification can only be created if the resource isn't more than
-  a day old. Notifications like likes, comments, etc.
+- A notification should only be created if the resource isn't more than
+  a day old. Notifications such as likes, comments, etc.
 - Change to using the thumbnail image for a post (on-create and on-react) and
   comment notifications etc.
 - Change to using the complete SubPost type
