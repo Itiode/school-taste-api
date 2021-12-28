@@ -144,6 +144,10 @@ const updateCoverImage = async (req, res, next) => {
                 url: `${config_1.default.get("serverAddress")}api/users/cover-images/${filename}`,
                 dUrl: req["file"]["location"],
             },
+            thumbnail: {
+                url: "",
+                dUrl: "",
+            },
         };
         await user_1.default.updateOne({ _id: userId }, { $set: { coverImage } });
         // TODO: Delete previous cover images from AWS
@@ -173,6 +177,10 @@ const updateProfileImage = async (req, res, next) => {
             original: {
                 url: `${config_1.default.get("serverAddress")}api/users/profile-images/${filename}`,
                 dUrl: req["file"]["location"],
+            },
+            thumbnail: {
+                url: "",
+                dUrl: "",
             },
         };
         await user_1.default.updateOne({ _id: userId }, { $set: { profileImage } });

@@ -194,6 +194,10 @@ export const updateCoverImage: RequestHandler<any, SimpleRes> = async (
         url: `${config.get("serverAddress")}api/users/cover-images/${filename}`,
         dUrl: req["file"]!["location"],
       },
+      thumbnail: {
+        url: "",
+        dUrl: "",
+      },
     };
 
     await UserModel.updateOne({ _id: userId }, { $set: { coverImage } });
@@ -237,6 +241,10 @@ export const updateProfileImage: RequestHandler<any, SimpleRes> = async (
           "serverAddress"
         )}api/users/profile-images/${filename}`,
         dUrl: req["file"]!["location"],
+      },
+      thumbnail: {
+        url: "",
+        dUrl: "",
       },
     };
 
