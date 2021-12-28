@@ -23,7 +23,7 @@ import {
   VerifyUsernameReqBody,
   GetRubyBalanceResBody,
 } from "../types/user";
-import SchoolModel from "../models/school";
+import SchoolModel from "../models/school/school";
 import { SimpleParams, SimpleRes, GetImageParams } from "../types/shared";
 import { getFileFromS3 } from "../shared/utils/s3";
 import {

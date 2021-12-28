@@ -28,7 +28,7 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_1 = __importStar(require("../models/user"));
 const transaction_1 = __importDefault(require("../models/transaction"));
 const notification_1 = __importDefault(require("../models/notification"));
-const school_1 = __importDefault(require("../models/school"));
+const school_1 = __importDefault(require("../models/school/school"));
 const s3_1 = require("../shared/utils/s3");
 const constants_1 = require("../shared/constants");
 const addUser = async (req, res, next) => {

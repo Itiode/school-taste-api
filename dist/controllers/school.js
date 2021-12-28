@@ -20,7 +20,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSchools = exports.addSchool = void 0;
-const school_1 = __importStar(require("../models/school"));
+const school_1 = __importStar(require("../models/school/school"));
 const addSchool = async (req, res, next) => {
     const { error } = (0, school_1.validateAddSchoolData)(req.body);
     if (error)
@@ -43,7 +43,9 @@ const addSchool = async (req, res, next) => {
 exports.addSchool = addSchool;
 const getSchools = async (req, res, next) => {
     try {
-        const schools = await school_1.default.find().select("-__v");
+        const schools = await school_1.default.find()
+            .select("-__v")
+            .sort({ shortName: 1 });
         const transformedSchs = schools.map((s) => {
             return {
                 id: s._id,

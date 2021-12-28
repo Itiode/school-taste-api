@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 
-import SchoolModel, { validateAddSchoolData } from "../models/school";
+import SchoolModel, { validateAddSchoolData } from "../models/school/school";
 import {
   School,
   AddSchoolData,
@@ -38,7 +38,9 @@ export const addSchool: RequestHandler<any, SimpleRes, AddSchoolData> = async (
 export const getSchools: RequestHandler<any, GetSchoolsRes | SimpleRes> =
   async (req, res, next) => {
     try {
-      const schools = await SchoolModel.find().select("-__v");
+      const schools = await SchoolModel.find()
+        .select("-__v")
+        .sort({ shortName: 1 });
 
       const transformedSchs: SchoolData[] = schools.map((s: School) => {
         return {
