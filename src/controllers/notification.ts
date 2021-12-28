@@ -51,13 +51,9 @@ export const getNotifications: RequestHandler<
         if (tempUser) {
           image = tempUser.image;
         } else {
-          console.log(n.creators[0].id);
-          
           const user = await UserModel.findById(n.creators[0].id).select(
             "profileImage"
           );
-
-          console.log(user);
 
           image = {
             thumbnail: {

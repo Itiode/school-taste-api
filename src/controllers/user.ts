@@ -94,24 +94,6 @@ export const addUser: RequestHandler<any, AuthResBody, AddUserReqBody> = async (
       coverImage: userImage,
     }).save();
 
-    const tx = new TransactionModel({
-      receiver: user._id,
-      description: txDesc.signupBonus,
-      amount: 1,
-    });
-
-    await tx.save();
-
-    const creators = [{ id: user._id, name: `${name.first} ${name.last}` }];
-
-    await new NotificationModel({
-      creators,
-      subscriber: { id: user._id },
-      type: rubyNotificationType.awardedRubyNotification,
-      phrase: notificationPhrase.awarded,
-      contentId: tx._id,
-    }).save();
-
     res.status(201).send({
       msg: "User added successfully",
       token: user.genAuthToken(),

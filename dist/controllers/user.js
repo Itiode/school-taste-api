@@ -26,11 +26,8 @@ exports.getRubyBalance = exports.verifyUsername = exports.updateMessagingToken =
 const config_1 = __importDefault(require("config"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_1 = __importStar(require("../models/user"));
-const transaction_1 = __importDefault(require("../models/transaction"));
-const notification_1 = __importDefault(require("../models/notification"));
 const school_1 = __importDefault(require("../models/school/school"));
 const s3_1 = require("../shared/utils/s3");
-const constants_1 = require("../shared/constants");
 const addUser = async (req, res, next) => {
     const { error } = (0, user_1.validateAddUserData)(req.body);
     if (error)
@@ -74,20 +71,6 @@ const addUser = async (req, res, next) => {
             password: hashedPw,
             profileImage: userImage,
             coverImage: userImage,
-        }).save();
-        const tx = new transaction_1.default({
-            receiver: user._id,
-            description: constants_1.txDesc.signupBonus,
-            amount: 1,
-        });
-        await tx.save();
-        const creators = [{ id: user._id, name: `${name.first} ${name.last}` }];
-        await new notification_1.default({
-            creators,
-            subscriber: { id: user._id },
-            type: constants_1.rubyNotificationType.awardedRubyNotification,
-            phrase: constants_1.notificationPhrase.awarded,
-            contentId: tx._id,
         }).save();
         res.status(201).send({
             msg: "User added successfully",

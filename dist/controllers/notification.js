@@ -33,9 +33,7 @@ const getNotifications = async (req, res, next) => {
                     image = tempUser.image;
                 }
                 else {
-                    console.log(n.creators[0].id);
                     const user = await user_1.default.findById(n.creators[0].id).select("profileImage");
-                    console.log(user);
                     image = {
                         thumbnail: {
                             url: user.profileImage.original.url,
