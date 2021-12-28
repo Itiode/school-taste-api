@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRubyBalance = exports.checkForUsername = exports.updateMessagingToken = exports.updatePaymentDetails = exports.updateStudentData = exports.updatePhone = exports.updateAbout = exports.getProfileImage = exports.updateProfileImage = exports.getCoverImage = exports.updateCoverImage = exports.getUser = exports.addUser = void 0;
+exports.getRubyBalance = exports.verifyUsername = exports.updateMessagingToken = exports.updatePaymentDetails = exports.updateStudentData = exports.updatePhone = exports.updateAbout = exports.getProfileImage = exports.updateProfileImage = exports.getCoverImage = exports.updateCoverImage = exports.getUser = exports.addUser = void 0;
 const config_1 = __importDefault(require("config"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_1 = __importStar(require("../models/user"));
@@ -276,7 +276,7 @@ const updateMessagingToken = async (req, res, next) => {
     }
 };
 exports.updateMessagingToken = updateMessagingToken;
-const checkForUsername = async (req, res, next) => {
+const verifyUsername = async (req, res, next) => {
     try {
         const user = await user_1.default.findOne({
             username: req.body.username,
@@ -289,7 +289,7 @@ const checkForUsername = async (req, res, next) => {
         next(new Error("Error in checking username: " + e));
     }
 };
-exports.checkForUsername = checkForUsername;
+exports.verifyUsername = verifyUsername;
 const getRubyBalance = async (req, res, next) => {
     try {
         const user = await user_1.default.findById(req["user"].id).select("rubyBalance");

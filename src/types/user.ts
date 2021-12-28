@@ -118,7 +118,7 @@ export interface UpdateMessagingTokenReqBody {
   messagingToken: string;
 }
 
-export interface CheckUsernameReqBody {
+export interface VerifyUsernameReqBody {
   username: string;
 }
 

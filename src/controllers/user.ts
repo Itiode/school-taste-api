@@ -20,7 +20,7 @@ import {
   UpdateStudentDataReqBody,
   UpdateMessagingTokenReqBody,
   PaymentDetails,
-  CheckUsernameReqBody,
+  VerifyUsernameReqBody,
   GetRubyBalanceResBody,
 } from "../types/user";
 import SchoolModel from "../models/school";
@@ -391,10 +391,10 @@ export const updateMessagingToken: RequestHandler<
   }
 };
 
-export const checkForUsername: RequestHandler<
+export const verifyUsername: RequestHandler<
   any,
   SimpleRes,
-  CheckUsernameReqBody
+  VerifyUsernameReqBody
 > = async (req, res, next) => {
   try {
     const user = await UserModel.findOne({

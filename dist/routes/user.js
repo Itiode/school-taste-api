@@ -33,7 +33,7 @@ const userC = __importStar(require("../controllers/user"));
 const auth_1 = __importDefault(require("../middleware/auth"));
 const router = (0, express_1.default)();
 router.post("/", userC.addUser);
-router.post('/check-for-username', userC.checkForUsername);
+router.post('/verify-username', userC.verifyUsername);
 router.get("/me", auth_1.default, userC.getUser);
 router.get("/:userId", auth_1.default, userC.getUser);
 router.put("/update-profile-image", auth_1.default, profileImgUpload.single("profile-image"), userC.updateProfileImage);
