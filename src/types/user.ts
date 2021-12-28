@@ -118,6 +118,10 @@ export interface UpdateMessagingTokenReqBody {
   messagingToken: string;
 }
 
+export interface CheckUsernameReqBody {
+  username: string;
+}
+
 export interface GetRubyBalanceResBody {
   msg: string;
   data: {

@@ -6,6 +6,6 @@ import * as schoolC from "../controllers/school";
 import auth from "../middleware/auth";
 
 router.post("/", auth, schoolC.addSchool);
-router.get("/", auth, schoolC.getSchools);
+router.get("/", schoolC.getSchools);
 
 export default router;

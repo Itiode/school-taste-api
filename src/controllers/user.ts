@@ -20,6 +20,7 @@ import {
   UpdateStudentDataReqBody,
   UpdateMessagingTokenReqBody,
   PaymentDetails,
+  CheckUsernameReqBody,
   GetRubyBalanceResBody,
 } from "../types/user";
 import SchoolModel from "../models/school";
@@ -387,6 +388,23 @@ export const updateMessagingToken: RequestHandler<
     res.send({ msg: "Messaging token saved successfully" });
   } catch (e) {
     next(new Error("Error in saving messaging token: " + e));
+  }
+};
+
+export const checkForUsername: RequestHandler<
+  any,
+  SimpleRes,
+  CheckUsernameReqBody
+> = async (req, res, next) => {
+  try {
+    const user = await UserModel.findOne({
+      username: req.body.username,
+    }).select("_id");
+
+    if (user) return res.send({ msg: "FOUND" });
+    res.send({ msg: "NOT_FOUND" });
+  } catch (e) {
+    next(new Error("Error in checking username: " + e));
   }
 };
 

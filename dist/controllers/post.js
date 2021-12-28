@@ -167,7 +167,7 @@ const getAllPosts = async (req, res, next) => {
     const userId = req["user"].id;
     const pageNumber = +req.query.pageNumber;
     const pageSize = +req.query.pageSize;
-    const { searchQuery, schoolFullName } = req.query;
+    const { searchQuery } = req.query;
     try {
         const posts = await post_1.default.find({
             $text: { $search: `${searchQuery}` },

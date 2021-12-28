@@ -13,6 +13,8 @@
 
 ## After MVP
 
+- When fetching posts, add fallback for a user not being available,
+in such a case, the post shouldn't be included in the returned posts.
 - Add Location field which should be an object with the following properties
 
 1. street

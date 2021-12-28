@@ -13,6 +13,7 @@ import auth from "../middleware/auth";
 const router = Router();
 
 router.post("/", userC.addUser);
+router.post('/check-for-username', userC.checkForUsername);
 router.get("/me", auth, userC.getUser);
 router.get("/:userId", auth, userC.getUser);
 router.put(

@@ -27,5 +27,5 @@ const router = (0, express_1.default)();
 const schoolC = __importStar(require("../controllers/school"));
 const auth_1 = __importDefault(require("../middleware/auth"));
 router.post("/", auth_1.default, schoolC.addSchool);
-router.get("/", auth_1.default, schoolC.getSchools);
+router.get("/", schoolC.getSchools);
 exports.default = router;

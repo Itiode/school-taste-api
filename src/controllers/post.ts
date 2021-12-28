@@ -208,7 +208,7 @@ export const getAllPosts: RequestHandler<any, GetPostsRes, any, GetPostsQuery> =
     const userId = req["user"].id;
     const pageNumber = +req.query.pageNumber;
     const pageSize = +req.query.pageSize;
-    const { searchQuery, schoolFullName } = req.query;
+    const { searchQuery } = req.query;
 
     try {
       const posts = await PostModel.find({
