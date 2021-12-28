@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 
-import { School } from "../../types/school";
+import { School } from "../../types/school/school";
 
 export default new Schema<School>(
   {

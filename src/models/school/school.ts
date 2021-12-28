@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import Joi from "joi";
 
-import { School, AddSchoolData } from "../../types/school";
+import { School, AddSchoolData } from "../../types/school/school";
 
 const schema = new Schema<School>(
   {

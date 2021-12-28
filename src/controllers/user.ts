@@ -55,10 +55,15 @@ export const addUser: RequestHandler<any, AuthResBody, AddUserReqBody> = async (
   try {
     const fetchedUser = await UserModel.findOne({
       $or: [{ phone }, { email }, { username }],
-    });
+    }).select("email phone username");
 
-    if (fetchedUser)
-      return res.status(400).send({ msg: "User already registered" });
+    if (fetchedUser.email === email) {
+      return res.status(400).send({ msg: "This email exists already" });
+    } else if (fetchedUser.phone === phone) {
+      return res.status(400).send({ msg: "This phone number exists already" });
+    } else if (fetchedUser.username === username) {
+      return res.status(400).send({ msg: "This username exists already" });
+    }
 
     const hashedPw = await bcrypt.hash(password, 12);
 

@@ -6,7 +6,7 @@ import {
   AddSchoolData,
   GetSchoolsRes,
   SchoolData,
-} from "../types/school";
+} from "../types/school/school";
 import { SimpleRes } from "../types/shared";
 
 export const addSchool: RequestHandler<any, SimpleRes, AddSchoolData> = async (
