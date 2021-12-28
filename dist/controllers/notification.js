@@ -27,21 +27,23 @@ const getNotifications = async (req, res, next) => {
         let tempUsers = [];
         for (let n of notifs) {
             if (n.creators.length === 1) {
-                const fetchedUser = tempUsers.find((tU) => tU.id === n.creator.id);
+                const tempUser = tempUsers.find((tU) => tU.id === n.creator.id);
                 let image;
-                if (fetchedUser) {
-                    image = fetchedUser.image;
+                if (tempUser) {
+                    image = tempUser.image;
                 }
                 else {
-                    const creator = await user_1.default.findById(n.creators[0].id).select("profileImage");
+                    console.log(n.creators[0].id);
+                    const user = await user_1.default.findById(n.creators[0].id).select("profileImage");
+                    console.log(user);
                     image = {
                         thumbnail: {
-                            url: creator.profileImage.original.url,
-                            dUrl: creator.profileImage.original.dUrl,
+                            url: user.profileImage.original.url,
+                            dUrl: user.profileImage.original.dUrl,
                         },
                     };
                     tempUsers.push({
-                        id: creator._id,
+                        id: user._id,
                         image,
                     });
                 }

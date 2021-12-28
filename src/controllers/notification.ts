@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 
-import Notification, {
+import {
   GetNotificationsRes,
   GetNotificationsQuery,
   NotificationRes,
@@ -11,7 +11,6 @@ import UserModel from "../models/user";
 import NotificationModel from "../models/notification";
 import { formatDate } from "../shared/utils/functions";
 import { SimpleRes } from "../types/shared";
-import { TempUser } from "../types/user";
 
 export const getNotifications: RequestHandler<
   any,
@@ -46,25 +45,29 @@ export const getNotifications: RequestHandler<
 
     for (let n of notifs) {
       if (n.creators.length === 1) {
-        const fetchedUser = tempUsers.find((tU) => tU.id === n.creator.id);
+        const tempUser = tempUsers.find((tU) => tU.id === n.creator.id);
         let image: NotificationImage;
 
-        if (fetchedUser) {
-          image = fetchedUser.image;
+        if (tempUser) {
+          image = tempUser.image;
         } else {
-          const creator = await UserModel.findById(n.creators[0].id).select(
+          console.log(n.creators[0].id);
+          
+          const user = await UserModel.findById(n.creators[0].id).select(
             "profileImage"
           );
 
+          console.log(user);
+
           image = {
             thumbnail: {
-              url: creator.profileImage.original.url,
-              dUrl: creator.profileImage.original.dUrl,
+              url: user.profileImage.original.url,
+              dUrl: user.profileImage.original.dUrl,
             },
           };
 
           tempUsers.push({
-            id: creator._id,
+            id: user._id,
             image,
           });
         }
