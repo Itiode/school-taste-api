@@ -113,14 +113,11 @@ exports.createPost = createPost;
 // TODO: Create a reusable function for creating a mod post and sub posts
 const getPost = async (req, res, next) => {
     try {
-        const userId = req["user"].id;
-        const user = await user_1.default.findById(userId).select("_id");
-        if (!user)
-            return res.status(404).send({ msg: "User not found" });
         const post = await post_1.default.findById(req.params.postId).select("-__v -tagsString -tags");
         if (!post)
             res.status(404).send({ msg: "Post not found" });
         const subPosts = await sub_post_1.default.find({ ppid: post._id }).select("-__v -views -dUrl");
+        const userId = req["user"].id;
         const modifiedSubPosts = [];
         for (const sP of subPosts) {
             const sPReaction = sP.reactions.find((r) => r.userId.toHexString() === userId);

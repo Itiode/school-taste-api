@@ -1,5 +1,6 @@
 # TODO
 
+- Posts should be fetched using schoolId
 - A notification should only be created if the resource isn't more than
   a day old. Notifications such as likes, comments, etc.
 - Change to using the thumbnail image for a post (on-create and on-react) and

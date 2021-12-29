@@ -137,10 +137,6 @@ export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
   next
 ) => {
   try {
-    const userId = req["user"].id;
-    const user = await UserModel.findById(userId).select("_id");
-    if (!user) return res.status(404).send({ msg: "User not found" });
-
     const post = await PostModel.findById(req.params.postId).select(
       "-__v -tagsString -tags"
     );
@@ -150,6 +146,8 @@ export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
     const subPosts = await SubPostModel.find({ ppid: post._id }).select(
       "-__v -views -dUrl"
     );
+
+    const userId = req["user"].id;
 
     const modifiedSubPosts: SubPostRes[] = [];
     for (const sP of subPosts) {

@@ -30,7 +30,7 @@ const pController = __importStar(require("../controllers/post"));
 const auth_1 = __importDefault(require("../middleware/auth"));
 const router = (0, express_1.default)();
 router.post("/", auth_1.default, upload.array("post-images", 10), pController.createPost);
-router.get("/my", auth_1.default, pController.getMyPosts);
+router.get("/me", auth_1.default, pController.getMyPosts);
 router.get("/:postId", auth_1.default, pController.getPost);
 router.get("/", auth_1.default, pController.getAllPosts);
 router.put("/react/:postId", auth_1.default, pController.reactToPost);
