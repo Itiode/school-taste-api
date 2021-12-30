@@ -14,7 +14,7 @@ const getNotifications = async (req, res, next) => {
         const userId = req["user"].id;
         const user = await user_1.default.findById(userId).select("_id");
         if (!user)
-            return res.status(404).send({ msg: "No user with the given ID" });
+            return res.status(404).send({ msg: "User not found" });
         const notifs = await notification_1.default.find({
             "subscriber.id": userId,
         })
@@ -25,9 +25,9 @@ const getNotifications = async (req, res, next) => {
         let notifImage = { thumbnail: { url: "", dUrl: "" } };
         const transformedNotifs = [];
         let tempUsers = [];
-        for (let n of notifs) {
+        for (const n of notifs) {
             if (n.creators.length === 1) {
-                const tempUser = tempUsers.find((tU) => tU.id === n.creator.id);
+                const tempUser = tempUsers.find((tU) => tU.id === n.creators[0].id);
                 let image;
                 if (tempUser) {
                     image = tempUser.image;

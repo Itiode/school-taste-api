@@ -25,7 +25,7 @@ export const getNotifications: RequestHandler<
     const userId = req["user"].id;
     const user = await UserModel.findById(userId).select("_id");
     if (!user)
-      return res.status(404).send({ msg: "No user with the given ID" });
+      return res.status(404).send({ msg: "User not found" });
 
     const notifs = await NotificationModel.find({
       "subscriber.id": userId,
@@ -43,9 +43,9 @@ export const getNotifications: RequestHandler<
       image: NotificationImage;
     }[] = [];
 
-    for (let n of notifs) {
+    for (const n of notifs) {
       if (n.creators.length === 1) {
-        const tempUser = tempUsers.find((tU) => tU.id === n.creator.id);
+        const tempUser = tempUsers.find((tU) => tU.id === n.creators[0].id);
         let image: NotificationImage;
 
         if (tempUser) {
