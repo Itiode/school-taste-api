@@ -43,17 +43,17 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
   if (error) return res.status(400).send({ msg: error.details[0].message });
 
   try {
-    const creatorId = req["user"].id;
+    const userId = req["user"].id;
 
-    const user = await UserModel.findById(creatorId).select(
-      "name studentData school profileImage"
+    const user = await UserModel.findById(userId).select(
+      "name studentData school"
     );
     if (!user)
       return res.status(404).send({ msg: "Can't create post, user not found" });
 
     const { text } = req.body;
 
-    const { name, studentData, school, profileImage } = user;
+    const { name, studentData, school } = user;
 
     const { department, faculty, level } = studentData;
 
@@ -61,7 +61,7 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
 
     const post = await new PostModel({
       creator: {
-        id: creatorId,
+        id: userId,
       },
       text,
       school,
@@ -90,16 +90,16 @@ export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
       "studentData.faculty": faculty,
       "studentData.department": department,
       "studentData.level": level,
-    }).select("_id name messagingToken profileImage");
+    }).select("_id name messagingToken");
 
     const notifs: any[] = [];
 
     for (let depMate of depMates) {
-      if (depMate._id.toHexString() !== creatorId) {
+      if (depMate._id.toHexString() !== userId) {
         const notif = new NotificationModel({
           creators: [
             {
-              id: creatorId,
+              id: userId,
               name: `${name.first} ${name.last}`,
             },
           ],

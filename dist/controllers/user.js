@@ -37,14 +37,18 @@ const addUser = async (req, res, next) => {
         const fetchedUser = await user_1.default.findOne({
             $or: [{ phone }, { email }, { username }],
         }).select("email phone username");
-        if (fetchedUser.email === email) {
-            return res.status(400).send({ msg: "This email exists already" });
-        }
-        else if (fetchedUser.phone === phone) {
-            return res.status(400).send({ msg: "This phone number exists already" });
-        }
-        else if (fetchedUser.username === username) {
-            return res.status(400).send({ msg: "This username exists already" });
+        if (fetchedUser) {
+            if (fetchedUser.email === email) {
+                return res.status(400).send({ msg: "This email exists already" });
+            }
+            else if (fetchedUser.phone === phone) {
+                return res
+                    .status(400)
+                    .send({ msg: "This phone number exists already" });
+            }
+            else if (fetchedUser.username === username) {
+                return res.status(400).send({ msg: "This username exists already" });
+            }
         }
         const hashedPw = await bcryptjs_1.default.hash(password, 12);
         const userImage = {

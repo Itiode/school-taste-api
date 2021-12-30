@@ -26,11 +26,6 @@ import {
 import SchoolModel from "../models/school/school";
 import { SimpleParams, SimpleRes, GetImageParams } from "../types/shared";
 import { getFileFromS3 } from "../shared/utils/s3";
-import {
-  txDesc,
-  rubyNotificationType,
-  notificationPhrase,
-} from "../shared/constants";
 
 export const addUser: RequestHandler<any, AuthResBody, AddUserReqBody> = async (
   req,
@@ -57,12 +52,16 @@ export const addUser: RequestHandler<any, AuthResBody, AddUserReqBody> = async (
       $or: [{ phone }, { email }, { username }],
     }).select("email phone username");
 
-    if (fetchedUser.email === email) {
-      return res.status(400).send({ msg: "This email exists already" });
-    } else if (fetchedUser.phone === phone) {
-      return res.status(400).send({ msg: "This phone number exists already" });
-    } else if (fetchedUser.username === username) {
-      return res.status(400).send({ msg: "This username exists already" });
+    if (fetchedUser) {
+      if (fetchedUser.email === email) {
+        return res.status(400).send({ msg: "This email exists already" });
+      } else if (fetchedUser.phone === phone) {
+        return res
+          .status(400)
+          .send({ msg: "This phone number exists already" });
+      } else if (fetchedUser.username === username) {
+        return res.status(400).send({ msg: "This username exists already" });
+      }
     }
 
     const hashedPw = await bcrypt.hash(password, 12);
