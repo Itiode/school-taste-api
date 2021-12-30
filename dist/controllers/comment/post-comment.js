@@ -41,15 +41,15 @@ const addPostComment = async (req, res, next) => {
         if (!post)
             return res.status(404).send({ msg: "Post not found" });
         const user = await user_1.default.findById(userId).select("name");
-        const { name } = user;
-        if (!user)
+        const postOwner = await user_1.default.findById(post.creator.id).select("name");
+        if (!user || !postOwner)
             return res.status(404).send({ msg: "User not found" });
         const comment = await new post_comment_1.default({
             text,
             postId,
             creator: {
                 id: userId,
-                name: `${name.first} ${name.last}`,
+                name: `${user.name.first} ${user.name.last}`,
             },
         }).save();
         const transformedC = {
@@ -67,13 +67,13 @@ const addPostComment = async (req, res, next) => {
             const creators = [
                 {
                     id: userId,
-                    name: `${name.first} ${name.last}`,
+                    name: `${user.name.first} ${user.name.last}`,
                 },
             ];
             const owners = [
                 {
                     id: post.creator.id,
-                    name: `${user.name.first} ${user.name.last}`,
+                    name: `${postOwner.name.first} ${postOwner.name.last}`,
                 },
             ];
             const phrase = constants_1.notificationPhrase.commented;

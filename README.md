@@ -13,8 +13,6 @@
 - Change to using the thumbnail image for a post (on-create and on-react) and
   comment notifications etc.
 - Change to using the complete SubPost type
-- Change name of transaction description for a ruby award gained via
-  number of views (content creation)
 - Post visibility (School, Faculty or Departmental mates) - PostModel.find(
   'schoolId: post.school.id' and ['visibility.school': true or 'visibility.faculty': 'true' or 'visibility.department': true]
   )

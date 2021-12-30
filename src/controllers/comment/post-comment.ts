@@ -22,7 +22,10 @@ import {
   postNotificationType,
   notificationPhrase,
 } from "../../shared/constants";
-import { getNotificationPayload, formatDate } from "../../shared/utils/functions";
+import {
+  getNotificationPayload,
+  formatDate,
+} from "../../shared/utils/functions";
 
 export const addPostComment: RequestHandler<
   any,
@@ -38,13 +41,12 @@ export const addPostComment: RequestHandler<
     const { text, postId } = req.body;
 
     const post = await PostModel.findById(postId).select("_id creator");
-    if (!post)
-      return res.status(404).send({ msg: "Post not found" });
+    if (!post) return res.status(404).send({ msg: "Post not found" });
 
     const user = await UserModel.findById(userId).select("name");
-    const { name } = user;
+    const postOwner = await UserModel.findById(post.creator.id).select("name");
 
-    if (!user)
+    if (!user || !postOwner)
       return res.status(404).send({ msg: "User not found" });
 
     const comment = await new PostCommentModel({
@@ -52,7 +54,7 @@ export const addPostComment: RequestHandler<
       postId,
       creator: {
         id: userId,
-        name: `${name.first} ${name.last}`,
+        name: `${user.name.first} ${user.name.last}`,
       },
     }).save();
 
@@ -73,14 +75,14 @@ export const addPostComment: RequestHandler<
       const creators = [
         {
           id: userId,
-          name: `${name.first} ${name.last}`,
+          name: `${user.name.first} ${user.name.last}`,
         },
       ];
 
       const owners = [
         {
           id: post.creator.id,
-          name: `${user.name.first} ${user.name.last}`,
+          name: `${postOwner.name.first} ${postOwner.name.last}`,
         },
       ];
 
@@ -133,8 +135,7 @@ export const reactToPostComment: RequestHandler<
     const userId = req["user"].id;
 
     const user = await UserModel.findById(userId).select("_id");
-    if (!user)
-      return res.status(404).send({ msg: "User not found" });
+    if (!user) return res.status(404).send({ msg: "User not found" });
 
     const { commentId } = req.params;
 
