@@ -39,6 +39,14 @@ export interface CreatePostReq {
   text: string;
 }
 
+export interface GetPostParams {
+  postId: string;
+}
+
+export interface GetMyPostsParams {
+  userId: string;
+}
+
 export interface GetPostsQuery {
   searchQuery: string;
   pageNumber: string;
@@ -46,15 +54,13 @@ export interface GetPostsQuery {
   schoolFullName: string;
 }
 
+
 export interface GetPostsRes {
   msg: string;
   postCount?: number;
   data?: PostRes[];
 }
 
-export interface GetPostParams {
-  postId: string;
-}
 
 export interface GetPostRes {
   msg: string;

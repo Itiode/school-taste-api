@@ -12,12 +12,12 @@ import NotificationModel from "../models/notification";
 import SubPostModel from "../models/sub-post";
 import UserModel from "../models/user";
 import {
-  Post,
   PostRes,
   CreatePostReq,
+  GetMyPostsParams,
+  GetPostParams,
   GetPostsQuery,
   GetPostsRes,
-  GetPostParams,
   GetPostRes,
   ReactToPostParams,
   ReactToPostReq,
@@ -224,9 +224,9 @@ export const getAllPosts: RequestHandler<any, GetPostsRes, any, GetPostsQuery> =
   };
 
 // TODO: Create a reusable function for creating a mod post and sub posts
-export const getMyPosts: RequestHandler<any, GetPostsRes, any, GetPostsQuery> =
+export const getMyPosts: RequestHandler<GetMyPostsParams, GetPostsRes, any, GetPostsQuery> =
   async (req, res, next) => {
-    const userId = req["user"].id;
+    const userId = req.params.userId;
     const pageNumber = +req.query.pageNumber;
     const pageSize = +req.query.pageSize;
 

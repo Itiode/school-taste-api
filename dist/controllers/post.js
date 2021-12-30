@@ -182,7 +182,7 @@ const getAllPosts = async (req, res, next) => {
 exports.getAllPosts = getAllPosts;
 // TODO: Create a reusable function for creating a mod post and sub posts
 const getMyPosts = async (req, res, next) => {
-    const userId = req["user"].id;
+    const userId = req.params.userId;
     const pageNumber = +req.query.pageNumber;
     const pageSize = +req.query.pageSize;
     try {
