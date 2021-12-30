@@ -28,10 +28,11 @@ export const validSubPostTypes: string[] = ["Image", "Video", "Gif", "Sticker"];
 
 export const notificationPhrase = {
   awarded: "awarded",
-  created: "created",
+  created: "created a",
   liked: "liked",
-  reacted: "reacted",
-  commented: "commented",
+  reacted: "reacted to",
+  commented: "commented on",
+  shared: "shared",
 };
 
 // POST NOTIFICATION TYPES
