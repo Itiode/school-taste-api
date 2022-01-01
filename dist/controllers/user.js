@@ -290,7 +290,7 @@ const updateLevel = async (req, res, next) => {
         res.send({ msg: "Level updated successfully" });
     }
     catch (e) {
-        next(new Error("Error in updating level"));
+        next(new Error("Error in updating level: " + e));
     }
 };
 exports.updateLevel = updateLevel;

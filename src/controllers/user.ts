@@ -394,7 +394,7 @@ export const updateLevel: RequestHandler<any, SimpleRes, UpdateLevelReqBody> =
 
       res.send({ msg: "Level updated successfully" });
     } catch (e) {
-      next(new Error("Error in updating level"));
+      next(new Error("Error in updating level: " + e));
     }
   };
 
