@@ -5,7 +5,7 @@ const router = Router();
 import * as fC from "../../controllers/student-data/faculty";
 import auth from "../../middleware/auth";
 
-router.post("/", auth, fC.addFaculty);
-router.get("/", auth, fC.getFaculties);
+router.post("/", fC.addFaculty);
+router.get("/", fC.getFaculties);
 
 export default router;
