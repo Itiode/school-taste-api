@@ -19,6 +19,7 @@
 
 ## After MVP
 
+- Only an admin can add a school, department, faculty 
 - When fetching posts, add fallback for a user not being available,
   in such a case, the post shouldn't be included in the returned posts.
 - Include name in a reaction when fetching a post, subpost, comment or sub post comment

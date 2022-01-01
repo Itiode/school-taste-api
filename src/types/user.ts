@@ -1,4 +1,4 @@
-import { School } from "./school/school";
+import { StudentData } from "./shared";
 
 export interface User {
   _id: string;
@@ -11,7 +11,6 @@ export interface User {
   about: string;
   profileImage: UserImage;
   coverImage: UserImage;
-  school: School;
   studentData: StudentData;
   password: string;
   interests: string[];
@@ -20,6 +19,21 @@ export interface User {
   rubyBalance: number;
   messagingToken: string;
   paymentDetails: PaymentDetails;
+}
+
+export interface MofifiedUser {
+  id: string;
+  name: { first: string; last: string };
+  username: string;
+  email: string;
+  phone: string;
+  dob: { day: string; month: string; year: string };
+  profileImage: UserImage;
+  coverImage: UserImage;
+  about: string;
+  gender: string;
+  studentData: StudentData;
+  rubyBalance: number;
 }
 
 export interface TempUser {
@@ -39,12 +53,6 @@ export interface DOB {
   year: string;
 }
 
-export interface StudentData {
-  department: string;
-  faculty: string;
-  level: string;
-}
-
 export interface UserImage {
   thumbnail: { url: string; dUrl: string };
   original: { url: string; dUrl: string };
@@ -57,8 +65,10 @@ export interface AddUserReqBody {
   phone: string;
   dob: { day: string; month: string; year: string };
   gender: string;
-  studentData: { department: string; faculty: string; level: string };
   schoolId: string;
+  facultyId: string;
+  departmentId: string;
+  level: string;
   password: string;
 }
 
@@ -74,21 +84,7 @@ export interface AuthReqBody {
 
 export interface GetUserResBody {
   msg: string;
-  data?: {
-    id: string;
-    name: { first: string; last: string };
-    username: string;
-    email: string;
-    phone: string;
-    dob: { day: string; month: string; year: string };
-    profileImage: UserImage;
-    coverImage: UserImage;
-    about: string;
-    gender: string;
-    school: School;
-    studentData: StudentData;
-    rubyBalance: number;
-  };
+  data?: MofifiedUser;
 }
 
 export interface AboutData {
@@ -99,6 +95,14 @@ export interface PhoneData {
   phone: string;
 }
 
+export interface UpdateFacultyReqBody {
+  facultyId: string;
+}
+
+export interface UpdateDepReqBody {
+  departmentId: string;
+}
+
 export interface PaymentDetails {
   bankName: string;
   bankSortCode: string;
@@ -106,12 +110,6 @@ export interface PaymentDetails {
   accountName: string;
   accountNumber: string;
   currency: string;
-}
-
-export interface UpdateStudentDataReqBody {
-  department: string;
-  faculty: string;
-  level: string;
 }
 
 export interface UpdateMessagingTokenReqBody {

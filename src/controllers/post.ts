@@ -3,7 +3,7 @@ import { RequestHandler } from "express";
 import * as firebase from "firebase-admin";
 
 import PostModel, {
-  validateCreatePostReq,
+  valCreatePostReqBody,
   validateReactToPostParams,
   validateViewPostReq,
   getPosts,
@@ -12,18 +12,19 @@ import NotificationModel from "../models/notification";
 import SubPostModel from "../models/sub-post";
 import UserModel from "../models/user";
 import {
-  PostRes,
-  CreatePostReq,
+  Post,
+  ModifiedPost,
+  CreatePostReqBody,
   GetMyPostsParams,
   GetPostParams,
   GetPostsQuery,
-  GetPostsRes,
-  GetPostRes,
+  GetPostsResBody,
+  GetPostResBody,
   ReactToPostParams,
   ReactToPostReq,
   ViewPostParams,
 } from "../types/post";
-import { SubPostRes } from "../types/sub-post";
+import SubPost, { ModifiedSubPost } from "../types/sub-post";
 import { SimpleRes, GetImageParams } from "../types/shared";
 import TransactionModel from "../models/transaction";
 import { txDesc, rubyCredit, maxViewsForRubyCredit } from "../shared/constants";
@@ -33,123 +34,120 @@ import { getFileFromS3 } from "../shared/utils/s3";
 import { getNotificationPayload } from "../shared/utils/functions";
 import { formatDate } from "../shared/utils/functions";
 import { postNotificationType, notificationPhrase } from "../shared/constants";
+import { User } from "../types/user";
 
-export const createPost: RequestHandler<any, SimpleRes, CreatePostReq> = async (
-  req,
-  res,
-  next
-) => {
-  const { error } = validateCreatePostReq(req.body);
-  if (error) return res.status(400).send({ msg: error.details[0].message });
+export const createPost: RequestHandler<any, SimpleRes, CreatePostReqBody> =
+  async (req, res, next) => {
+    const { error } = valCreatePostReqBody(req.body);
+    if (error) return res.status(400).send({ msg: error.details[0].message });
 
-  try {
-    const userId = req["user"].id;
+    try {
+      const userId = req["user"].id;
 
-    const user = await UserModel.findById(userId).select(
-      "name studentData school"
-    );
-    if (!user)
-      return res.status(404).send({ msg: "Can't create post, user not found" });
+      const user: User = await UserModel.findById(userId).select(
+        "name studentData"
+      );
+      if (!user)
+        return res
+          .status(404)
+          .send({ msg: "Can't create post, user not found" });
 
-    const { text } = req.body;
+      const { text } = req.body;
 
-    const { name, studentData, school } = user;
+      const { name, studentData } = user;
 
-    const { department, faculty, level } = studentData;
+      const { school, department, faculty, level } = studentData;
 
-    const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department} ${faculty} ${level}`;
+      const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department.name} ${faculty.name} ${level}`;
 
-    const post = await new PostModel({
-      creator: {
-        id: userId,
-      },
-      text,
-      school,
-      studentData,
-      tagsString,
-    }).save();
+      const post = await new PostModel({
+        creator: {
+          id: userId,
+        },
+        text,
+        studentData,
+        tagsString,
+      }).save();
 
-    if (req["files"]) {
-      for (let i = 0; i < req["files"].length; i++) {
-        const file = req["files"][i];
-        // Remove the folder name (post-images), leaving just the file name
-        const filename = file.key.split("/")[1];
+      if (req["files"]) {
+        for (let i = 0; i < req["files"].length; i++) {
+          const file = req["files"][i];
+          // Remove the folder name (post-images), leaving just the file name
+          const filename = file.key.split("/")[1];
 
-        await new SubPostModel({
-          type: "Image",
-          ppid: post._id,
-          url: `${config.get("serverAddress")}api/posts/images/${filename}`,
-          dUrl: file.location,
-        }).save();
+          await new SubPostModel({
+            type: "Image",
+            ppid: post._id,
+            url: `${config.get("serverAddress")}api/posts/images/${filename}`,
+            dUrl: file.location,
+          }).save();
+        }
       }
-    }
 
-    // Create notifications and notify departmental mates.
-    const depMates = await UserModel.find({
-      "school.fullName": school.fullName,
-      "studentData.faculty": faculty,
-      "studentData.department": department,
-      "studentData.level": level,
-    }).select("_id name messagingToken");
+      // Create notifications and notify departmental mates.
+      const depMates = await UserModel.find({
+        "studentData.department.id": department.id,
+        "studentData.level": level,
+      }).select("_id name messagingToken");
 
-    const notifs: any[] = [];
+      const notifs: any[] = [];
 
-    for (let depMate of depMates) {
-      if (depMate._id.toHexString() !== userId) {
-        const notif = new NotificationModel({
-          creators: [
-            {
-              id: userId,
-              name: `${name.first} ${name.last}`,
-            },
-          ],
-          subscriber: { id: depMate._id },
-          type: postNotificationType.createdPostNotification,
-          phrase: notificationPhrase.created,
-          contentId: post._id,
-          payload: getNotificationPayload(post.text),
-        });
+      for (let depMate of depMates) {
+        if (depMate._id.toHexString() !== userId) {
+          const notif = new NotificationModel({
+            creators: [
+              {
+                id: userId,
+                name: `${name.first} ${name.last}`,
+              },
+            ],
+            subscriber: { id: depMate._id },
+            type: postNotificationType.createdPostNotification,
+            phrase: notificationPhrase.created,
+            contentId: post._id,
+            payload: getNotificationPayload(post.text),
+          });
 
-        notifs.push(notif);
+          notifs.push(notif);
 
-        const fcmPayload = {
-          data: { msg: "PostCreated", status: "0", picture: "" },
-        };
+          const fcmPayload = {
+            data: { msg: "PostCreated", status: "0", picture: "" },
+          };
 
-        // firebase
-        //   .messaging()
-        //   .sendToDevice(user.messagingToken, fcmPayload, messagingOptions);
+          // firebase
+          //   .messaging()
+          //   .sendToDevice(user.messagingToken, fcmPayload, messagingOptions);
+        }
       }
+
+      await NotificationModel.insertMany(notifs);
+
+      res.status(201).send({ msg: "Post created successfully" });
+    } catch (e) {
+      next(new Error("Error in creating post: " + e));
     }
-
-    await NotificationModel.insertMany(notifs);
-
-    res.status(201).send({ msg: "Post created successfully" });
-  } catch (e) {
-    next(new Error("Error in creating post: " + e));
-  }
-};
+  };
 
 // TODO: Create a reusable function for creating a mod post and sub posts
-export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
+export const getPost: RequestHandler<GetPostParams, GetPostResBody> = async (
   req,
   res,
   next
 ) => {
   try {
-    const post = await PostModel.findById(req.params.postId).select(
+    const post: Post = await PostModel.findById(req.params.postId).select(
       "-__v -tagsString -tags"
     );
 
     if (!post) res.status(404).send({ msg: "Post not found" });
 
-    const subPosts = await SubPostModel.find({ ppid: post._id }).select(
-      "-__v -views -dUrl"
-    );
+    const subPosts: SubPost[] = await SubPostModel.find({
+      ppid: post._id,
+    }).select("-__v -views -dUrl");
 
     const userId = req["user"].id;
 
-    const modifiedSubPosts: SubPostRes[] = [];
+    const modifiedSubPosts: ModifiedSubPost[] = [];
     for (const sP of subPosts) {
       const sPReaction = sP.reactions.find(
         (r: any) => r.userId.toHexString() === userId
@@ -175,7 +173,7 @@ export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
       "name profileImage"
     );
 
-    const modPost: PostRes = {
+    const modPost: ModifiedPost = {
       id: post._id,
       creator: {
         id: post.creator.id,
@@ -184,10 +182,9 @@ export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
       },
       text: post.text,
       subPosts: modifiedSubPosts,
-      school: post.school,
       studentData: post.studentData,
       date: post.date,
-      formattedDate: formatDate(post.date),
+      formattedDate: formatDate(post.date.toString()),
       reactionCount: post.reactionCount ? post.reactionCount : 0,
       reaction: postReaction ? postReaction : { type: "", userId: "" },
       viewCount: post.viewCount,
@@ -201,47 +198,55 @@ export const getPost: RequestHandler<GetPostParams, GetPostRes> = async (
 };
 
 // TODO: Create a reusable function for creating a mod post and sub posts
-export const getAllPosts: RequestHandler<any, GetPostsRes, any, GetPostsQuery> =
-  async (req, res, next) => {
-    const userId = req["user"].id;
-    const pageNumber = +req.query.pageNumber;
-    const pageSize = +req.query.pageSize;
-    const { searchQuery } = req.query;
+export const getAllPosts: RequestHandler<
+  any,
+  GetPostsResBody,
+  any,
+  GetPostsQuery
+> = async (req, res, next) => {
+  const userId = req["user"].id;
+  const pageNumber = +req.query.pageNumber;
+  const pageSize = +req.query.pageSize;
+  const { searchQuery } = req.query;
 
-    try {
-      const posts = await PostModel.find({
-        $text: { $search: `${searchQuery}` },
-      })
-        // .skip((pageNumber - 1) * pageSize)
-        // .limit(pageSize)
-        .select("-__v -tagsString -tags")
-        .sort({ _id: -1 });
+  try {
+    const posts = await PostModel.find({
+      $text: { $search: `${searchQuery}` },
+    })
+      // .skip((pageNumber - 1) * pageSize)
+      // .limit(pageSize)
+      .select("-__v -tagsString -tags")
+      .sort({ _id: -1 });
 
-      await getPosts(userId, posts, res);
-    } catch (e) {
-      next(new Error("Error in getting all posts: " + e));
-    }
-  };
+    await getPosts(userId, posts, res);
+  } catch (e) {
+    next(new Error("Error in getting all posts: " + e));
+  }
+};
 
 // TODO: Create a reusable function for creating a mod post and sub posts
-export const getMyPosts: RequestHandler<GetMyPostsParams, GetPostsRes, any, GetPostsQuery> =
-  async (req, res, next) => {
-    const userId = req.params.userId;
-    const pageNumber = +req.query.pageNumber;
-    const pageSize = +req.query.pageSize;
+export const getMyPosts: RequestHandler<
+  GetMyPostsParams,
+  GetPostsResBody,
+  any,
+  GetPostsQuery
+> = async (req, res, next) => {
+  const userId = req.params.userId;
+  const pageNumber = +req.query.pageNumber;
+  const pageSize = +req.query.pageSize;
 
-    try {
-      const posts = await PostModel.find({ "creator.id": userId })
-        // .skip((pageNumber - 1) * pageSize)
-        // .limit(pageSize)
-        .select("-__v -tagsString -tags")
-        .sort({ _id: -1 });
+  try {
+    const posts = await PostModel.find({ "creator.id": userId })
+      // .skip((pageNumber - 1) * pageSize)
+      // .limit(pageSize)
+      .select("-__v -tagsString -tags")
+      .sort({ _id: -1 });
 
-      await getPosts(userId, posts, res);
-    } catch (e) {
-      next(new Error("Error in getting user's posts: " + e));
-    }
-  };
+    await getPosts(userId, posts, res);
+  } catch (e) {
+    next(new Error("Error in getting user's posts: " + e));
+  }
+};
 
 export const getPostImage: RequestHandler<GetImageParams> = async (
   req,

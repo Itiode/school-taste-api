@@ -22,17 +22,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRubyBalance = exports.verifyUsername = exports.updateMessagingToken = exports.updatePaymentDetails = exports.updateStudentData = exports.updatePhone = exports.updateAbout = exports.getProfileImage = exports.updateProfileImage = exports.getCoverImage = exports.updateCoverImage = exports.getUser = exports.addUser = void 0;
+exports.getRubyBalance = exports.verifyUsername = exports.updateMessagingToken = exports.updatePaymentDetails = exports.updateDepartment = exports.updateFaculty = exports.updatePhone = exports.updateAbout = exports.getProfileImage = exports.updateProfileImage = exports.getCoverImage = exports.updateCoverImage = exports.getUser = exports.addUser = void 0;
 const config_1 = __importDefault(require("config"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_1 = __importStar(require("../models/user"));
-const school_1 = __importDefault(require("../models/school/school"));
+const school_1 = __importDefault(require("../models/student-data/school"));
+const faculty_1 = __importDefault(require("../models/student-data/faculty"));
+const department_1 = __importDefault(require("../models/student-data/department"));
 const s3_1 = require("../shared/utils/s3");
 const addUser = async (req, res, next) => {
-    const { error } = (0, user_1.validateAddUserData)(req.body);
+    const { error } = (0, user_1.valAddUserReqBody)(req.body);
     if (error)
         return res.status(400).send({ msg: error.details[0].message });
-    const { name, username, email, phone, dob, gender, schoolId, studentData, password, } = req.body;
+    const { name, username, email, phone, dob, gender, schoolId, facultyId, departmentId, level, password, } = req.body;
     try {
         const fetchedUser = await user_1.default.findOne({
             $or: [{ phone }, { email }, { username }],
@@ -50,7 +52,7 @@ const addUser = async (req, res, next) => {
                 return res.status(400).send({ msg: "This username exists already" });
             }
         }
-        const hashedPw = await bcryptjs_1.default.hash(password, 12);
+        const hashedPw = await bcryptjs_1.default.hash(password, 10);
         const userImage = {
             original: { url: "", dUrl: "" },
             thumbnail: { url: "", dUrl: "" },
@@ -58,6 +60,28 @@ const addUser = async (req, res, next) => {
         const school = await school_1.default.findById(schoolId);
         if (!school)
             return res.status(404).send({ msg: "School not found" });
+        const faculty = await faculty_1.default.findById(facultyId);
+        if (!faculty)
+            return res.status(404).send({ msg: "Faculty not found" });
+        const dep = await department_1.default.findById(departmentId);
+        if (!dep)
+            return res.status(404).send({ msg: "Department not found" });
+        const studentData = {
+            school: {
+                id: school._id,
+                fullName: school.fullName,
+                shortName: school.shortName,
+            },
+            faculty: {
+                id: faculty._id,
+                name: faculty.name,
+            },
+            department: {
+                id: dep._id,
+                name: dep.name,
+            },
+            level,
+        };
         const user = await new user_1.default({
             name,
             username,
@@ -66,11 +90,6 @@ const addUser = async (req, res, next) => {
             dob,
             gender,
             about: `I'm a student of ${school.fullName}`,
-            school: {
-                id: school._id,
-                fullName: school.fullName,
-                shortName: school.shortName,
-            },
             studentData,
             password: hashedPw,
             profileImage: userImage,
@@ -96,7 +115,7 @@ const getUser = async (req, res, next) => {
         const user = await user_1.default.findById(userId).select("-password -__v -createdAt -updatedAt");
         if (!user)
             return res.status(404).send({ msg: "User not found" });
-        const { _id: id, name, username, email, phone, dob, profileImage, coverImage, about, gender, school, studentData, rubyBalance, } = user;
+        const { _id: id, name, username, email, phone, dob, profileImage, coverImage, about, gender, studentData, rubyBalance, } = user;
         res.send({
             msg: "User's data fetched successfully",
             data: {
@@ -110,7 +129,6 @@ const getUser = async (req, res, next) => {
                 profileImage,
                 coverImage,
                 about,
-                school,
                 studentData,
                 rubyBalance: req.params.userId ? 0 : rubyBalance,
             },
@@ -217,24 +235,48 @@ const updatePhone = async (req, res, next) => {
     }
 };
 exports.updatePhone = updatePhone;
-const updateStudentData = async (req, res, next) => {
-    const { error } = (0, user_1.validateStudentData)(req.body);
+const updateFaculty = async (req, res, next) => {
+    const { error } = (0, user_1.valUpdateFacultyReqBody)(req.body);
     if (error)
         return res.status(400).send({ msg: error.details[0].message });
     try {
-        const { department, faculty, level } = req.body;
         const userId = req["user"].id;
-        const user = await user_1.default.findById(userId).select("_id");
+        const user = await user_1.default.findById(userId);
         if (!user)
             return res.status(404).send({ msg: "User not found" });
-        await user_1.default.updateOne({ _id: userId }, { $set: { studentData: { department, faculty, level } } });
-        res.send({ msg: "Student data updated successfully" });
+        const { facultyId } = req.body;
+        const faculty = await faculty_1.default.findById(facultyId);
+        if (!faculty)
+            return res.status(404).send({ msg: "Faculty not found" });
+        await user_1.default.updateOne({ _id: userId }, { "studentData.faculty": { id: facultyId, name: faculty.name } });
+        res.send({ msg: "Faculty updated successfully" });
     }
     catch (e) {
-        next(new Error("Error in updating student data: " + e));
+        next(new Error("Error in updating faculty: " + e));
     }
 };
-exports.updateStudentData = updateStudentData;
+exports.updateFaculty = updateFaculty;
+const updateDepartment = async (req, res, next) => {
+    const { error } = (0, user_1.valUpdateDepReqBody)(req.body);
+    if (error)
+        return res.status(400).send({ msg: error.details[0].message });
+    try {
+        const userId = req["user"].id;
+        const user = await user_1.default.findById(userId);
+        if (!user)
+            return res.status(404).send({ msg: "User not found" });
+        const { departmentId } = req.body;
+        const dep = await department_1.default.findById(departmentId);
+        if (!dep)
+            return res.status(404).send({ msg: "Department not found" });
+        await user_1.default.updateOne({ _id: userId }, { "studentData.department": { id: departmentId, name: dep.name } });
+        res.send({ msg: "Department updated successfully" });
+    }
+    catch (e) {
+        next(new Error("Error in updating department: " + e));
+    }
+};
+exports.updateDepartment = updateDepartment;
 const updatePaymentDetails = async (req, res, next) => {
     const { error } = (0, user_1.validatePaymentDetailsData)(req.body);
     if (error)

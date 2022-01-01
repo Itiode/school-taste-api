@@ -4,7 +4,7 @@ export interface School {
   shortName: string;
 }
 
-export interface AddSchoolData {
+export interface AddSchoolReqBody {
   fullName: string;
   shortName: string;
 }

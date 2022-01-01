@@ -22,21 +22,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPosts = exports.validateViewPostReq = exports.validateReactToPostParams = exports.validateCreatePostReq = void 0;
+exports.getPosts = exports.validateViewPostReq = exports.validateReactToPostParams = exports.valCreatePostReqBody = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const joi_1 = __importDefault(require("joi"));
 const sub_post_1 = __importDefault(require("../models/sub-post"));
 const functions_1 = require("../shared/utils/functions");
 const user_1 = __importDefault(require("../models/user"));
 const reaction_1 = __importDefault(require("./schemas/reaction"));
-const school_1 = __importDefault(require("./schemas/school"));
 const student_data_1 = __importDefault(require("./schemas/student-data"));
 const schema = new mongoose_1.Schema({
     creator: {
         id: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
     },
     text: { type: String, trim: true, maxLength: 10000, required: true },
-    school: { type: school_1.default, required: true },
     studentData: { type: student_data_1.default, required: true },
     tagsString: { type: String, trim: true, required: true },
     tags: { type: [String] },
@@ -48,12 +46,12 @@ const schema = new mongoose_1.Schema({
     commentCount: Number,
 });
 exports.default = mongoose_1.default.model("Post", schema);
-function validateCreatePostReq(data) {
+function valCreatePostReqBody(data) {
     return joi_1.default.object({
         text: joi_1.default.string().trim().max(10000).required(),
     }).validate(data);
 }
-exports.validateCreatePostReq = validateCreatePostReq;
+exports.valCreatePostReqBody = valCreatePostReqBody;
 function validateReactToPostParams(data) {
     return joi_1.default.object({
         postId: joi_1.default.string()
@@ -115,7 +113,6 @@ async function getPosts(userId, posts, res) {
             },
             text: p.text,
             subPosts: modifiedSubPosts,
-            school: p.school,
             studentData: p.studentData,
             date: p.date,
             formattedDate: (0, functions_1.formatDate)(p.date),

@@ -36,24 +36,25 @@ const functions_1 = require("../shared/utils/functions");
 const functions_2 = require("../shared/utils/functions");
 const constants_2 = require("../shared/constants");
 const createPost = async (req, res, next) => {
-    const { error } = (0, post_1.validateCreatePostReq)(req.body);
+    const { error } = (0, post_1.valCreatePostReqBody)(req.body);
     if (error)
         return res.status(400).send({ msg: error.details[0].message });
     try {
         const userId = req["user"].id;
-        const user = await user_1.default.findById(userId).select("name studentData school");
+        const user = await user_1.default.findById(userId).select("name studentData");
         if (!user)
-            return res.status(404).send({ msg: "Can't create post, user not found" });
+            return res
+                .status(404)
+                .send({ msg: "Can't create post, user not found" });
         const { text } = req.body;
-        const { name, studentData, school } = user;
-        const { department, faculty, level } = studentData;
-        const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department} ${faculty} ${level}`;
+        const { name, studentData } = user;
+        const { school, department, faculty, level } = studentData;
+        const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department.name} ${faculty.name} ${level}`;
         const post = await new post_1.default({
             creator: {
                 id: userId,
             },
             text,
-            school,
             studentData,
             tagsString,
         }).save();
@@ -72,9 +73,7 @@ const createPost = async (req, res, next) => {
         }
         // Create notifications and notify departmental mates.
         const depMates = await user_1.default.find({
-            "school.fullName": school.fullName,
-            "studentData.faculty": faculty,
-            "studentData.department": department,
+            "studentData.department.id": department.id,
             "studentData.level": level,
         }).select("_id name messagingToken");
         const notifs = [];
@@ -116,7 +115,9 @@ const getPost = async (req, res, next) => {
         const post = await post_1.default.findById(req.params.postId).select("-__v -tagsString -tags");
         if (!post)
             res.status(404).send({ msg: "Post not found" });
-        const subPosts = await sub_post_1.default.find({ ppid: post._id }).select("-__v -views -dUrl");
+        const subPosts = await sub_post_1.default.find({
+            ppid: post._id,
+        }).select("-__v -views -dUrl");
         const userId = req["user"].id;
         const modifiedSubPosts = [];
         for (const sP of subPosts) {
@@ -143,10 +144,9 @@ const getPost = async (req, res, next) => {
             },
             text: post.text,
             subPosts: modifiedSubPosts,
-            school: post.school,
             studentData: post.studentData,
             date: post.date,
-            formattedDate: (0, functions_2.formatDate)(post.date),
+            formattedDate: (0, functions_2.formatDate)(post.date.toString()),
             reactionCount: post.reactionCount ? post.reactionCount : 0,
             reaction: postReaction ? postReaction : { type: "", userId: "" },
             viewCount: post.viewCount,

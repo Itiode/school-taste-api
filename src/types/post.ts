@@ -1,5 +1,6 @@
-import { SubPostRes } from "./sub-post";
+import { ModifiedSubPost } from "./sub-post";
 import { Creator, Reaction } from "./shared";
+import { StudentData } from "./shared";
 
 export interface Post {
   _id: string;
@@ -7,8 +8,7 @@ export interface Post {
     id: string;
   };
   text: string;
-  school: { fullName: string; shortName: string };
-  studentData: { department: string; faculty: string; level: string };
+  studentData: StudentData;
   tagsString: string;
   tags: string[];
   date: Date;
@@ -20,13 +20,12 @@ export interface Post {
   commentCount: number;
 }
 
-export interface PostRes {
+export interface ModifiedPost {
   id: string;
   creator: Creator;
   text: string;
-  subPosts: SubPostRes[];
-  school: { fullName: string; shortName: string };
-  studentData: { department: string; faculty: string; level: string };
+  subPosts: ModifiedSubPost[];
+  studentData: StudentData;
   date: Date;
   formattedDate: string;
   reactionCount: number;
@@ -35,7 +34,7 @@ export interface PostRes {
   commentCount: number;
 }
 
-export interface CreatePostReq {
+export interface CreatePostReqBody {
   text: string;
 }
 
@@ -54,17 +53,15 @@ export interface GetPostsQuery {
   schoolFullName: string;
 }
 
-
-export interface GetPostsRes {
+export interface GetPostsResBody {
   msg: string;
   postCount?: number;
-  data?: PostRes[];
+  data?: ModifiedPost[];
 }
 
-
-export interface GetPostRes {
+export interface GetPostResBody {
   msg: string;
-  data?: PostRes;
+  data?: ModifiedPost;
 }
 
 export interface ReactToPostReq {

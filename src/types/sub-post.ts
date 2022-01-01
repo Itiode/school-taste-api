@@ -32,7 +32,7 @@ export default interface SubPost {
 //   };
 // }
 
-export interface SubPostRes {
+export interface ModifiedSubPost {
   id: string;
   type: string;
   url: string;

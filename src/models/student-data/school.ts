@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import Joi from "joi";
 
-import { School, AddSchoolData } from "../../types/school/school";
+import { School, AddSchoolReqBody } from "../../types/student-data/school";
 
 const schema = new Schema<School>(
   {
@@ -19,7 +19,7 @@ const schema = new Schema<School>(
 
 export default mongoose.model("School", schema);
 
-export function validateAddSchoolData(data: AddSchoolData) {
+export function validateAddSchoolData(data: AddSchoolReqBody) {
   return Joi.object({
     fullName: Joi.string().trim().max(250).required(),
     shortName: Joi.string().trim().uppercase().max(25).required(),

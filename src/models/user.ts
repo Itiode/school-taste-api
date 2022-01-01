@@ -3,14 +3,20 @@ import config from "config";
 import * as Jwt from "jsonwebtoken";
 import Joi from "joi";
 
-import { User, AddUserReqBody, AuthReqBody, PaymentDetails } from "../types/user";
-import { UpdateStudentDataReqBody, AboutData, PhoneData } from "./../types/user";
+import {
+  User,
+  AddUserReqBody,
+  AuthReqBody,
+  UpdateFacultyReqBody,
+  UpdateDepReqBody,
+  PaymentDetails,
+} from "../types/user";
+import { AboutData, PhoneData } from "./../types/user";
 import nameSchema from "./schemas/name";
 import dobSchema from "./schemas/dob";
 import studentDataSchema from "./schemas/student-data";
 import userImageSchema from "./schemas/user-image";
 import paymentDetailsSchema from "./schemas/payment-details";
-import schoolSchema from "./schemas/school";
 
 const schema = new Schema<User>(
   {
@@ -41,10 +47,9 @@ const schema = new Schema<User>(
     },
     gender: { type: String, enum: ["Male", "Female", "Other"], required: true },
     dob: dobSchema,
-    profileImage: {type: userImageSchema, required: true},
-    coverImage: {type: userImageSchema, required: true},
+    profileImage: { type: userImageSchema, required: true },
+    coverImage: { type: userImageSchema, required: true },
     about: { type: String, trim: true, minLength: 1, maxLength: 200 },
-    school: { type: schoolSchema, required: true },
     studentData: { type: studentDataSchema, required: true },
     password: { type: String, trim: true, required: true },
     interests: [String],
@@ -71,7 +76,7 @@ schema.methods.genAuthToken = function () {
 
 export default mongoose.model("User", schema);
 
-export function validateAddUserData(data: AddUserReqBody) {
+export function valAddUserReqBody(data: AddUserReqBody) {
   const schema = Joi.object({
     name: Joi.object({
       first: Joi.string().trim().min(2).max(25).required(),
@@ -99,11 +104,15 @@ export function validateAddUserData(data: AddUserReqBody) {
       .trim()
       .regex(new RegExp("^[0-9a-fA-F]{24}$"))
       .required(),
-    studentData: Joi.object({
-      department: Joi.string().trim().max(250).required(),
-      faculty: Joi.string().trim().max(250).required(),
-      level: Joi.string().trim().required(),
-    }),
+    facultyId: Joi.string()
+      .trim()
+      .regex(new RegExp("^[0-9a-fA-F]{24}$"))
+      .required(),
+    departmentId: Joi.string()
+      .trim()
+      .regex(new RegExp("^[0-9a-fA-F]{24}$"))
+      .required(),
+    level: Joi.string().trim().max(15).required(),
     password: Joi.string().trim().min(6).max(50).required(),
   });
 
@@ -140,15 +149,29 @@ export function validatePhoneData(data: PhoneData) {
   }).validate(data);
 }
 
-export function validateStudentData(data: UpdateStudentDataReqBody) {
-  const schema = Joi.object({
-    department: Joi.string().trim().max(250).required(),
-    faculty: Joi.string().trim().max(250).required(),
-    level: Joi.string().trim().required(),
-  });
-
-  return schema.validate(data);
+export function valUpdateFacultyReqBody(data: UpdateFacultyReqBody) {
+  return Joi.object({
+    facultyId: Joi.string()
+      .trim()
+      .regex(new RegExp("^[0-9a-fA-F]{24}$"))
+      .required(),
+  }).validate(data);
 }
+
+export function valUpdateDepReqBody(data: UpdateDepReqBody) {
+  return Joi.object({
+    departmentId: Joi.string()
+      .trim()
+      .regex(new RegExp("^[0-9a-fA-F]{24}$"))
+      .required(),
+  }).validate(data);
+}
+
+// export function valUpdateLevelReqBody(data: ) {
+//   return Joi.object({
+//     level: Joi.string().trim().max(15).required(),
+//   }).validate(data);
+// }
 
 export function validatePaymentDetailsData(data: PaymentDetails) {
   const schema = Joi.object({

@@ -14,7 +14,9 @@ import postCommentRoutes from "./routes/comment/post-comment";
 import subPostRoutes from "./routes/sub-post";
 import subPostCommentRoutes from "./routes/comment/sub-post-comment";
 import notificationRoutes from "./routes/notification";
-import schoolRoutes from "./routes/school";
+import schoolRoutes from "./routes/student-data/school";
+import facultyRoutes from "./routes/student-data/faculty";
+import departmentRoutes from "./routes/student-data/department";
 
 const app = express();
 
@@ -30,6 +32,8 @@ app.use("/api/sub-posts", subPostRoutes);
 app.use("/api/sub-post-comments", subPostCommentRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/schools", schoolRoutes);
+app.use("/api/faculties", facultyRoutes);
+app.use("/api/departments", departmentRoutes);
 
 app.use(error);
 

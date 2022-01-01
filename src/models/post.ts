@@ -4,19 +4,18 @@ import { Response } from "express";
 
 import {
   Post,
-  CreatePostReq,
+  CreatePostReqBody,
   ReactToPostParams,
   ViewPostParams,
-  PostRes,
+  ModifiedPost,
 } from "../types/post";
-import { SubPostRes } from "../types/sub-post";
+import { ModifiedSubPost } from "../types/sub-post";
 import SubPostModel from "../models/sub-post";
 import { formatDate } from "../shared/utils/functions";
 import UserModel from "../models/user";
 import { TempUser } from "../types/user";
 
 import reactionSchema from "./schemas/reaction";
-import schoolSchema from "./schemas/school";
 import studentDataSchema from "./schemas/student-data";
 
 const schema = new Schema<Post>({
@@ -24,7 +23,6 @@ const schema = new Schema<Post>({
     id: { type: Schema.Types.ObjectId, ref: "User", required: true },
   },
   text: { type: String, trim: true, maxLength: 10000, required: true },
-  school: { type: schoolSchema, required: true },
   studentData: { type: studentDataSchema, required: true },
   tagsString: { type: String, trim: true, required: true },
   tags: { type: [String] },
@@ -38,7 +36,7 @@ const schema = new Schema<Post>({
 
 export default mongoose.model("Post", schema);
 
-export function validateCreatePostReq(data: CreatePostReq) {
+export function valCreatePostReqBody(data: CreatePostReqBody) {
   return Joi.object({
     text: Joi.string().trim().max(10000).required(),
   }).validate(data);
@@ -63,7 +61,7 @@ export function validateViewPostReq(data: ViewPostParams) {
 }
 
 export async function getPosts(userId: string, posts: any[], res: Response) {
-  const modifiedPosts: PostRes[] = [];
+  const modifiedPosts: ModifiedPost[] = [];
   const tempUsers: TempUser[] = [];
 
   for (const p of posts) {
@@ -89,7 +87,7 @@ export async function getPosts(userId: string, posts: any[], res: Response) {
       tempUser = tempUsers.find((tU) => tU.id === p.creator.id)!;
     }
 
-    const modifiedSubPosts: SubPostRes[] = [];
+    const modifiedSubPosts: ModifiedSubPost[] = [];
     for (const sP of subPosts) {
       const sPReaction = sP.reactions.find(
         (r: any) => r.userId.toHexString() === userId
@@ -111,7 +109,7 @@ export async function getPosts(userId: string, posts: any[], res: Response) {
       (r: any) => r.userId.toHexString() === userId
     );
 
-    const modPost: PostRes = {
+    const modPost: ModifiedPost = {
       id: p._id,
       creator: {
         id: tempUser.id,
@@ -120,7 +118,6 @@ export async function getPosts(userId: string, posts: any[], res: Response) {
       },
       text: p.text,
       subPosts: modifiedSubPosts,
-      school: p.school,
       studentData: p.studentData,
       date: p.date,
       formattedDate: formatDate(p.date),

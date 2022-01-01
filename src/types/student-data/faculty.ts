@@ -3,12 +3,17 @@ export interface Faculty {
   name: string;
 }
 
+export interface FacultyData {
+  id: string;
+  name: string;
+}
+
 export interface AddFacultyReqBody {
   name: string;
 }
 
-export interface GetFacultiesRes {
+export interface GetFacultiesResBody {
   msg: string;
   facultyCount: number;
-  data: { name: string }[];
+  data: { id: string; name: string }[];
 }

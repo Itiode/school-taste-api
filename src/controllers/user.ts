@@ -3,10 +3,11 @@ import bcrypt from "bcryptjs";
 import { RequestHandler } from "express";
 
 import UserModel, {
-  validateAddUserData,
-  validateStudentData,
+  valAddUserReqBody,
   validateAboutData,
   validatePhoneData,
+  valUpdateFacultyReqBody,
+  valUpdateDepReqBody,
   validatePaymentDetailsData,
 } from "../models/user";
 import TransactionModel from "../models/transaction";
@@ -17,13 +18,16 @@ import {
   GetUserResBody,
   AboutData,
   PhoneData,
-  UpdateStudentDataReqBody,
+  UpdateFacultyReqBody,
+  UpdateDepReqBody,
   UpdateMessagingTokenReqBody,
   PaymentDetails,
   VerifyUsernameReqBody,
   GetRubyBalanceResBody,
 } from "../types/user";
-import SchoolModel from "../models/school/school";
+import SchoolModel from "../models/student-data/school";
+import FacultyModel from "../models/student-data/faculty";
+import DepModel from "../models/student-data/department";
 import { SimpleParams, SimpleRes, GetImageParams } from "../types/shared";
 import { getFileFromS3 } from "../shared/utils/s3";
 
@@ -32,7 +36,7 @@ export const addUser: RequestHandler<any, AuthResBody, AddUserReqBody> = async (
   res,
   next
 ) => {
-  const { error } = validateAddUserData(req.body);
+  const { error } = valAddUserReqBody(req.body);
   if (error) return res.status(400).send({ msg: error.details[0].message });
 
   const {
@@ -43,7 +47,9 @@ export const addUser: RequestHandler<any, AuthResBody, AddUserReqBody> = async (
     dob,
     gender,
     schoolId,
-    studentData,
+    facultyId,
+    departmentId,
+    level,
     password,
   } = req.body;
 
@@ -64,7 +70,7 @@ export const addUser: RequestHandler<any, AuthResBody, AddUserReqBody> = async (
       }
     }
 
-    const hashedPw = await bcrypt.hash(password, 12);
+    const hashedPw = await bcrypt.hash(password, 10);
 
     const userImage = {
       original: { url: "", dUrl: "" },
@@ -74,6 +80,29 @@ export const addUser: RequestHandler<any, AuthResBody, AddUserReqBody> = async (
     const school = await SchoolModel.findById(schoolId);
     if (!school) return res.status(404).send({ msg: "School not found" });
 
+    const faculty = await FacultyModel.findById(facultyId);
+    if (!faculty) return res.status(404).send({ msg: "Faculty not found" });
+
+    const dep = await DepModel.findById(departmentId);
+    if (!dep) return res.status(404).send({ msg: "Department not found" });
+
+    const studentData = {
+      school: {
+        id: school._id,
+        fullName: school.fullName,
+        shortName: school.shortName,
+      },
+      faculty: {
+        id: faculty._id,
+        name: faculty.name,
+      },
+      department: {
+        id: dep._id,
+        name: dep.name,
+      },
+      level,
+    };
+
     const user = await new UserModel({
       name,
       username,
@@ -82,11 +111,6 @@ export const addUser: RequestHandler<any, AuthResBody, AddUserReqBody> = async (
       dob,
       gender,
       about: `I'm a student of ${school.fullName}`,
-      school: {
-        id: school._id,
-        fullName: school.fullName,
-        shortName: school.shortName,
-      },
       studentData,
       password: hashedPw,
       profileImage: userImage,
@@ -131,7 +155,6 @@ export const getUser: RequestHandler<SimpleParams, GetUserResBody> = async (
       coverImage,
       about,
       gender,
-      school,
       studentData,
       rubyBalance,
     } = user;
@@ -149,7 +172,6 @@ export const getUser: RequestHandler<SimpleParams, GetUserResBody> = async (
         profileImage,
         coverImage,
         about,
-        school,
         studentData,
         rubyBalance: req.params.userId ? 0 : rubyBalance,
       },
@@ -295,29 +317,61 @@ export const updatePhone: RequestHandler<any, SimpleRes, PhoneData> = async (
   }
 };
 
-export const updateStudentData: RequestHandler<
+export const updateFaculty: RequestHandler<
   any,
   SimpleRes,
-  UpdateStudentDataReqBody
+  UpdateFacultyReqBody
 > = async (req, res, next) => {
-  const { error } = validateStudentData(req.body);
+  const { error } = valUpdateFacultyReqBody(req.body);
   if (error) return res.status(400).send({ msg: error.details[0].message });
 
   try {
-    const { department, faculty, level } = req.body;
     const userId = req["user"].id;
-
-    const user = await UserModel.findById(userId).select("_id");
+    const user = await UserModel.findById(userId);
     if (!user) return res.status(404).send({ msg: "User not found" });
+
+    const { facultyId } = req.body;
+
+    const faculty = await FacultyModel.findById(facultyId);
+    if (!faculty) return res.status(404).send({ msg: "Faculty not found" });
 
     await UserModel.updateOne(
       { _id: userId },
-      { $set: { studentData: { department, faculty, level } } }
+      { "studentData.faculty": { id: facultyId, name: faculty.name } }
     );
 
-    res.send({ msg: "Student data updated successfully" });
+    res.send({ msg: "Faculty updated successfully" });
   } catch (e) {
-    next(new Error("Error in updating student data: " + e));
+    next(new Error("Error in updating faculty: " + e));
+  }
+};
+
+export const updateDepartment: RequestHandler<
+  any,
+  SimpleRes,
+  UpdateDepReqBody
+> = async (req, res, next) => {
+  const { error } = valUpdateDepReqBody(req.body);
+  if (error) return res.status(400).send({ msg: error.details[0].message });
+
+  try {
+    const userId = req["user"].id;
+    const user = await UserModel.findById(userId);
+    if (!user) return res.status(404).send({ msg: "User not found" });
+
+    const { departmentId } = req.body;
+
+    const dep = await DepModel.findById(departmentId);
+    if (!dep) return res.status(404).send({ msg: "Department not found" });
+
+    await UserModel.updateOne(
+      { _id: userId },
+      { "studentData.department": { id: departmentId, name: dep.name } }
+    );
+
+    res.send({ msg: "Department updated successfully" });
+  } catch (e) {
+    next(new Error("Error in updating department: " + e));
   }
 };
 
