@@ -9,6 +9,7 @@ import UserModel, {
   valUpdateFacultyReqBody,
   valUpdateDepReqBody,
   validatePaymentDetailsData,
+  valUpdateLevelReqBody,
 } from "../models/user";
 import TransactionModel from "../models/transaction";
 import NotificationModel from "../models/notification";
@@ -20,6 +21,7 @@ import {
   PhoneData,
   UpdateFacultyReqBody,
   UpdateDepReqBody,
+  UpdateLevelReqBody,
   UpdateMessagingTokenReqBody,
   PaymentDetails,
   VerifyUsernameReqBody,
@@ -374,6 +376,27 @@ export const updateDepartment: RequestHandler<
     next(new Error("Error in updating department: " + e));
   }
 };
+
+export const updateLevel: RequestHandler<any, SimpleRes, UpdateLevelReqBody> =
+  async (req, res, next) => {
+    try {
+      const { error } = valUpdateLevelReqBody(req.body);
+      if (error) return res.status(400).send({ msg: error.details[0].message });
+
+      const userId = req["user"].id;
+      const user = await UserModel.findById(userId);
+      if (!user) return res.status(404).send({ msg: "User not found" });
+
+      await UserModel.updateOne(
+        { _id: userId },
+        { "studentData.level": req.body.level }
+      );
+
+      res.send({ msg: "Level updated successfully" });
+    } catch (e) {
+      next(new Error("Error in updating level"));
+    }
+  };
 
 export const updatePaymentDetails: RequestHandler<
   any,

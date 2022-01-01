@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRubyBalance = exports.verifyUsername = exports.updateMessagingToken = exports.updatePaymentDetails = exports.updateDepartment = exports.updateFaculty = exports.updatePhone = exports.updateAbout = exports.getProfileImage = exports.updateProfileImage = exports.getCoverImage = exports.updateCoverImage = exports.getUser = exports.addUser = void 0;
+exports.getRubyBalance = exports.verifyUsername = exports.updateMessagingToken = exports.updatePaymentDetails = exports.updateLevel = exports.updateDepartment = exports.updateFaculty = exports.updatePhone = exports.updateAbout = exports.getProfileImage = exports.updateProfileImage = exports.getCoverImage = exports.updateCoverImage = exports.getUser = exports.addUser = void 0;
 const config_1 = __importDefault(require("config"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_1 = __importStar(require("../models/user"));
@@ -277,6 +277,23 @@ const updateDepartment = async (req, res, next) => {
     }
 };
 exports.updateDepartment = updateDepartment;
+const updateLevel = async (req, res, next) => {
+    try {
+        const { error } = (0, user_1.valUpdateLevelReqBody)(req.body);
+        if (error)
+            return res.status(400).send({ msg: error.details[0].message });
+        const userId = req["user"].id;
+        const user = await user_1.default.findById(userId);
+        if (!user)
+            return res.status(404).send({ msg: "User not found" });
+        await user_1.default.updateOne({ _id: userId }, { "studentData.level": req.body.level });
+        res.send({ msg: "Level updated successfully" });
+    }
+    catch (e) {
+        next(new Error("Error in updating level"));
+    }
+};
+exports.updateLevel = updateLevel;
 const updatePaymentDetails = async (req, res, next) => {
     const { error } = (0, user_1.validatePaymentDetailsData)(req.body);
     if (error)

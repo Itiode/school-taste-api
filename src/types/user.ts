@@ -103,6 +103,10 @@ export interface UpdateDepReqBody {
   departmentId: string;
 }
 
+export interface UpdateLevelReqBody {
+  level: string;
+}
+
 export interface PaymentDetails {
   bankName: string;
   bankSortCode: string;

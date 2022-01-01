@@ -45,6 +45,7 @@ router.put("/about/me", auth_1.default, uC.updateAbout);
 router.put("/phone/me", auth_1.default, uC.updatePhone);
 router.put("/faculty/me", auth_1.default, uC.updateFaculty);
 router.put("/department/me", auth_1.default, uC.updateDepartment);
+router.put("/level/me", auth_1.default, uC.updateLevel);
 router.put("/messaging-token/me", auth_1.default, uC.updateMessagingToken);
 router.put("/payment-details/me", auth_1.default, uC.updatePaymentDetails);
 exports.default = router;

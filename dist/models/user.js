@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validatePaymentDetailsData = exports.valUpdateDepReqBody = exports.valUpdateFacultyReqBody = exports.validatePhoneData = exports.validateAboutData = exports.validateAuthData = exports.valAddUserReqBody = void 0;
+exports.validatePaymentDetailsData = exports.valUpdateLevelReqBody = exports.valUpdateDepReqBody = exports.valUpdateFacultyReqBody = exports.validatePhoneData = exports.validateAboutData = exports.validateAuthData = exports.valAddUserReqBody = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const config_1 = __importDefault(require("config"));
 const Jwt = __importStar(require("jsonwebtoken"));
@@ -170,11 +170,12 @@ function valUpdateDepReqBody(data) {
     }).validate(data);
 }
 exports.valUpdateDepReqBody = valUpdateDepReqBody;
-// export function valUpdateLevelReqBody(data: ) {
-//   return Joi.object({
-//     level: Joi.string().trim().max(15).required(),
-//   }).validate(data);
-// }
+function valUpdateLevelReqBody(data) {
+    return joi_1.default.object({
+        level: joi_1.default.string().trim().max(15).required(),
+    }).validate(data);
+}
+exports.valUpdateLevelReqBody = valUpdateLevelReqBody;
 function validatePaymentDetailsData(data) {
     const schema = joi_1.default.object({
         bankName: joi_1.default.string().trim().max(500).required(),

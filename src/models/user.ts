@@ -9,6 +9,7 @@ import {
   AuthReqBody,
   UpdateFacultyReqBody,
   UpdateDepReqBody,
+  UpdateLevelReqBody,
   PaymentDetails,
 } from "../types/user";
 import { AboutData, PhoneData } from "./../types/user";
@@ -167,11 +168,11 @@ export function valUpdateDepReqBody(data: UpdateDepReqBody) {
   }).validate(data);
 }
 
-// export function valUpdateLevelReqBody(data: ) {
-//   return Joi.object({
-//     level: Joi.string().trim().max(15).required(),
-//   }).validate(data);
-// }
+export function valUpdateLevelReqBody(data: UpdateLevelReqBody) {
+  return Joi.object({
+    level: Joi.string().trim().max(15).required(),
+  }).validate(data);
+}
 
 export function validatePaymentDetailsData(data: PaymentDetails) {
   const schema = Joi.object({

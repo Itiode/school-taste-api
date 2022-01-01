@@ -35,6 +35,7 @@ router.put("/about/me", auth, uC.updateAbout);
 router.put("/phone/me", auth, uC.updatePhone);
 router.put("/faculty/me", auth, uC.updateFaculty);
 router.put("/department/me", auth, uC.updateDepartment);
+router.put("/level/me", auth, uC.updateLevel);
 router.put("/messaging-token/me", auth, uC.updateMessagingToken);
 router.put("/payment-details/me", auth, uC.updatePaymentDetails);
 
