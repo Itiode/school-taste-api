@@ -11,7 +11,7 @@ const router = Router();
 
 router.post("/", auth, upload.array("post-images", 10), pController.createPost);
 router.get("/me/:userId", auth, pController.getMyPosts);
-router.get("/:userId", auth, pController.getPost);
+router.get("/:postId", auth, pController.getPost);
 router.get("/", auth, pController.getAllPosts);
 router.put("/react/:postId", auth, pController.reactToPost);
 router.put("/view/:postId", auth, pController.viewPost);
