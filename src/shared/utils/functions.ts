@@ -1,7 +1,7 @@
 import moment from 'moment';
 
 export function formatDate(date: string) {
-    return moment(date).startOf('hour').fromNow(); 
+    return moment(date).fromNow(); 
 }
 
 export function getNotificationPayload(payload: string) {

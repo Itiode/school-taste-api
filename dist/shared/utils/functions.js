@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isADayOld = exports.getNotificationPayload = exports.formatDate = void 0;
 const moment_1 = __importDefault(require("moment"));
 function formatDate(date) {
-    return (0, moment_1.default)(date).startOf('hour').fromNow();
+    return (0, moment_1.default)(date).fromNow();
 }
 exports.formatDate = formatDate;
 function getNotificationPayload(payload) {
