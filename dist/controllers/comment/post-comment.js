@@ -154,24 +154,46 @@ const getPostComments = async (req, res, next) => {
         const userId = req["user"].id;
         const pageNumber = +req.query.pageNumber;
         const pageSize = +req.query.pageSize;
-        const comments = await post_comment_1.default.find({ postId: req.params.postId })
+        const comments = await post_comment_1.default.find({
+            postId: req.params.postId,
+        })
             // .skip((pageNumber - 1) * pageSize)
             // .limit(pageSize)
             .select("-__v")
             .sort({ _id: -1 });
-        const transformedComments = comments.map((c) => {
+        const transformedComments = [];
+        const tempUsers = [];
+        for (const c of comments) {
+            let tempUser;
+            const isFetched = tempUsers.find((tU) => tU.id === c.creator.id);
+            if (!isFetched) {
+                const creator = await user_1.default.findById(c.creator.id).select("name profileImage");
+                tempUser = {
+                    id: creator._id,
+                    fullName: `${creator.name.first} ${creator.name.last}`,
+                    userImage: creator.profileImage,
+                };
+                tempUsers.push(tempUser);
+            }
+            else {
+                tempUser = tempUsers.find((tU) => tU.id === c.creator.id);
+            }
             const reaction = c.reactions.find((r) => r.userId.toHexString() === userId);
-            return {
+            transformedComments.push({
                 id: c._id,
                 text: c.text,
-                creator: c.creator,
+                creator: {
+                    id: tempUser.id,
+                    name: tempUser.fullName,
+                    imageUrl: tempUser.userImage.original.url,
+                },
                 postId: c.postId,
                 date: c.date,
                 formattedDate: (0, functions_1.formatDate)(c.date.toString()),
                 reactionCount: c.reactionCount ? c.reactionCount : 0,
                 reaction: reaction ? reaction : { type: "", userId: "" },
-            };
-        });
+            });
+        }
         res.send({
             msg: "Post comments gotten successfully",
             commentCount: transformedComments.length,

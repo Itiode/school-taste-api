@@ -36,7 +36,7 @@ const schema = new mongoose_1.Schema({
     },
     postId: { type: mongoose_1.Schema.Types.ObjectId, required: true },
     creator: {
-        id: { type: mongoose_1.Schema.Types.ObjectId, required: true, ref: 'User' },
+        id: { type: mongoose_1.Schema.Types.ObjectId, required: true, ref: "User" },
         name: {
             type: String,
             trim: true,
@@ -49,13 +49,13 @@ const schema = new mongoose_1.Schema({
     reactions: [reaction_1.default],
     reactionCount: Number,
 });
-exports.default = mongoose_1.default.model('Post-Comment', schema);
+exports.default = mongoose_1.default.model("Post-Comment", schema);
 function validateAddPostCommentData(data) {
     return joi_1.default.object({
         text: joi_1.default.string().trim().min(1).max(1000).required(),
         postId: joi_1.default.string()
             .trim()
-            .regex(new RegExp('^[0-9a-fA-F]{24}$'))
+            .regex(new RegExp("^[0-9a-fA-F]{24}$"))
             .required(),
     }).validate(data);
 }
@@ -64,7 +64,7 @@ function validateReactToPostCommentParams(data) {
     return joi_1.default.object({
         commentId: joi_1.default.string()
             .trim()
-            .regex(new RegExp('^[0-9a-fA-F]{24}$'))
+            .regex(new RegExp("^[0-9a-fA-F]{24}$"))
             .required(),
     }).validate(data);
 }

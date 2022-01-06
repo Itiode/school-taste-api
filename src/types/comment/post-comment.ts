@@ -1,41 +1,35 @@
-import { Reaction } from "../shared";
+import { Reaction, Creator } from "../shared";
 
 export interface PostComment {
   _id: string;
   text: string;
   postId: string;
-  creator: {
-    id: string;
-    name: string;
-  };
+  creator: Creator;
   date: Date;
   reactions: Reaction[];
   reactionCount: number;
   reaction: Reaction;
 }
 
-export interface PostCommentRes {
+export interface PostCommentData {
   id: string;
   text: string;
   postId: string;
-  creator: {
-    id: string;
-    name: string;
-  };
+  creator: Creator;
   date: Date;
   formattedDate: string;
   reactionCount: number;
   reaction: Reaction;
 }
 
-export interface AddPostCommentData {
+export interface AddPostCommentReqBody {
   text: string;
   postId: string;
 }
 
-export interface AddPostCommentRes {
+export interface AddPostCommentResBody {
   msg: string;
-  data?: PostCommentRes;
+  data?: PostCommentData;
 }
 
 export interface ReactToPostCommentParams {
@@ -47,13 +41,13 @@ export interface GetPostCommentsQuery {
   pageSize: string;
 }
 
-export interface GetPostCommentsRes {
+export interface GetPostCommentsResBody {
   msg: string;
   commentCount: number;
-  data: PostCommentRes[];
+  data: PostCommentData[];
 }
 
-export interface GetPostCommentCountRes {
+export interface GetPostCommentCountResBody {
   msg: string;
   count?: number;
 }

@@ -2,12 +2,12 @@ import { RequestHandler } from "express";
 
 import {
   PostComment,
-  AddPostCommentData,
-  AddPostCommentRes,
+  AddPostCommentReqBody,
+  AddPostCommentResBody,
   ReactToPostCommentParams,
   GetPostCommentsQuery,
-  GetPostCommentsRes,
-  PostCommentRes,
+  GetPostCommentsResBody,
+  PostCommentData,
 } from "../../types/comment/post-comment";
 import PostCommentModel, {
   validateAddPostCommentData,
@@ -26,11 +26,12 @@ import {
   getNotificationPayload,
   formatDate,
 } from "../../shared/utils/functions";
+import { TempUser, User } from "../../types/user";
 
 export const addPostComment: RequestHandler<
   any,
-  AddPostCommentRes,
-  AddPostCommentData
+  AddPostCommentResBody,
+  AddPostCommentReqBody
 > = async (req, res, next) => {
   const { error } = validateAddPostCommentData(req.body);
   if (error) return res.status(400).send({ msg: error.details[0].message });
@@ -58,7 +59,7 @@ export const addPostComment: RequestHandler<
       },
     }).save();
 
-    const transformedC: PostCommentRes = {
+    const transformedC: PostCommentData = {
       id: comment._id,
       text: comment.text,
       creator: comment.creator,
@@ -192,7 +193,7 @@ export const reactToPostComment: RequestHandler<
 
 export const getPostComments: RequestHandler<
   { postId: string },
-  GetPostCommentsRes,
+  GetPostCommentsResBody,
   any,
   GetPostCommentsQuery
 > = async (req, res, next) => {
@@ -201,30 +202,55 @@ export const getPostComments: RequestHandler<
     const pageNumber = +req.query.pageNumber;
     const pageSize = +req.query.pageSize;
 
-    const comments = await PostCommentModel.find({ postId: req.params.postId })
+    const comments: PostComment[] = await PostCommentModel.find({
+      postId: req.params.postId,
+    })
       // .skip((pageNumber - 1) * pageSize)
       // .limit(pageSize)
       .select("-__v")
       .sort({ _id: -1 });
 
-    const transformedComments: PostCommentRes[] = comments.map(
-      (c: PostComment) => {
-        const reaction = c.reactions.find(
-          (r: any) => r.userId.toHexString() === userId
+    const transformedComments: PostCommentData[] = [];
+    const tempUsers: TempUser[] = [];
+
+    for (const c of comments) {
+      let tempUser: TempUser;
+
+      const isFetched = tempUsers.find((tU) => tU.id === c.creator.id);
+      if (!isFetched) {
+        const creator: User = await UserModel.findById(c.creator.id).select(
+          "name profileImage"
         );
 
-        return {
-          id: c._id,
-          text: c.text,
-          creator: c.creator,
-          postId: c.postId,
-          date: c.date,
-          formattedDate: formatDate(c.date.toString()),
-          reactionCount: c.reactionCount ? c.reactionCount : 0,
-          reaction: reaction ? reaction : { type: "", userId: "" },
+        tempUser = {
+          id: creator._id,
+          fullName: `${creator.name.first} ${creator.name.last}`,
+          userImage: creator.profileImage,
         };
+        tempUsers.push(tempUser);
+      } else {
+        tempUser = tempUsers.find((tU) => tU.id === c.creator.id)!;
       }
-    );
+
+      const reaction = c.reactions.find(
+        (r: any) => r.userId.toHexString() === userId
+      );
+
+      transformedComments.push({
+        id: c._id,
+        text: c.text,
+        creator: {
+          id: tempUser.id,
+          name: tempUser.fullName,
+          imageUrl: tempUser.userImage.original.url,
+        },
+        postId: c.postId,
+        date: c.date,
+        formattedDate: formatDate(c.date.toString()),
+        reactionCount: c.reactionCount ? c.reactionCount : 0,
+        reaction: reaction ? reaction : { type: "", userId: "" },
+      });
+    }
 
     res.send({
       msg: "Post comments gotten successfully",
