@@ -1,4 +1,4 @@
-import { StudentData } from "./shared";
+import { Image, StudentData } from "./shared";
 
 export interface User {
   _id: string;
@@ -9,8 +9,8 @@ export interface User {
   gender: string;
   dob: DOB;
   about: string;
-  profileImage: UserImage;
-  coverImage: UserImage;
+  profileImage: Image;
+  coverImage: Image;
   studentData: StudentData;
   password: string;
   interests: string[];
@@ -28,8 +28,8 @@ export interface MofifiedUser {
   email: string;
   phone: string;
   dob: { day: string; month: string; year: string };
-  profileImage: UserImage;
-  coverImage: UserImage;
+  profileImage: Image;
+  coverImage: Image;
   about: string;
   gender: string;
   studentData: StudentData;
@@ -39,7 +39,7 @@ export interface MofifiedUser {
 export interface TempUser {
   id: string;
   fullName: string;
-  userImage: UserImage;
+  userImage: Image;
 }
 
 export interface Name {
@@ -51,11 +51,6 @@ export interface DOB {
   day: string;
   month: string;
   year: string;
-}
-
-export interface UserImage {
-  thumbnail: { url: string; dUrl: string };
-  original: { url: string; dUrl: string };
 }
 
 export interface AddUserReqBody {

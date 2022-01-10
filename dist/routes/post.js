@@ -24,8 +24,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const multer_1 = __importDefault(require("multer"));
-const s3_1 = require("../shared/utils/s3");
-const upload = (0, multer_1.default)({ storage: (0, s3_1.getStorageConfig)("post-images") });
+const s3_1 = __importDefault(require("../shared/utils/s3"));
+const upload = (0, multer_1.default)({ storage: s3_1.default });
 const pController = __importStar(require("../controllers/post"));
 const auth_1 = __importDefault(require("../middleware/auth"));
 const router = (0, express_1.default)();

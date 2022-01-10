@@ -1,8 +1,8 @@
 import { Schema } from "mongoose";
 
-import { UserImage } from "../../types/user";
+import { Image } from "../../types/shared";
 
-export default new Schema<UserImage>(
+export default new Schema<Image>(
   {
     original: {
       url: { type: String, trim: true },

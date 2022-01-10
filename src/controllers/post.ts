@@ -1,5 +1,6 @@
 import config from "config";
 import { RequestHandler } from "express";
+import sizeOf from "image-size";
 import * as firebase from "firebase-admin";
 
 import PostModel, {
@@ -30,103 +31,132 @@ import TransactionModel from "../models/transaction";
 import { txDesc, rubyCredit, maxViewsForRubyCredit } from "../shared/constants";
 import { validateReactionType } from "../shared/utils/validators";
 import { messagingOptions } from "../main/firebase";
-import { getFileFromS3 } from "../shared/utils/s3";
+import {
+  delFileFromFS,
+  getFileFromS3,
+  uploadFileToS3,
+} from "../shared/utils/s3";
 import { getNotificationPayload } from "../shared/utils/functions";
 import { formatDate } from "../shared/utils/functions";
 import { postNotificationType, notificationPhrase } from "../shared/constants";
 import { User } from "../types/user";
 
-export const createPost: RequestHandler<any, SimpleRes, CreatePostReqBody> =
-  async (req, res, next) => {
-    const { error } = valCreatePostReqBody(req.body);
-    if (error) return res.status(400).send({ msg: error.details[0].message });
+export const createPost: RequestHandler<
+  any,
+  SimpleRes,
+  CreatePostReqBody
+> = async (req, res, next) => {
+  const { error } = valCreatePostReqBody(req.body);
+  if (error) return res.status(400).send({ msg: error.details[0].message });
 
-    try {
-      const userId = req["user"].id;
+  try {
+    const userId = req["user"].id;
 
-      const user: User = await UserModel.findById(userId).select(
-        "name studentData"
-      );
-      if (!user)
-        return res
-          .status(404)
-          .send({ msg: "Can't create post, user not found" });
+    const user: User = await UserModel.findById(userId).select(
+      "name studentData"
+    );
+    if (!user)
+      return res.status(404).send({ msg: "Can't create post, user not found" });
 
-      const { text } = req.body;
+    const { text } = req.body;
 
-      const { name, studentData } = user;
+    const { name, studentData } = user;
 
-      const { school, department, faculty, level } = studentData;
+    const { school, department, faculty, level } = studentData;
 
-      const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department.name} ${faculty.name} ${level}`;
+    const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department.name} ${faculty.name} ${level}`;
 
-      const post = await new PostModel({
-        creator: {
-          id: userId,
-        },
-        text,
-        studentData,
-        tagsString,
-      }).save();
+    const post = await new PostModel({
+      creator: {
+        id: userId,
+      },
+      text,
+      studentData,
+      tagsString,
+    }).save();
 
-      if (req["files"]) {
-        for (let i = 0; i < req["files"].length; i++) {
-          const file = req["files"][i];
-          // Remove the folder name (post-images), leaving just the file name
-          const filename = file.key.split("/")[1];
+    if (req["files"]) {
+      for (let i = 0; i < req["files"].length; i++) {
+        const file = req["files"][i];
 
-          await new SubPostModel({
-            type: "Image",
-            ppid: post._id,
-            url: `${config.get("serverAddress")}api/posts/images/${filename}`,
-            dUrl: file.location,
-          }).save();
-        }
+        const imageSize = sizeOf(file.path);
+
+        const uploadedFile = await uploadFileToS3("post-images", file);
+        await delFileFromFS(file.path);
+
+        // Remove the folder name (post-images), leaving just the file name
+        const filename = uploadedFile["key"].split("/")[1];
+
+        await new SubPostModel({
+          type: "Image",
+          ppid: post._id,
+          item: {
+            original: {
+              url: `${config.get("serverAddress")}api/posts/images/${filename}`,
+              dUrl: uploadedFile["Location"],
+            },
+            thumbnail: {
+              url: "",
+              dUrl: "",
+            },
+          },
+          metadata: {
+            original: {
+              width: imageSize.width,
+              height: imageSize.height,
+            },
+            thumbnail: {
+              width: 0,
+              height: 0,
+            },
+          },
+        }).save();
       }
-
-      // Create notifications and notify departmental mates.
-      const depMates = await UserModel.find({
-        "studentData.department.id": department.id,
-        "studentData.level": level,
-      }).select("_id name messagingToken");
-
-      const notifs: any[] = [];
-
-      for (let depMate of depMates) {
-        if (depMate._id.toHexString() !== userId) {
-          const notif = new NotificationModel({
-            creators: [
-              {
-                id: userId,
-                name: `${name.first} ${name.last}`,
-              },
-            ],
-            subscriber: { id: depMate._id },
-            type: postNotificationType.createdPostNotification,
-            phrase: notificationPhrase.created,
-            contentId: post._id,
-            payload: getNotificationPayload(post.text),
-          });
-
-          notifs.push(notif);
-
-          const fcmPayload = {
-            data: { msg: "PostCreated", status: "0", picture: "" },
-          };
-
-          // firebase
-          //   .messaging()
-          //   .sendToDevice(user.messagingToken, fcmPayload, messagingOptions);
-        }
-      }
-
-      await NotificationModel.insertMany(notifs);
-
-      res.status(201).send({ msg: "Post created successfully" });
-    } catch (e) {
-      next(new Error("Error in creating post: " + e));
     }
-  };
+
+    // Create notifications and notify departmental mates.
+    const depMates = await UserModel.find({
+      "studentData.department.id": department.id,
+      "studentData.level": level,
+    }).select("_id name messagingToken");
+
+    const notifs: any[] = [];
+
+    for (let depMate of depMates) {
+      if (depMate._id.toHexString() !== userId) {
+        const notif = new NotificationModel({
+          creators: [
+            {
+              id: userId,
+              name: `${name.first} ${name.last}`,
+            },
+          ],
+          subscriber: { id: depMate._id },
+          type: postNotificationType.createdPostNotification,
+          phrase: notificationPhrase.created,
+          contentId: post._id,
+          payload: getNotificationPayload(post.text),
+        });
+
+        notifs.push(notif);
+
+        const fcmPayload = {
+          data: { msg: "PostCreated", status: "0", picture: "" },
+        };
+
+        // firebase
+        //   .messaging()
+        //   .sendToDevice(user.messagingToken, fcmPayload, messagingOptions);
+      }
+    }
+
+    await NotificationModel.insertMany(notifs);
+
+    res.status(201).send({ msg: "Post created successfully" });
+  } catch (e) {
+    next(new Error("Error in creating post: " + e));
+  }
+};
 
 // TODO: Create a reusable function for creating a mod post and sub posts
 export const getPost: RequestHandler<GetPostParams, GetPostResBody> = async (
@@ -147,21 +177,22 @@ export const getPost: RequestHandler<GetPostParams, GetPostResBody> = async (
 
     const userId = req["user"].id;
 
-    const modifiedSubPosts: ModifiedSubPost[] = [];
+    const modSubPosts: ModifiedSubPost[] = [];
     for (const sP of subPosts) {
       const sPReaction = sP.reactions.find(
         (r: any) => r.userId.toHexString() === userId
       );
 
-      modifiedSubPosts.push({
+      modSubPosts.push({
         id: sP._id,
         type: sP.type,
-        url: sP.url,
+        item: sP.item,
         ppid: sP.ppid,
         reaction: sPReaction ? sPReaction : { type: "", userId: "" },
         reactionCount: sP.reactionCount ? sP.reactionCount : 0,
         commentCount: sP.commentCount,
         viewCount: sP.viewCount,
+        metadata: sP.metadata,
       });
     }
 
@@ -181,7 +212,7 @@ export const getPost: RequestHandler<GetPostParams, GetPostResBody> = async (
         imageUrl: creator.profileImage.original.url,
       },
       text: post.text,
-      subPosts: modifiedSubPosts,
+      subPosts: modSubPosts,
       studentData: post.studentData,
       date: post.date,
       formattedDate: formatDate(post.date.toString()),

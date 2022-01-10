@@ -95,12 +95,13 @@ async function getPosts(userId, posts, res) {
             modifiedSubPosts.push({
                 id: sP._id,
                 type: sP.type,
-                url: sP.url,
+                item: sP.item,
                 ppid: sP.ppid,
                 reaction: sPReaction ? sPReaction : { type: "", userId: "" },
                 reactionCount: sP.reactionCount ? sP.reactionCount : 0,
                 commentCount: sP.commentCount,
                 viewCount: sP.viewCount,
+                metadata: sP.metadata,
             });
         }
         const postReaction = p.reactions.find((r) => r.userId.toHexString() === userId);

@@ -16,7 +16,7 @@ import { AboutData, PhoneData } from "./../types/user";
 import nameSchema from "./schemas/name";
 import dobSchema from "./schemas/dob";
 import studentDataSchema from "./schemas/student-data";
-import userImageSchema from "./schemas/user-image";
+import imageSchema from "./schemas/image";
 import paymentDetailsSchema from "./schemas/payment-details";
 
 const schema = new Schema<User>(
@@ -48,8 +48,8 @@ const schema = new Schema<User>(
     },
     gender: { type: String, enum: ["Male", "Female", "Other"], required: true },
     dob: dobSchema,
-    profileImage: { type: userImageSchema, required: true },
-    coverImage: { type: userImageSchema, required: true },
+    profileImage: { type: imageSchema, required: true },
+    coverImage: { type: imageSchema, required: true },
     about: { type: String, trim: true, minLength: 1, maxLength: 200 },
     studentData: { type: studentDataSchema, required: true },
     password: { type: String, trim: true, required: true },

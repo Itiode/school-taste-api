@@ -33,6 +33,16 @@ app.use("/api/notifications", notification_1.default);
 app.use("/api/schools", school_1.default);
 app.use("/api/faculties", faculty_1.default);
 app.use("/api/departments", department_1.default);
+// {
+//   "port": "3200",
+//   "dbUrl": "mongodb://localhost:27017/school-taste",
+//   "serverAddress": "http://192.168.43.120:3200/",
+//   "jwtAuthPrivateKey": "unsecureJwtAuthPrivateKey",
+//   "awsBucketName": "school-taste-bucket",
+//   "awsBucketRegion": "us-east-1",
+//   "awsBucketAccessKeyId": "ACCESS_ID",
+//   "awsBucketSecretAccessKey": "SECRET_ACCESS_KEY"
+// }
 app.use(auth_1.default);
 (0, db_1.default)((db, err) => {
     if (!err) {

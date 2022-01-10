@@ -1,8 +1,10 @@
 import mongoose, { Schema } from "mongoose";
-import Joi from 'joi';
+import Joi from "joi";
 
-import SubPost, {ReactToSubPostParams} from "../types/sub-post";
+import SubPost, { ReactToSubPostParams } from "../types/sub-post";
 import ReactionSchema from "../models/schemas/reaction";
+import imageSchema from "./schemas/image";
+import metadataSchema from "./schemas/metadata";
 
 const schema = new Schema<SubPost>({
   type: {
@@ -12,13 +14,13 @@ const schema = new Schema<SubPost>({
     required: true,
   },
   ppid: { type: Schema.Types.ObjectId, required: true },
-  url: { type: String, required: true },
-  dUrl: { type: String, required: true },
+  item: { type: imageSchema, required: true },
   reactions: [ReactionSchema],
   reactionCount: Number,
   views: [String],
   viewCount: Number,
   commentCount: Number,
+  metadata: { type: metadataSchema, required: true },
 });
 
 export default mongoose.model("Sub-Post", schema);

@@ -9,7 +9,7 @@ import {
   ViewPostParams,
   ModifiedPost,
 } from "../types/post";
-import { ModifiedSubPost } from "../types/sub-post";
+import SubPost, { ModifiedSubPost } from "../types/sub-post";
 import SubPostModel from "../models/sub-post";
 import { formatDate } from "../shared/utils/functions";
 import UserModel from "../models/user";
@@ -65,7 +65,7 @@ export async function getPosts(userId: string, posts: any[], res: Response) {
   const tempUsers: TempUser[] = [];
 
   for (const p of posts) {
-    const subPosts = await SubPostModel.find({ ppid: p._id }).select(
+    const subPosts: SubPost[] = await SubPostModel.find({ ppid: p._id }).select(
       "-__v -views -dUrl"
     );
 
@@ -96,12 +96,13 @@ export async function getPosts(userId: string, posts: any[], res: Response) {
       modifiedSubPosts.push({
         id: sP._id,
         type: sP.type,
-        url: sP.url,
+        item: sP.item,
         ppid: sP.ppid,
         reaction: sPReaction ? sPReaction : { type: "", userId: "" },
         reactionCount: sP.reactionCount ? sP.reactionCount : 0,
         commentCount: sP.commentCount,
         viewCount: sP.viewCount,
+        metadata: sP.metadata,
       });
     }
 

@@ -10,6 +10,16 @@ export interface SimpleRes {
   msg: string;
 }
 
+export interface Image {
+  thumbnail: { url: string; dUrl: string };
+  original: { url: string; dUrl: string };
+}
+
+export interface Metadata {
+  original: { width: number; height: number };
+  thumbnail: { width: number; height: number };
+}
+
 export interface StudentData {
   school: SchoolData;
   department: DepartmentData;

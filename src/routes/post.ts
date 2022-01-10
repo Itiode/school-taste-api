@@ -1,8 +1,8 @@
 import Router from "express";
 import multer from "multer";
 
-import { getStorageConfig } from "../shared/utils/s3";
-const upload = multer({ storage: getStorageConfig("post-images") });
+import storageConfig from "../shared/utils/s3";
+const upload = multer({ storage: storageConfig });
 
 import * as pController from "../controllers/post";
 import auth from "../middleware/auth";

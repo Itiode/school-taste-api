@@ -1,11 +1,9 @@
 import Router from "express";
 import multer from "multer";
 
-import { getStorageConfig } from "../shared/utils/s3";
-const profileImgUpload = multer({
-  storage: getStorageConfig("profile-images"),
-});
-const coverImgUpload = multer({ storage: getStorageConfig("cover-images") });
+import storageConfig from "../shared/utils/s3";
+const profileImgUpload = multer({ storage: storageConfig });
+const coverImgUpload = multer({ storage: storageConfig });
 
 import * as uC from "../controllers/user";
 import auth from "../middleware/auth";

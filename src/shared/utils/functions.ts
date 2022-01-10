@@ -1,7 +1,7 @@
-import moment from 'moment';
+import moment from "moment";
 
 export function formatDate(date: string) {
-    return moment(date).fromNow(); 
+  return moment(date).fromNow();
 }
 
 export function getNotificationPayload(payload: string) {
@@ -10,5 +10,4 @@ export function getNotificationPayload(payload: string) {
 
 export function isADayOld(date: string) {
   const currentDate = new Date();
-  
 }

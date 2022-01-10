@@ -30,7 +30,7 @@ const joi_1 = __importDefault(require("joi"));
 const name_1 = __importDefault(require("./schemas/name"));
 const dob_1 = __importDefault(require("./schemas/dob"));
 const student_data_1 = __importDefault(require("./schemas/student-data"));
-const user_image_1 = __importDefault(require("./schemas/user-image"));
+const image_1 = __importDefault(require("./schemas/image"));
 const payment_details_1 = __importDefault(require("./schemas/payment-details"));
 const schema = new mongoose_1.Schema({
     name: name_1.default,
@@ -60,8 +60,8 @@ const schema = new mongoose_1.Schema({
     },
     gender: { type: String, enum: ["Male", "Female", "Other"], required: true },
     dob: dob_1.default,
-    profileImage: { type: user_image_1.default, required: true },
-    coverImage: { type: user_image_1.default, required: true },
+    profileImage: { type: image_1.default, required: true },
+    coverImage: { type: image_1.default, required: true },
     about: { type: String, trim: true, minLength: 1, maxLength: 200 },
     studentData: { type: student_data_1.default, required: true },
     password: { type: String, trim: true, required: true },

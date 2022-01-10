@@ -24,6 +24,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.viewPost = exports.reactToPost = exports.getPostImage = exports.getMyPosts = exports.getAllPosts = exports.getPost = exports.createPost = void 0;
 const config_1 = __importDefault(require("config"));
+const image_size_1 = __importDefault(require("image-size"));
 const post_1 = __importStar(require("../models/post"));
 const notification_1 = __importDefault(require("../models/notification"));
 const sub_post_1 = __importDefault(require("../models/sub-post"));
@@ -43,9 +44,7 @@ const createPost = async (req, res, next) => {
         const userId = req["user"].id;
         const user = await user_1.default.findById(userId).select("name studentData");
         if (!user)
-            return res
-                .status(404)
-                .send({ msg: "Can't create post, user not found" });
+            return res.status(404).send({ msg: "Can't create post, user not found" });
         const { text } = req.body;
         const { name, studentData } = user;
         const { school, department, faculty, level } = studentData;
@@ -61,13 +60,34 @@ const createPost = async (req, res, next) => {
         if (req["files"]) {
             for (let i = 0; i < req["files"].length; i++) {
                 const file = req["files"][i];
+                const imageSize = (0, image_size_1.default)(file.path);
+                const uploadedFile = await (0, s3_1.uploadFileToS3)("post-images", file);
+                await (0, s3_1.delFileFromFS)(file.path);
                 // Remove the folder name (post-images), leaving just the file name
-                const filename = file.key.split("/")[1];
+                const filename = uploadedFile["key"].split("/")[1];
                 await new sub_post_1.default({
                     type: "Image",
                     ppid: post._id,
-                    url: `${config_1.default.get("serverAddress")}api/posts/images/${filename}`,
-                    dUrl: file.location,
+                    item: {
+                        original: {
+                            url: `${config_1.default.get("serverAddress")}api/posts/images/${filename}`,
+                            dUrl: uploadedFile["Location"],
+                        },
+                        thumbnail: {
+                            url: "",
+                            dUrl: "",
+                        },
+                    },
+                    metadata: {
+                        original: {
+                            width: imageSize.width,
+                            height: imageSize.height,
+                        },
+                        thumbnail: {
+                            width: 0,
+                            height: 0,
+                        },
+                    },
                 }).save();
             }
         }
@@ -119,18 +139,19 @@ const getPost = async (req, res, next) => {
             ppid: post._id,
         }).select("-__v -views -dUrl");
         const userId = req["user"].id;
-        const modifiedSubPosts = [];
+        const modSubPosts = [];
         for (const sP of subPosts) {
             const sPReaction = sP.reactions.find((r) => r.userId.toHexString() === userId);
-            modifiedSubPosts.push({
+            modSubPosts.push({
                 id: sP._id,
                 type: sP.type,
-                url: sP.url,
+                item: sP.item,
                 ppid: sP.ppid,
                 reaction: sPReaction ? sPReaction : { type: "", userId: "" },
                 reactionCount: sP.reactionCount ? sP.reactionCount : 0,
                 commentCount: sP.commentCount,
                 viewCount: sP.viewCount,
+                metadata: sP.metadata,
             });
         }
         const postReaction = post.reactions.find((r) => r.userId.toHexString() === userId);
@@ -143,7 +164,7 @@ const getPost = async (req, res, next) => {
                 imageUrl: creator.profileImage.original.url,
             },
             text: post.text,
-            subPosts: modifiedSubPosts,
+            subPosts: modSubPosts,
             studentData: post.studentData,
             date: post.date,
             formattedDate: (0, functions_2.formatDate)(post.date.toString()),

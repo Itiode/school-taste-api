@@ -1,47 +1,29 @@
-import { Reaction } from "./shared";
+import { Reaction, Image, Metadata } from "./shared";
 
 export default interface SubPost {
   _id: string;
   type: string;
   ppid: string;
-  url: string;
-  dUrl: string;
+  item: Image;
   reactions: Reaction[];
   reactionCount: number;
   reaction: Reaction;
   views: string[];
   commentCount: number;
   viewCount: number;
+  metadata: Metadata;
 }
-
-// export default interface SubPost {
-//   _id: string;
-//   type: string;
-//   ppid: string;
-//   url: { original: string; thumbnail: string };
-//   dUrl: { original: string; thumbnail: string };
-//   reactions: Reaction[];
-//   reactionCount: number;
-//   reaction: Reaction;
-//   views: string[];
-//   commentCount: number;
-//   viewCount: number;
-//   metadata: {
-//     width: number;
-//     height: number;
-//   };
-// }
 
 export interface ModifiedSubPost {
   id: string;
   type: string;
-  url: string;
-  dUrl?: string;
+  item: Image;
   ppid: string;
   reaction: Reaction;
   reactionCount: number;
   commentCount: number;
   viewCount: number;
+  metadata: Metadata;
 }
 
 export interface ReactToSubPostData {
