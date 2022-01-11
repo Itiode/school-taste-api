@@ -264,12 +264,12 @@ const getCourseMates = async (req, res, next) => {
             transformedCMs.push(tCM);
         }
         res.send({
-            msg: "Course mates fetched successfully",
+            msg: "Coursemates fetched successfully",
             data: transformedCMs,
         });
     }
     catch (e) {
-        next(new Error("Error in getting course mates: " + e));
+        next(new Error("Error in getting coursemates: " + e));
     }
 };
 exports.getCourseMates = getCourseMates;
