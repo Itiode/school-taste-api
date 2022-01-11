@@ -16,8 +16,9 @@ export interface Image {
 }
 
 export interface Metadata {
-  original: { width: number; height: number };
-  thumbnail: { width: number; height: number };
+  width: number;
+  height: number;
+  size?: number;
 }
 
 export interface StudentData {
@@ -25,6 +26,12 @@ export interface StudentData {
   department: DepartmentData;
   faculty: FacultyData;
   level: string;
+}
+
+export interface CourseMate {
+  id: string;
+  name: string;
+  profileImageUrl: string;
 }
 
 export interface Creator {

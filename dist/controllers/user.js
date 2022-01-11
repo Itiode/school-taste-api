@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRubyBalance = exports.verifyUsername = exports.updateMessagingToken = exports.updatePaymentDetails = exports.updateLevel = exports.updateDepartment = exports.updateFaculty = exports.updatePhone = exports.updateAbout = exports.getProfileImage = exports.updateProfileImage = exports.getCoverImage = exports.updateCoverImage = exports.getUser = exports.addUser = void 0;
+exports.getRubyBalance = exports.verifyUsername = exports.updateMessagingToken = exports.updatePaymentDetails = exports.updateLevel = exports.updateDepartment = exports.updateFaculty = exports.getCourseMates = exports.updatePhone = exports.updateAbout = exports.getProfileImage = exports.updateProfileImage = exports.getCoverImage = exports.updateCoverImage = exports.getUser = exports.addUser = void 0;
 const config_1 = __importDefault(require("config"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_1 = __importStar(require("../models/user"));
@@ -142,8 +142,11 @@ exports.getUser = getUser;
 const updateCoverImage = async (req, res, next) => {
     try {
         const userId = req["user"].id;
+        const file = req["file"];
+        const uploadedFile = await (0, s3_1.uploadFileToS3)("cover-images", file);
+        await (0, s3_1.delFileFromFS)(file.path);
         // Remove the folder name (cover-images), leaving just the file name
-        const filename = req["file"]["key"].split("/")[1];
+        const filename = uploadedFile["key"].split("/")[1];
         const coverImage = {
             original: {
                 url: `${config_1.default.get("serverAddress")}api/users/cover-images/${filename}`,
@@ -176,8 +179,11 @@ exports.getCoverImage = getCoverImage;
 const updateProfileImage = async (req, res, next) => {
     try {
         const userId = req["user"].id;
+        const file = req["file"];
+        const uploadedFile = await (0, s3_1.uploadFileToS3)("profile-images", file);
+        await (0, s3_1.delFileFromFS)(file.path);
         // Remove the folder name (profile-images), leaving just the file name
-        const filename = req["file"]["key"].split("/")[1];
+        const filename = uploadedFile["key"].split("/")[1];
         const profileImage = {
             original: {
                 url: `${config_1.default.get("serverAddress")}api/users/profile-images/${filename}`,
@@ -235,6 +241,38 @@ const updatePhone = async (req, res, next) => {
     }
 };
 exports.updatePhone = updatePhone;
+const getCourseMates = async (req, res, next) => {
+    try {
+        const userId = req["user"].id;
+        const user = await user_1.default.findById(userId).select("studentData");
+        if (!user)
+            res.status(404).send({ msg: "User not found" });
+        const courseMates = await user_1.default.find({
+            $and: [
+                { "studentData.school.id": user.studentData.school.id },
+                { "studentData.department.id": user.studentData.department.id },
+                { "studentData.level": user.studentData.level },
+            ],
+        }).select("name profileImage");
+        const transformedCMs = [];
+        for (let c of courseMates) {
+            const tCM = {
+                id: c._id,
+                name: `${c.name.first} ${c.name.last}`,
+                profileImageUrl: c.profileImage.original.url,
+            };
+            transformedCMs.push(tCM);
+        }
+        res.send({
+            msg: "Course mates fetched successfully",
+            data: transformedCMs,
+        });
+    }
+    catch (e) {
+        next(new Error("Error in getting course mates: " + e));
+    }
+};
+exports.getCourseMates = getCourseMates;
 const updateFaculty = async (req, res, next) => {
     const { error } = (0, user_1.valUpdateFacultyReqBody)(req.body);
     if (error)

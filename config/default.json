@@ -1,10 +1,10 @@
 {
   "port": "3200",
-  "dbUrl": "mongodb+srv://admin-user:BmL8SD2RPp59xcgi88888hahfafn5akfahfr78anfjaifj832828hfiafnafiai@schooltastecluster.sajgg.mongodb.net/school-taste?retryWrites=true&w=majority",
-  "serverAddress": "https://school-taste-nodejs.herokuapp.com/",
+  "dbUrl": "mongodb://localhost:27017/school-taste",
+  "serverAddress": "http://192.168.43.120:3200/",
   "jwtAuthPrivateKey": "unsecureJwtAuthPrivateKey",
   "awsBucketName": "school-taste-bucket",
   "awsBucketRegion": "us-east-1",
-  "awsBucketAccessKeyId": "AKIA4UJ3IBQHS5QWKT4G",
-  "awsBucketSecretAccessKey": "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"
+  "awsBucketAccessKeyId": "ACCESS_ID",
+  "awsBucketSecretAccessKey": "SECRET_ACCESS_KEY"
 }

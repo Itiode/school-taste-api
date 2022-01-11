@@ -14,7 +14,12 @@ const schema = new Schema<SubPost>({
     required: true,
   },
   ppid: { type: Schema.Types.ObjectId, required: true },
-  item: { type: imageSchema, required: true },
+  item: {
+    original: {
+      url: { type: String, required: true },
+      dUrl: { type: String, required: true },
+    },
+  },
   reactions: [ReactionSchema],
   reactionCount: Number,
   views: [String],

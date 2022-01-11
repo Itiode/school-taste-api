@@ -95,20 +95,10 @@ export const createPost: RequestHandler<
               url: `${config.get("serverAddress")}api/posts/images/${filename}`,
               dUrl: uploadedFile["Location"],
             },
-            thumbnail: {
-              url: "",
-              dUrl: "",
-            },
           },
           metadata: {
-            original: {
-              width: imageSize.width,
-              height: imageSize.height,
-            },
-            thumbnail: {
-              width: 0,
-              height: 0,
-            },
+            width: imageSize.width,
+            height: imageSize.height,
           },
         }).save();
       }
@@ -238,16 +228,25 @@ export const getAllPosts: RequestHandler<
   const userId = req["user"].id;
   const pageNumber = +req.query.pageNumber;
   const pageSize = +req.query.pageSize;
-  const { searchQuery } = req.query;
+  const { searchQuery, schoolId } = req.query;
 
   try {
-    const posts = await PostModel.find({
-      $text: { $search: `${searchQuery}` },
-    })
-      // .skip((pageNumber - 1) * pageSize)
-      // .limit(pageSize)
-      .select("-__v -tagsString -tags")
-      .sort({ _id: -1 });
+    let posts: Post[];
+    if (schoolId) {
+      posts = await PostModel.find({ "studentData.school.id": schoolId })
+        // .skip((pageNumber - 1) * pageSize)
+        // .limit(pageSize)
+        .select("-__v -tagsString -tags")
+        .sort({ _id: -1 });
+    } else {
+      posts = await PostModel.find({
+        $text: { $search: `${searchQuery}` },
+      })
+        // .skip((pageNumber - 1) * pageSize)
+        // .limit(pageSize)
+        .select("-__v -tagsString -tags")
+        .sort({ _id: -1 });
+    }
 
     await getPosts(userId, posts, res);
   } catch (e) {

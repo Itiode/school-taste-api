@@ -73,20 +73,10 @@ const createPost = async (req, res, next) => {
                             url: `${config_1.default.get("serverAddress")}api/posts/images/${filename}`,
                             dUrl: uploadedFile["Location"],
                         },
-                        thumbnail: {
-                            url: "",
-                            dUrl: "",
-                        },
                     },
                     metadata: {
-                        original: {
-                            width: imageSize.width,
-                            height: imageSize.height,
-                        },
-                        thumbnail: {
-                            width: 0,
-                            height: 0,
-                        },
+                        width: imageSize.width,
+                        height: imageSize.height,
                     },
                 }).save();
             }
@@ -185,15 +175,25 @@ const getAllPosts = async (req, res, next) => {
     const userId = req["user"].id;
     const pageNumber = +req.query.pageNumber;
     const pageSize = +req.query.pageSize;
-    const { searchQuery } = req.query;
+    const { searchQuery, schoolId } = req.query;
     try {
-        const posts = await post_1.default.find({
-            $text: { $search: `${searchQuery}` },
-        })
-            // .skip((pageNumber - 1) * pageSize)
-            // .limit(pageSize)
-            .select("-__v -tagsString -tags")
-            .sort({ _id: -1 });
+        let posts;
+        if (schoolId) {
+            posts = await post_1.default.find({ "studentData.school.id": schoolId })
+                // .skip((pageNumber - 1) * pageSize)
+                // .limit(pageSize)
+                .select("-__v -tagsString -tags")
+                .sort({ _id: -1 });
+        }
+        else {
+            posts = await post_1.default.find({
+                $text: { $search: `${searchQuery}` },
+            })
+                // .skip((pageNumber - 1) * pageSize)
+                // .limit(pageSize)
+                .select("-__v -tagsString -tags")
+                .sort({ _id: -1 });
+        }
         await (0, post_1.getPosts)(userId, posts, res);
     }
     catch (e) {

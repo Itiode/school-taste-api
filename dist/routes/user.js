@@ -39,6 +39,7 @@ router.put("/cover-image/me", auth_1.default, coverImgUpload.single("cover-image
 router.get("/profile-images/:filename", auth_1.default, uC.getProfileImage);
 router.get("/cover-images/:filename", auth_1.default, uC.getCoverImage);
 router.get("/ruby-balance/me", auth_1.default, uC.getRubyBalance);
+router.get("/course-mates/me", auth_1.default, uC.getCourseMates);
 router.put("/about/me", auth_1.default, uC.updateAbout);
 router.put("/phone/me", auth_1.default, uC.updatePhone);
 router.put("/faculty/me", auth_1.default, uC.updateFaculty);

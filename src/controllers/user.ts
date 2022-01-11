@@ -11,9 +11,9 @@ import UserModel, {
   validatePaymentDetailsData,
   valUpdateLevelReqBody,
 } from "../models/user";
-import TransactionModel from "../models/transaction";
 import NotificationModel from "../models/notification";
 import {
+  User,
   AddUserReqBody,
   AuthResBody,
   GetUserResBody,
@@ -26,12 +26,22 @@ import {
   PaymentDetails,
   VerifyUsernameReqBody,
   GetRubyBalanceResBody,
+  GetCourseMatesResBody,
 } from "../types/user";
 import SchoolModel from "../models/student-data/school";
 import FacultyModel from "../models/student-data/faculty";
 import DepModel from "../models/student-data/department";
-import { SimpleParams, SimpleRes, GetImageParams } from "../types/shared";
-import { getFileFromS3 } from "../shared/utils/s3";
+import {
+  SimpleParams,
+  SimpleRes,
+  GetImageParams,
+  CourseMate,
+} from "../types/shared";
+import {
+  delFileFromFS,
+  getFileFromS3,
+  uploadFileToS3,
+} from "../shared/utils/s3";
 
 export const addUser: RequestHandler<any, AuthResBody, AddUserReqBody> = async (
   req,
@@ -190,9 +200,13 @@ export const updateCoverImage: RequestHandler<any, SimpleRes> = async (
 ) => {
   try {
     const userId = req["user"].id;
+    const file = req["file"];
+
+    const uploadedFile = await uploadFileToS3("cover-images", file);
+    await delFileFromFS(file!.path);
 
     // Remove the folder name (cover-images), leaving just the file name
-    const filename = req["file"]!["key"].split("/")[1];
+    const filename = uploadedFile["key"].split("/")[1];
 
     const coverImage = {
       original: {
@@ -236,9 +250,13 @@ export const updateProfileImage: RequestHandler<any, SimpleRes> = async (
 ) => {
   try {
     const userId = req["user"].id;
+    const file = req["file"];
+
+    const uploadedFile = await uploadFileToS3("profile-images", file);
+    await delFileFromFS(file!.path);
 
     // Remove the folder name (profile-images), leaving just the file name
-    const filename = req["file"]!["key"].split("/")[1];
+    const filename = uploadedFile["key"].split("/")[1];
 
     const profileImage = {
       original: {
@@ -319,6 +337,43 @@ export const updatePhone: RequestHandler<any, SimpleRes, PhoneData> = async (
   }
 };
 
+export const getCourseMates: RequestHandler<
+  any,
+  GetCourseMatesResBody
+> = async (req, res, next) => {
+  try {
+    const userId = req["user"].id;
+    const user: User = await UserModel.findById(userId).select("studentData");
+    if (!user) res.status(404).send({ msg: "User not found" });
+
+    const courseMates = await UserModel.find({
+      $and: [
+        { "studentData.school.id": user.studentData.school.id },
+        { "studentData.department.id": user.studentData.department.id },
+        { "studentData.level": user.studentData.level },
+      ],
+    }).select("name profileImage");
+
+    const transformedCMs: CourseMate[] = [];
+    for (let c of courseMates) {
+      const tCM = {
+        id: c._id,
+        name: `${c.name.first} ${c.name.last}`,
+        profileImageUrl: c.profileImage.original.url,
+      };
+
+      transformedCMs.push(tCM);
+    }
+
+    res.send({
+      msg: "Course mates fetched successfully",
+      data: transformedCMs,
+    });
+  } catch (e) {
+    next(new Error("Error in getting course mates: " + e));
+  }
+};
+
 export const updateFaculty: RequestHandler<
   any,
   SimpleRes,
@@ -377,26 +432,29 @@ export const updateDepartment: RequestHandler<
   }
 };
 
-export const updateLevel: RequestHandler<any, SimpleRes, UpdateLevelReqBody> =
-  async (req, res, next) => {
-    try {
-      const { error } = valUpdateLevelReqBody(req.body);
-      if (error) return res.status(400).send({ msg: error.details[0].message });
+export const updateLevel: RequestHandler<
+  any,
+  SimpleRes,
+  UpdateLevelReqBody
+> = async (req, res, next) => {
+  try {
+    const { error } = valUpdateLevelReqBody(req.body);
+    if (error) return res.status(400).send({ msg: error.details[0].message });
 
-      const userId = req["user"].id;
-      const user = await UserModel.findById(userId);
-      if (!user) return res.status(404).send({ msg: "User not found" });
+    const userId = req["user"].id;
+    const user = await UserModel.findById(userId);
+    if (!user) return res.status(404).send({ msg: "User not found" });
 
-      await UserModel.updateOne(
-        { _id: userId },
-        { "studentData.level": req.body.level }
-      );
+    await UserModel.updateOne(
+      { _id: userId },
+      { "studentData.level": req.body.level }
+    );
 
-      res.send({ msg: "Level updated successfully" });
-    } catch (e) {
-      next(new Error("Error in updating level: " + e));
-    }
-  };
+    res.send({ msg: "Level updated successfully" });
+  } catch (e) {
+    next(new Error("Error in updating level: " + e));
+  }
+};
 
 export const updatePaymentDetails: RequestHandler<
   any,

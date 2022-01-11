@@ -1,10 +1,10 @@
-import { Reaction, Image, Metadata } from "./shared";
+import { Reaction, Metadata } from "./shared";
 
 export default interface SubPost {
   _id: string;
   type: string;
   ppid: string;
-  item: Image;
+  item: { original: { url: string; dUrl: string } };
   reactions: Reaction[];
   reactionCount: number;
   reaction: Reaction;
@@ -17,7 +17,7 @@ export default interface SubPost {
 export interface ModifiedSubPost {
   id: string;
   type: string;
-  item: Image;
+  item: { original: { url: string; dUrl: string } };
   ppid: string;
   reaction: Reaction;
   reactionCount: number;

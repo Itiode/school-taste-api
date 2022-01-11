@@ -47,10 +47,10 @@ export interface GetMyPostsParams {
 }
 
 export interface GetPostsQuery {
-  searchQuery: string;
   pageNumber: string;
   pageSize: string;
-  schoolFullName: string;
+  searchQuery: string;
+  schoolId: string;
 }
 
 export interface GetPostsResBody {

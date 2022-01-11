@@ -1,8 +1,6 @@
 # TODO
 
-- Posts should be fetched using schoolId as a query or search query.
-- search query is then used in the search text, while school ID is used, as
-  for a normal query
+- Fix updating profile image and cover image.
 - Use relational style as much as possible. e.g. include name of user, imageUrl, when
   fetching comments and sub-post comments, not when they're being
   created.
@@ -13,6 +11,7 @@
 - Post audience (School, Faculty or Departmental mates) - PostModel.find(
   'schoolId: post.school.id' and ['audience.school': true or 'audience.faculty': 'true' or 'audience.department': true]
   )
+- Remove unused info, like payment details and rubyBalance from a user.
 
 ## After MVP
 

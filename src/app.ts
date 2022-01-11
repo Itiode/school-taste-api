@@ -35,18 +35,6 @@ app.use("/api/schools", schoolRoutes);
 app.use("/api/faculties", facultyRoutes);
 app.use("/api/departments", departmentRoutes);
 
-// {
-//   "port": "3200",
-//   "dbUrl": "mongodb://localhost:27017/school-taste",
-//   "serverAddress": "http://192.168.43.120:3200/",
-//   "jwtAuthPrivateKey": "unsecureJwtAuthPrivateKey",
-//   "awsBucketName": "school-taste-bucket",
-//   "awsBucketRegion": "us-east-1",
-//   "awsBucketAccessKeyId": "ACCESS_ID",
-//   "awsBucketSecretAccessKey": "SECRET_ACCESS_KEY"
-// }
-
-
 app.use(error);
 
 connectToDB((db: Mongoose | null, err: Error | null) => {

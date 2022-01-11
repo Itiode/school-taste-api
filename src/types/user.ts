@@ -1,4 +1,4 @@
-import { Image, StudentData } from "./shared";
+import { CourseMate, Image, StudentData } from "./shared";
 
 export interface User {
   _id: string;
@@ -117,6 +117,11 @@ export interface UpdateMessagingTokenReqBody {
 
 export interface VerifyUsernameReqBody {
   username: string;
+}
+
+export interface GetCourseMatesResBody {
+  msg: string;
+  data?: CourseMate[];
 }
 
 export interface GetRubyBalanceResBody {
