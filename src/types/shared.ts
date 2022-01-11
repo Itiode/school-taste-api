@@ -30,7 +30,7 @@ export interface StudentData {
 
 export interface CourseMate {
   id: string;
-  name: string;
+  fullName: string;
   profileImageUrl: string;
 }
 

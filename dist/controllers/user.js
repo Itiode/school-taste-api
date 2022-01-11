@@ -258,7 +258,7 @@ const getCourseMates = async (req, res, next) => {
         for (let c of courseMates) {
             const tCM = {
                 id: c._id,
-                name: `${c.name.first} ${c.name.last}`,
+                fullName: `${c.name.first} ${c.name.last}`,
                 profileImageUrl: c.profileImage.original.url,
             };
             transformedCMs.push(tCM);
