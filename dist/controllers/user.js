@@ -150,7 +150,7 @@ const updateCoverImage = async (req, res, next) => {
         const coverImage = {
             original: {
                 url: `${config_1.default.get("serverAddress")}api/users/cover-images/${filename}`,
-                dUrl: req["file"]["location"],
+                dUrl: uploadedFile["Location"],
             },
             thumbnail: {
                 url: "",
@@ -187,7 +187,7 @@ const updateProfileImage = async (req, res, next) => {
         const profileImage = {
             original: {
                 url: `${config_1.default.get("serverAddress")}api/users/profile-images/${filename}`,
-                dUrl: req["file"]["location"],
+                dUrl: uploadedFile["Location"],
             },
             thumbnail: {
                 url: "",

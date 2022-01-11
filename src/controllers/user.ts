@@ -211,7 +211,7 @@ export const updateCoverImage: RequestHandler<any, SimpleRes> = async (
     const coverImage = {
       original: {
         url: `${config.get("serverAddress")}api/users/cover-images/${filename}`,
-        dUrl: req["file"]!["location"],
+        dUrl: uploadedFile["Location"],
       },
       thumbnail: {
         url: "",
@@ -263,7 +263,7 @@ export const updateProfileImage: RequestHandler<any, SimpleRes> = async (
         url: `${config.get(
           "serverAddress"
         )}api/users/profile-images/${filename}`,
-        dUrl: req["file"]!["location"],
+        dUrl: uploadedFile["Location"],
       },
       thumbnail: {
         url: "",
