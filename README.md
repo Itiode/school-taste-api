@@ -1,11 +1,11 @@
 # TODO
 
-- Fix updating profile image and cover image.
 - Use relational style as much as possible. e.g. include name of user, imageUrl, when
   fetching comments and sub-post comments, not when they're being
   created.
 - A notification should only be created if the resource isn't more than
   a day old. Notifications such as likes, comments, etc.
+- The latest coursemates should be fetched
 - Change to using the thumbnail image for a post (on-create and on-react) and
   comment notifications etc.
 - Post audience (School, Faculty or Departmental mates) - PostModel.find(

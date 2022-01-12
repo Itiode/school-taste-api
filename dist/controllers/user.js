@@ -246,22 +246,26 @@ const getCourseMates = async (req, res, next) => {
         const userId = req["user"].id;
         const user = await user_1.default.findById(userId).select("studentData");
         if (!user)
-            res.status(404).send({ msg: "User not found" });
+            return res.status(404).send({ msg: "User not found" });
         const courseMates = await user_1.default.find({
             $and: [
                 { "studentData.school.id": user.studentData.school.id },
                 { "studentData.department.id": user.studentData.department.id },
                 { "studentData.level": user.studentData.level },
             ],
-        }).select("name profileImage");
+        })
+            .select("name profileImage")
+            .sort({ _id: -1 });
         const transformedCMs = [];
         for (let c of courseMates) {
-            const tCM = {
-                id: c._id,
-                fullName: `${c.name.first} ${c.name.last}`,
-                profileImageUrl: c.profileImage.original.url,
-            };
-            transformedCMs.push(tCM);
+            if (userId !== c._id.toHexString()) {
+                const tCM = {
+                    id: c._id,
+                    fullName: `${c.name.first} ${c.name.last}`,
+                    profileImageUrl: c.profileImage.original.url,
+                };
+                transformedCMs.push(tCM);
+            }
         }
         res.send({
             msg: "Coursemates fetched successfully",

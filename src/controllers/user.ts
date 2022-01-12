@@ -344,7 +344,7 @@ export const getCourseMates: RequestHandler<
   try {
     const userId = req["user"].id;
     const user: User = await UserModel.findById(userId).select("studentData");
-    if (!user) res.status(404).send({ msg: "User not found" });
+    if (!user) return res.status(404).send({ msg: "User not found" });
 
     const courseMates = await UserModel.find({
       $and: [
@@ -352,17 +352,21 @@ export const getCourseMates: RequestHandler<
         { "studentData.department.id": user.studentData.department.id },
         { "studentData.level": user.studentData.level },
       ],
-    }).select("name profileImage");
+    })
+      .select("name profileImage")
+      .sort({ _id: -1 });
 
     const transformedCMs: CourseMate[] = [];
     for (let c of courseMates) {
-      const tCM = {
-        id: c._id,
-        fullName: `${c.name.first} ${c.name.last}`,
-        profileImageUrl: c.profileImage.original.url,
-      };
+      if (userId !== c._id.toHexString()) {
+        const tCM = {
+          id: c._id,
+          fullName: `${c.name.first} ${c.name.last}`,
+          profileImageUrl: c.profileImage.original.url,
+        };
 
-      transformedCMs.push(tCM);
+        transformedCMs.push(tCM);
+      }
     }
 
     res.send({
