@@ -230,22 +230,27 @@ export const getAllPosts: RequestHandler<
   const pageSize = +req.query.pageSize;
   const { searchQuery, schoolId } = req.query;
 
+  if (!(searchQuery || schoolId)) {
+    return res
+      .status(400)
+      .send({ msg: "A search term or school ID must be provided" });
+  }
+
   try {
     let posts: Post[];
     if (schoolId) {
       posts = await PostModel.find({ "studentData.school.id": schoolId })
-        // .skip((pageNumber - 1) * pageSize)
-        // .limit(pageSize)
+        //   // .skip((pageNumber - 1) * pageSize)
+        //   // .limit(pageSize)
         .select("-__v -tagsString -tags")
         .sort({ _id: -1 });
     } else {
-      posts = await PostModel.find({
-        $text: { $search: `${searchQuery}` },
-      })
-        // .skip((pageNumber - 1) * pageSize)
-        // .limit(pageSize)
-        .select("-__v -tagsString -tags")
-        .sort({ _id: -1 });
+      // TODO: Exclude -__v -tagsString -tags using the appropriate
+      // aggregate operator
+      posts = await PostModel.aggregate([
+        { $match: { $text: { $search: searchQuery } } },
+        { $sort: { score: { $meta: "textScore" } } },
+      ]);
     }
 
     await getPosts(userId, posts, res);

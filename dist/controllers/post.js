@@ -176,23 +176,27 @@ const getAllPosts = async (req, res, next) => {
     const pageNumber = +req.query.pageNumber;
     const pageSize = +req.query.pageSize;
     const { searchQuery, schoolId } = req.query;
+    if (!(searchQuery || schoolId)) {
+        return res
+            .status(400)
+            .send({ msg: "A search term or school ID must be provided" });
+    }
     try {
         let posts;
         if (schoolId) {
             posts = await post_1.default.find({ "studentData.school.id": schoolId })
-                // .skip((pageNumber - 1) * pageSize)
-                // .limit(pageSize)
+                //   // .skip((pageNumber - 1) * pageSize)
+                //   // .limit(pageSize)
                 .select("-__v -tagsString -tags")
                 .sort({ _id: -1 });
         }
         else {
-            posts = await post_1.default.find({
-                $text: { $search: `${searchQuery}` },
-            })
-                // .skip((pageNumber - 1) * pageSize)
-                // .limit(pageSize)
-                .select("-__v -tagsString -tags")
-                .sort({ _id: -1 });
+            // TODO: Exclude -__v -tagsString -tags using the appropriate
+            // aggregate operator
+            posts = await post_1.default.aggregate([
+                { $match: { $text: { $search: searchQuery } } },
+                { $sort: { score: { $meta: "textScore" } } },
+            ]);
         }
         await (0, post_1.getPosts)(userId, posts, res);
     }
