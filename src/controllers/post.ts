@@ -136,7 +136,7 @@ export const createPost: RequestHandler<
           type: postNotificationType.createdPostNotification,
           title: `${name.first} ${name.last} created a post`,
           body: notifPayload,
-          contentId: post._id,
+          contentId: post._id.toHexString(),
           status: "0",
           imageUrl: "",
         },
