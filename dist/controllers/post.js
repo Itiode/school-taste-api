@@ -89,6 +89,7 @@ const createPost = async (req, res, next) => {
             "studentData.level": level,
         }).select("_id name messagingToken");
         const notifs = [];
+        const notifPayload = (0, functions_1.getNotificationPayload)(post.text);
         for (let depMate of depMates) {
             // if (depMate._id.toHexString() !== userId) {
             const notif = new notification_1.default({
@@ -102,11 +103,17 @@ const createPost = async (req, res, next) => {
                 type: constants_2.postNotificationType.createdPostNotification,
                 phrase: constants_2.notificationPhrase.created,
                 contentId: post._id,
-                payload: (0, functions_1.getNotificationPayload)(post.text),
+                payload: notifPayload,
             });
             notifs.push(notif);
             const fcmPayload = {
-                data: { msg: "PostCreated", status: "0", picture: "" },
+                data: {
+                    type: constants_2.postNotificationType.createdPostNotification,
+                    contentId: post._id,
+                    msg: notifPayload,
+                    status: "0",
+                    imageUrl: "",
+                },
             };
             firebase
                 .messaging()

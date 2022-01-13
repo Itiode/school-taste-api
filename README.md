@@ -1,5 +1,7 @@
 # TODO
 
+- Exclude post creator from receiving notifications when a post is created (only
+  departmental mates)
 - Use relational style as much as possible. e.g. include name of user, imageUrl, when
   fetching comments and sub-post comments, not when they're being
   created.

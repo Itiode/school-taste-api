@@ -111,6 +111,7 @@ export const createPost: RequestHandler<
     }).select("_id name messagingToken");
 
     const notifs: any[] = [];
+    const notifPayload = getNotificationPayload(post.text);
 
     for (let depMate of depMates) {
       // if (depMate._id.toHexString() !== userId) {
@@ -125,13 +126,19 @@ export const createPost: RequestHandler<
         type: postNotificationType.createdPostNotification,
         phrase: notificationPhrase.created,
         contentId: post._id,
-        payload: getNotificationPayload(post.text),
+        payload: notifPayload,
       });
 
       notifs.push(notif);
 
       const fcmPayload = {
-        data: { msg: "PostCreated", status: "0", picture: "" },
+        data: {
+          type: postNotificationType.createdPostNotification,
+          contentId: post._id,
+          msg: notifPayload,
+          status: "0",
+          imageUrl: "",
+        },
       };
 
       firebase
