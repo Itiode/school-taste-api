@@ -134,9 +134,9 @@ export const createPost: RequestHandler<
           data: { msg: "PostCreated", status: "0", picture: "" },
         };
 
-        // firebase
-        //   .messaging()
-        //   .sendToDevice(user.messagingToken, fcmPayload, messagingOptions);
+        firebase
+          .messaging()
+          .sendToDevice(user.messagingToken, fcmPayload, messagingOptions);
       }
     }
 

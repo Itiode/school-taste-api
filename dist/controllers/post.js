@@ -25,6 +25,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.viewPost = exports.reactToPost = exports.getPostImage = exports.getMyPosts = exports.getAllPosts = exports.getPost = exports.createPost = void 0;
 const config_1 = __importDefault(require("config"));
 const image_size_1 = __importDefault(require("image-size"));
+const firebase = __importStar(require("firebase-admin"));
 const post_1 = __importStar(require("../models/post"));
 const notification_1 = __importDefault(require("../models/notification"));
 const sub_post_1 = __importDefault(require("../models/sub-post"));
@@ -32,6 +33,7 @@ const user_1 = __importDefault(require("../models/user"));
 const transaction_1 = __importDefault(require("../models/transaction"));
 const constants_1 = require("../shared/constants");
 const validators_1 = require("../shared/utils/validators");
+const firebase_1 = require("../main/firebase");
 const s3_1 = require("../shared/utils/s3");
 const functions_1 = require("../shared/utils/functions");
 const functions_2 = require("../shared/utils/functions");
@@ -106,9 +108,9 @@ const createPost = async (req, res, next) => {
                 const fcmPayload = {
                     data: { msg: "PostCreated", status: "0", picture: "" },
                 };
-                // firebase
-                //   .messaging()
-                //   .sendToDevice(user.messagingToken, fcmPayload, messagingOptions);
+                firebase
+                    .messaging()
+                    .sendToDevice(user.messagingToken, fcmPayload, firebase_1.messagingOptions);
             }
         }
         await notification_1.default.insertMany(notifs);
