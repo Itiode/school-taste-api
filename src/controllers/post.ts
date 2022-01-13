@@ -134,8 +134,9 @@ export const createPost: RequestHandler<
       const fcmPayload = {
         data: {
           type: postNotificationType.createdPostNotification,
+          title: `${name.first} ${name.last} created a post`,
+          body: notifPayload,
           contentId: post._id,
-          msg: notifPayload,
           status: "0",
           imageUrl: "",
         },

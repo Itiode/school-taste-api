@@ -109,8 +109,9 @@ const createPost = async (req, res, next) => {
             const fcmPayload = {
                 data: {
                     type: constants_2.postNotificationType.createdPostNotification,
+                    title: `${name.first} ${name.last} created a post`,
+                    body: notifPayload,
                     contentId: post._id,
-                    msg: notifPayload,
                     status: "0",
                     imageUrl: "",
                 },
