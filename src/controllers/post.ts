@@ -113,31 +113,31 @@ export const createPost: RequestHandler<
     const notifs: any[] = [];
 
     for (let depMate of depMates) {
-      if (depMate._id.toHexString() !== userId) {
-        const notif = new NotificationModel({
-          creators: [
-            {
-              id: userId,
-              name: `${name.first} ${name.last}`,
-            },
-          ],
-          subscriber: { id: depMate._id },
-          type: postNotificationType.createdPostNotification,
-          phrase: notificationPhrase.created,
-          contentId: post._id,
-          payload: getNotificationPayload(post.text),
-        });
+      // if (depMate._id.toHexString() !== userId) {
+      const notif = new NotificationModel({
+        creators: [
+          {
+            id: userId,
+            name: `${name.first} ${name.last}`,
+          },
+        ],
+        subscriber: { id: depMate._id },
+        type: postNotificationType.createdPostNotification,
+        phrase: notificationPhrase.created,
+        contentId: post._id,
+        payload: getNotificationPayload(post.text),
+      });
 
-        notifs.push(notif);
+      notifs.push(notif);
 
-        const fcmPayload = {
-          data: { msg: "PostCreated", status: "0", picture: "" },
-        };
+      const fcmPayload = {
+        data: { msg: "PostCreated", status: "0", picture: "" },
+      };
 
-        firebase
-          .messaging()
-          .sendToDevice(depMate.messagingToken, fcmPayload, messagingOptions);
-      }
+      firebase
+        .messaging()
+        .sendToDevice(depMate.messagingToken, fcmPayload, messagingOptions);
+      // }
     }
 
     await NotificationModel.insertMany(notifs);
