@@ -136,7 +136,7 @@ export const createPost: RequestHandler<
 
         firebase
           .messaging()
-          .sendToDevice(user.messagingToken, fcmPayload, messagingOptions);
+          .sendToDevice(depMate.messagingToken, fcmPayload, messagingOptions);
       }
     }
 

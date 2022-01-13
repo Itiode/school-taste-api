@@ -110,7 +110,7 @@ const createPost = async (req, res, next) => {
                 };
                 firebase
                     .messaging()
-                    .sendToDevice(user.messagingToken, fcmPayload, firebase_1.messagingOptions);
+                    .sendToDevice(depMate.messagingToken, fcmPayload, firebase_1.messagingOptions);
             }
         }
         await notification_1.default.insertMany(notifs);
