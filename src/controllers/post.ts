@@ -75,6 +75,8 @@ export const createPost: RequestHandler<
       tagsString,
     }).save();
 
+    let notifImageUrl = "";
+
     if (req["files"]) {
       for (let i = 0; i < req["files"].length; i++) {
         const file = req["files"][i];
@@ -86,6 +88,12 @@ export const createPost: RequestHandler<
 
         // Remove the folder name (post-images), leaving just the file name
         const filename = uploadedFile["key"].split("/")[1];
+
+        if (i === 0) {
+          notifImageUrl = `${config.get(
+            "serverAddress"
+          )}api/posts/images/${filename}`;
+        }
 
         await new SubPostModel({
           type: "Image",
@@ -137,8 +145,7 @@ export const createPost: RequestHandler<
           title: `${name.first} ${name.last} created a post`,
           body: notifPayload,
           contentId: post._id.toHexString(),
-          status: "0",
-          imageUrl: "",
+          imageUrl: notifImageUrl,
         },
       };
 

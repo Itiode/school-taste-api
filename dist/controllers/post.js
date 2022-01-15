@@ -59,6 +59,7 @@ const createPost = async (req, res, next) => {
             studentData,
             tagsString,
         }).save();
+        let notifImageUrl = "";
         if (req["files"]) {
             for (let i = 0; i < req["files"].length; i++) {
                 const file = req["files"][i];
@@ -67,6 +68,9 @@ const createPost = async (req, res, next) => {
                 await (0, s3_1.delFileFromFS)(file.path);
                 // Remove the folder name (post-images), leaving just the file name
                 const filename = uploadedFile["key"].split("/")[1];
+                if (i === 0) {
+                    notifImageUrl = `${config_1.default.get("serverAddress")}api/posts/images/${filename}`;
+                }
                 await new sub_post_1.default({
                     type: "Image",
                     ppid: post._id,
@@ -112,8 +116,7 @@ const createPost = async (req, res, next) => {
                     title: `${name.first} ${name.last} created a post`,
                     body: notifPayload,
                     contentId: post._id.toHexString(),
-                    status: "0",
-                    imageUrl: "",
+                    imageUrl: notifImageUrl,
                 },
             };
             firebase
