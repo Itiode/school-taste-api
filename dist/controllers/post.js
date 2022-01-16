@@ -95,34 +95,34 @@ const createPost = async (req, res, next) => {
         const notifs = [];
         const notifPayload = (0, functions_1.getNotificationPayload)(post.text);
         for (let depMate of depMates) {
-            // if (depMate._id.toHexString() !== userId) {
-            const notif = new notification_1.default({
-                creators: [
-                    {
-                        id: userId,
-                        name: `${name.first} ${name.last}`,
-                    },
-                ],
-                subscriber: { id: depMate._id },
-                type: constants_2.postNotificationType.createdPostNotification,
-                phrase: constants_2.notificationPhrase.created,
-                contentId: post._id,
-                payload: notifPayload,
-            });
-            notifs.push(notif);
-            const fcmPayload = {
-                data: {
+            if (depMate._id.toHexString() !== userId) {
+                const notif = new notification_1.default({
+                    creators: [
+                        {
+                            id: userId,
+                            name: `${name.first} ${name.last}`,
+                        },
+                    ],
+                    subscriber: { id: depMate._id },
                     type: constants_2.postNotificationType.createdPostNotification,
-                    title: `${name.first} ${name.last} created a post`,
-                    body: notifPayload,
-                    contentId: post._id.toHexString(),
-                    imageUrl: notifImageUrl,
-                },
-            };
-            firebase
-                .messaging()
-                .sendToDevice(depMate.messagingToken, fcmPayload, firebase_1.messagingOptions);
-            // }
+                    phrase: constants_2.notificationPhrase.created,
+                    contentId: post._id,
+                    payload: notifPayload,
+                });
+                notifs.push(notif);
+                const fcmPayload = {
+                    data: {
+                        type: constants_2.postNotificationType.createdPostNotification,
+                        title: `${name.first} ${name.last} created a post`,
+                        body: notifPayload,
+                        contentId: post._id.toHexString(),
+                        imageUrl: notifImageUrl,
+                    },
+                };
+                firebase
+                    .messaging()
+                    .sendToDevice(depMate.messagingToken, fcmPayload, firebase_1.messagingOptions);
+            }
         }
         await notification_1.default.insertMany(notifs);
         res.status(201).send({ msg: "Post created successfully" });

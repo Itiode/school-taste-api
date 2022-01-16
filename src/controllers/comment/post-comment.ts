@@ -55,7 +55,6 @@ export const addPostComment: RequestHandler<
       postId,
       creator: {
         id: userId,
-        name: `${user.name.first} ${user.name.last}`,
       },
     }).save();
 

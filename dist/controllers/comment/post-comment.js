@@ -49,7 +49,6 @@ const addPostComment = async (req, res, next) => {
             postId,
             creator: {
                 id: userId,
-                name: `${user.name.first} ${user.name.last}`,
             },
         }).save();
         const transformedC = {

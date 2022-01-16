@@ -16,16 +16,9 @@ const schema = new Schema<PostComment>({
     maxLength: 1000,
     required: true,
   },
-  postId: { type: Schema.Types.ObjectId, required: true },
+  postId: { type: Schema.Types.ObjectId, required: true, ref: "Post" },
   creator: {
     id: { type: Schema.Types.ObjectId, required: true, ref: "User" },
-    name: {
-      type: String,
-      trim: true,
-      minLength: 5,
-      maxLength: 50,
-      required: true,
-    },
   },
   date: { type: Date, default: Date.now },
   reactions: [ReactionSchema],

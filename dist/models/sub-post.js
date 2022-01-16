@@ -34,7 +34,7 @@ const schema = new mongoose_1.Schema({
         enum: ["Image", "Video", "Gif", "Sticker"],
         required: true,
     },
-    ppid: { type: mongoose_1.Schema.Types.ObjectId, required: true },
+    ppid: { type: mongoose_1.Schema.Types.ObjectId, required: true, ref: "Post" },
     item: {
         original: {
             url: { type: String, required: true },

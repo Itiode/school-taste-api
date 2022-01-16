@@ -3,7 +3,6 @@ import Joi from "joi";
 
 import SubPost, { ReactToSubPostParams } from "../types/sub-post";
 import ReactionSchema from "../models/schemas/reaction";
-import imageSchema from "./schemas/image";
 import metadataSchema from "./schemas/metadata";
 
 const schema = new Schema<SubPost>({
@@ -13,7 +12,7 @@ const schema = new Schema<SubPost>({
     enum: ["Image", "Video", "Gif", "Sticker"],
     required: true,
   },
-  ppid: { type: Schema.Types.ObjectId, required: true },
+  ppid: { type: Schema.Types.ObjectId, required: true, ref: "Post" },
   item: {
     original: {
       url: { type: String, required: true },

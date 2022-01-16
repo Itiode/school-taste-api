@@ -1,4 +1,4 @@
-import { Reaction } from "../shared";
+import { Creator, Reaction } from "../shared";
 
 export interface SubPostComment {
   _id: string;
@@ -6,7 +6,6 @@ export interface SubPostComment {
   subPostId: string;
   creator: {
     id: string;
-    name: string;
   };
   date: Date;
   reactions: Reaction[];
@@ -14,28 +13,25 @@ export interface SubPostComment {
   reaction: Reaction;
 }
 
-export interface SubPostCommentRes {
+export interface SubPostCommentData {
   id: string;
   text: string;
   subPostId: string;
-  creator: {
-    id: string;
-    name: string;
-  };
+  creator: Creator;
   date: Date;
   formattedDate: String;
   reactionCount: number;
   reaction: Reaction;
 }
 
-export interface AddSubPostCommentData {
+export interface AddSubPostCommentReqBody {
   text: string;
   subPostId: string;
 }
 
-export interface AddSubPostCommentRes {
+export interface AddSubPostCommentResBody {
   msg: string;
-  data?: SubPostCommentRes;
+  data?: SubPostCommentData;
 }
 
 export interface ReactToSubPostCommentParams {
@@ -47,13 +43,13 @@ export interface GetSubPostCommentsQuery {
   pageSize: string;
 }
 
-export interface GetSubPostCommentsRes {
+export interface GetSubPostCommentsResBody {
   msg: string;
   commentCount: number;
-  data: SubPostCommentRes[];
+  data: SubPostCommentData[];
 }
 
-export interface GetSubPostCommentCountRes {
+export interface GetSubPostCommentCountResBody {
   msg: string;
   count?: number;
 }

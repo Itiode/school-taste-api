@@ -2,22 +2,20 @@
 
 - Exclude post creator from receiving notifications when a post is created (only
   departmental mates)
-- Use relational style as much as possible. e.g. include name of user, imageUrl, when
-  fetching comments and sub-post comments, not when they're being
-  created.
 - A notification should only be created if the resource isn't more than
-  a day old. Notifications such as likes, comments, etc.
-- The latest coursemates should be fetched
+  a day old. Notifications such as post creation, likes, comments, etc.
 - Change to using the thumbnail image for a post (on-create and on-react) and
   comment notifications etc.
 - Post audience (School, Faculty or Departmental mates) - PostModel.find(
   'schoolId: post.school.id' and ['audience.school': true or 'audience.faculty': 'true' or 'audience.department': true]
   )
+- Check that a post contains either an image or text (one must be there)
 - Remove unused info, like payment details and rubyBalance from a user.
 
 ## After MVP
 
 - Only an admin can add a school, department, faculty
+- A post can be created with just text
 - When fetching posts, add fallback for a user not being available,
   in such a case, the post shouldn't be included in the returned posts.
 - Include name in a reaction when fetching a post, subpost, comment or sub post comment

@@ -34,16 +34,9 @@ const schema = new mongoose_1.Schema({
         maxLength: 250,
         required: true,
     },
-    subPostId: { type: mongoose_1.Schema.Types.ObjectId, required: true },
+    subPostId: { type: mongoose_1.Schema.Types.ObjectId, required: true, ref: "Sub-Post" },
     creator: {
         id: { type: mongoose_1.Schema.Types.ObjectId, required: true, ref: "User" },
-        name: {
-            type: String,
-            trim: true,
-            minLength: 5,
-            maxLength: 50,
-            required: true,
-        },
     },
     date: { type: Date, default: Date.now },
     reactions: [reaction_1.default],

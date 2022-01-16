@@ -46,7 +46,6 @@ const addSubPostComment = async (req, res, next) => {
             subPostId,
             creator: {
                 id: userId,
-                name: `${user.name.first} ${user.name.last}`,
             },
         }).save();
         const transformedC = {

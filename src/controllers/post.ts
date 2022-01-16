@@ -122,37 +122,37 @@ export const createPost: RequestHandler<
     const notifPayload = getNotificationPayload(post.text);
 
     for (let depMate of depMates) {
-      // if (depMate._id.toHexString() !== userId) {
-      const notif = new NotificationModel({
-        creators: [
-          {
-            id: userId,
-            name: `${name.first} ${name.last}`,
-          },
-        ],
-        subscriber: { id: depMate._id },
-        type: postNotificationType.createdPostNotification,
-        phrase: notificationPhrase.created,
-        contentId: post._id,
-        payload: notifPayload,
-      });
-
-      notifs.push(notif);
-
-      const fcmPayload = {
-        data: {
+      if (depMate._id.toHexString() !== userId) {
+        const notif = new NotificationModel({
+          creators: [
+            {
+              id: userId,
+              name: `${name.first} ${name.last}`,
+            },
+          ],
+          subscriber: { id: depMate._id },
           type: postNotificationType.createdPostNotification,
-          title: `${name.first} ${name.last} created a post`,
-          body: notifPayload,
-          contentId: post._id.toHexString(),
-          imageUrl: notifImageUrl,
-        },
-      };
+          phrase: notificationPhrase.created,
+          contentId: post._id,
+          payload: notifPayload,
+        });
 
-      firebase
-        .messaging()
-        .sendToDevice(depMate.messagingToken, fcmPayload, messagingOptions);
-      // }
+        notifs.push(notif);
+
+        const fcmPayload = {
+          data: {
+            type: postNotificationType.createdPostNotification,
+            title: `${name.first} ${name.last} created a post`,
+            body: notifPayload,
+            contentId: post._id.toHexString(),
+            imageUrl: notifImageUrl,
+          },
+        };
+
+        firebase
+          .messaging()
+          .sendToDevice(depMate.messagingToken, fcmPayload, messagingOptions);
+      }
     }
 
     await NotificationModel.insertMany(notifs);

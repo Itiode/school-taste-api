@@ -4,7 +4,7 @@ export interface PostComment {
   _id: string;
   text: string;
   postId: string;
-  creator: Creator;
+  creator: { id: string };
   date: Date;
   reactions: Reaction[];
   reactionCount: number;

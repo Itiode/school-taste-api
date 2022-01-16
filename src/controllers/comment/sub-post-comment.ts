@@ -2,12 +2,12 @@ import { RequestHandler } from "express";
 
 import {
   SubPostComment,
-  AddSubPostCommentData,
-  AddSubPostCommentRes,
+  AddSubPostCommentReqBody,
+  AddSubPostCommentResBody,
   ReactToSubPostCommentParams,
-  SubPostCommentRes,
+  SubPostCommentData,
   GetSubPostCommentsQuery,
-  GetSubPostCommentsRes,
+  GetSubPostCommentsResBody,
 } from "../../types/comment/sub-post-comment";
 import SubPostCommentModel, {
   validateAddSubPostCommentData,
@@ -21,8 +21,8 @@ import { formatDate } from "../../shared/utils/functions";
 
 export const addSubPostComment: RequestHandler<
   any,
-  AddSubPostCommentRes,
-  AddSubPostCommentData
+  AddSubPostCommentResBody,
+  AddSubPostCommentReqBody
 > = async (req, res, next) => {
   const { error } = validateAddSubPostCommentData(req.body);
   if (error) return res.status(400).send({ msg: error.details[0].message });
@@ -45,11 +45,10 @@ export const addSubPostComment: RequestHandler<
       subPostId,
       creator: {
         id: userId,
-        name: `${user.name.first} ${user.name.last}`,
       },
     }).save();
 
-    const transformedC: SubPostCommentRes = {
+    const transformedC: SubPostCommentData = {
       id: comment._id,
       text: comment.text,
       creator: comment.creator,
@@ -149,7 +148,7 @@ export const reactToSubPostComment: RequestHandler<
 
 export const getSubPostComments: RequestHandler<
   { subPostId: string },
-  GetSubPostCommentsRes,
+  GetSubPostCommentsResBody,
   any,
   GetSubPostCommentsQuery
 > = async (req, res, next) => {
@@ -166,7 +165,7 @@ export const getSubPostComments: RequestHandler<
       .select("-__v")
       .sort({ _id: -1 });
 
-    const transformedComments: SubPostCommentRes[] = comments.map(
+    const transformedComments: SubPostCommentData[] = comments.map(
       (c: SubPostComment) => {
         const reaction = c.reactions.find(
           (r: any) => r.userId.toHexString() === userId
