@@ -38,7 +38,7 @@ const addSubPostComment = async (req, res, next) => {
         const subPost = await sub_post_1.default.findById(subPostId).select("_id");
         if (!subPost)
             return res.status(404).send({ msg: "No sub post with the given ID" });
-        const user = await user_1.default.findById(userId).select("name");
+        const user = await user_1.default.findById(userId).select("name profileImage");
         if (!user)
             return res.status(404).send({ msg: "No user with the given ID" });
         const comment = await new sub_post_comment_1.default({
@@ -51,10 +51,14 @@ const addSubPostComment = async (req, res, next) => {
         const transformedC = {
             id: comment._id,
             text: comment.text,
-            creator: comment.creator,
+            creator: {
+                id: comment.creator.id,
+                name: `${user.name.first} ${user.name.last}`,
+                imageUrl: user.profileImage.original.url,
+            },
             subPostId: comment.subPostId,
             date: comment.date,
-            formattedDate: (0, functions_1.formatDate)(comment.date.toString()),
+            formattedDate: (0, functions_1.formatDate)(comment.date.toISOString()),
             reactionCount: 0,
             reaction: { type: "", userId: "" },
         };

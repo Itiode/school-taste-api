@@ -36,7 +36,7 @@ export const addSubPostComment: RequestHandler<
     if (!subPost)
       return res.status(404).send({ msg: "No sub post with the given ID" });
 
-    const user = await UserModel.findById(userId).select("name");
+    const user = await UserModel.findById(userId).select("name profileImage");
     if (!user)
       return res.status(404).send({ msg: "No user with the given ID" });
 
@@ -51,10 +51,14 @@ export const addSubPostComment: RequestHandler<
     const transformedC: SubPostCommentData = {
       id: comment._id,
       text: comment.text,
-      creator: comment.creator,
+      creator: {
+        id: comment.creator.id,
+        name: `${user.name.first} ${user.name.last}`,
+        imageUrl: user.profileImage.original.url,
+      },
       subPostId: comment.subPostId,
       date: comment.date,
-      formattedDate: formatDate(comment.date.toString()),
+      formattedDate: formatDate(comment.date.toISOString()),
       reactionCount: 0,
       reaction: { type: "", userId: "" },
     };

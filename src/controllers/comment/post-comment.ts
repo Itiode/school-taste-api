@@ -46,7 +46,7 @@ export const addPostComment: RequestHandler<
     const post = await PostModel.findById(postId).select("_id creator");
     if (!post) return res.status(404).send({ msg: "Post not found" });
 
-    const user = await UserModel.findById(userId).select("name");
+    const user = await UserModel.findById(userId).select("name profileImage");
     const postOwner = await UserModel.findById(post.creator.id).select("name");
 
     if (!user || !postOwner)
@@ -63,7 +63,11 @@ export const addPostComment: RequestHandler<
     const transformedC: PostCommentData = {
       id: comment._id,
       text: comment.text,
-      creator: comment.creator,
+      creator: {
+        id: comment.creator.id,
+        name: `${user.name.first} ${user.name.last}`,
+        imageUrl: user.profileImage.original.url,
+      },
       postId: comment.postId,
       date: comment.date,
       formattedDate: formatDate(comment.date.toISOString()),

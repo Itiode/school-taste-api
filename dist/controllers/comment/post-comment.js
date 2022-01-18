@@ -40,7 +40,7 @@ const addPostComment = async (req, res, next) => {
         const post = await post_1.default.findById(postId).select("_id creator");
         if (!post)
             return res.status(404).send({ msg: "Post not found" });
-        const user = await user_1.default.findById(userId).select("name");
+        const user = await user_1.default.findById(userId).select("name profileImage");
         const postOwner = await user_1.default.findById(post.creator.id).select("name");
         if (!user || !postOwner)
             return res.status(404).send({ msg: "User not found" });
@@ -54,7 +54,11 @@ const addPostComment = async (req, res, next) => {
         const transformedC = {
             id: comment._id,
             text: comment.text,
-            creator: comment.creator,
+            creator: {
+                id: comment.creator.id,
+                name: `${user.name.first} ${user.name.last}`,
+                imageUrl: user.profileImage.original.url,
+            },
             postId: comment.postId,
             date: comment.date,
             formattedDate: (0, functions_1.formatDate)(comment.date.toISOString()),

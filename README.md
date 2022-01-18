@@ -6,7 +6,7 @@
   'schoolId: post.school.id' and ['audience.school': true or 'audience.faculty': 'true' or 'audience.department': true]
   )
 - Check that a post contains either an image or text (one must be there)
-- Remove unused info, like payment details and rubyBalance from a user.
+- Remove unused info, like payment details and rubyBalance, transaction doc from a user.
 - Review url endpoints that they follow the REST standard 
 
 ## After MVP

@@ -21,14 +21,14 @@ const schema = new Schema<Notification>({
 const NotificationModel = mongoose.model("Notification", schema);
 
 export const shouldCreateNotif = async (
-  userId: string,
+  creatorId: string,
   notifType: string,
-  creatorId: string
+  ownerId: string
 ) => {
   const notif = await NotificationModel.findOne({
-    "creators.id": userId,
+    "creators.id": creatorId,
     type: notifType,
-    "owners.id": creatorId,
+    "owners.id": ownerId,
   }).select("date");
 
   if (!notif) return true;
