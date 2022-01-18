@@ -9,7 +9,7 @@ import PostModel, {
   validateViewPostReq,
   getPosts,
 } from "../models/post";
-import NotificationModel from "../models/notification";
+import NotificationModel, { shouldCreateNotif } from "../models/notification";
 import SubPostModel from "../models/sub-post";
 import UserModel from "../models/user";
 import {
@@ -111,6 +111,16 @@ export const createPost: RequestHandler<
         }).save();
       }
     }
+
+    const notifType = postNotificationType.createdPostNotification;
+
+    const shouldCreate = await shouldCreateNotif(
+      userId,
+      notifType,
+      post.creator.id
+    );
+    if (!shouldCreate)
+      return res.status(201).send({ msg: "Post created successfully" });
 
     // Create notifications and notify departmental mates.
     const depMates = await UserModel.find({

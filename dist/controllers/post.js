@@ -27,7 +27,7 @@ const config_1 = __importDefault(require("config"));
 const image_size_1 = __importDefault(require("image-size"));
 const firebase = __importStar(require("firebase-admin"));
 const post_1 = __importStar(require("../models/post"));
-const notification_1 = __importDefault(require("../models/notification"));
+const notification_1 = __importStar(require("../models/notification"));
 const sub_post_1 = __importDefault(require("../models/sub-post"));
 const user_1 = __importDefault(require("../models/user"));
 const transaction_1 = __importDefault(require("../models/transaction"));
@@ -87,6 +87,10 @@ const createPost = async (req, res, next) => {
                 }).save();
             }
         }
+        const notifType = constants_2.postNotificationType.createdPostNotification;
+        const shouldCreate = await (0, notification_1.shouldCreateNotif)(userId, notifType, post.creator.id);
+        if (!shouldCreate)
+            return res.status(201).send({ msg: "Post created successfully" });
         // Create notifications and notify departmental mates.
         const depMates = await user_1.default.find({
             "studentData.department.id": department.id,

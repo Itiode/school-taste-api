@@ -18,4 +18,26 @@ const schema = new Schema<Notification>({
   seen: { type: Boolean, default: false },
 });
 
-export default mongoose.model("Notification", schema);
+const NotificationModel = mongoose.model("Notification", schema);
+
+export const shouldCreateNotif = async (
+  userId: string,
+  notifType: string,
+  creatorId: string
+) => {
+  const notif = await NotificationModel.findOne({
+    "creators.id": userId,
+    type: notifType,
+    "owners.id": creatorId,
+  }).select("date");
+
+  if (!notif) return true;
+
+  const aDayInMillis = 86400000;
+  const currentTime = new Date().getTime();
+  const creationTime = new Date(notif.date).getTime();
+  const diff = currentTime - creationTime;
+  return diff > aDayInMillis;
+};
+
+export default NotificationModel;

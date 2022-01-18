@@ -38,8 +38,8 @@ app.use(auth_1.default);
     if (!err) {
         const port = process.env.PORT || 3200;
         app.listen(port, () => {
-            console.log("Connected to DB:", config_1.default.get("dbUrl"));
-            console.log("Listening on port:", port);
+            console.log("Connected to", config_1.default.get("dbUrl"));
+            console.log("Listening on port", port);
         });
         (0, firebase_1.default)((err) => {
             if (err) {

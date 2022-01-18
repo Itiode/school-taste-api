@@ -15,7 +15,9 @@ import PostCommentModel, {
 } from "../../models/comment/post-comment";
 import PostModel from "../../models/post";
 import UserModel from "../../models/user";
-import NotificationModel from "../../models/notification";
+import NotificationModel, {
+  shouldCreateNotif,
+} from "../../models/notification";
 import { validateReactionType } from "../../shared/utils/validators";
 import { SimpleRes } from "../../types/shared";
 import {
@@ -64,14 +66,22 @@ export const addPostComment: RequestHandler<
       creator: comment.creator,
       postId: comment.postId,
       date: comment.date,
-      formattedDate: formatDate(comment.date.toString()),
+      formattedDate: formatDate(comment.date.toISOString()),
       reactionCount: comment.reactionCount ? comment.reactionCount : 0,
       reaction: { type: "", userId: "" },
     };
 
     await PostModel.updateOne({ _id: postId }, { $inc: { commentCount: 1 } });
 
-    if (userId !== post.creator.id.toHexString()) {
+    const notifType = postNotificationType.commentedOnPostNotification;
+
+    const shouldCreate = await shouldCreateNotif(
+      userId,
+      notifType,
+      post.creator.id
+    );
+
+    if (userId !== post.creator.id.toHexString() && shouldCreate) {
       const creators = [
         {
           id: userId,
@@ -95,7 +105,7 @@ export const addPostComment: RequestHandler<
           owners,
           subscriber: { id: post.creator.id },
           contentId: post._id,
-          type: postNotificationType.commentedOnPostNotification,
+          type: notifType,
           phrase,
           payload,
         }),
@@ -104,7 +114,7 @@ export const addPostComment: RequestHandler<
           owners,
           subscriber: { id: userId },
           contentId: post._id,
-          type: postNotificationType.commentedOnPostNotification,
+          type: notifType,
           phrase,
           payload,
         }),
@@ -245,7 +255,7 @@ export const getPostComments: RequestHandler<
         },
         postId: c.postId,
         date: c.date,
-        formattedDate: formatDate(c.date.toString()),
+        formattedDate: formatDate(c.date.toISOString()),
         reactionCount: c.reactionCount ? c.reactionCount : 0,
         reaction: reaction ? reaction : { type: "", userId: "" },
       });

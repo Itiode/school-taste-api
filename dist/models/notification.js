@@ -22,6 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.shouldCreateNotif = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const creator_1 = __importDefault(require("../models/schemas/creator"));
 const owner_1 = __importDefault(require("../models/schemas/owner"));
@@ -38,4 +39,20 @@ const schema = new mongoose_1.Schema({
     payload: { type: String, trim: true, maxLength: 100 },
     seen: { type: Boolean, default: false },
 });
-exports.default = mongoose_1.default.model("Notification", schema);
+const NotificationModel = mongoose_1.default.model("Notification", schema);
+const shouldCreateNotif = async (userId, notifType, creatorId) => {
+    const notif = await NotificationModel.findOne({
+        "creators.id": userId,
+        type: notifType,
+        "owners.id": creatorId,
+    }).select("date");
+    if (!notif)
+        return true;
+    const aDayInMillis = 86400000;
+    const currentTime = new Date().getTime();
+    const creationTime = new Date(notif.date).getTime();
+    const diff = currentTime - creationTime;
+    return diff > aDayInMillis;
+};
+exports.shouldCreateNotif = shouldCreateNotif;
+exports.default = NotificationModel;

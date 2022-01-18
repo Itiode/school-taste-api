@@ -41,8 +41,8 @@ connectToDB((db: Mongoose | null, err: Error | null) => {
   if (!err) {
     const port = process.env.PORT || 3200;
     app.listen(port, () => {
-      console.log("Connected to DB:", config.get("dbUrl"));
-      console.log("Listening on port:", port);
+      console.log("Connected to", config.get("dbUrl"));
+      console.log("Listening on port", port);
     });
 
     initializeFirebase((err: Error | null) => {

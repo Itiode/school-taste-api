@@ -1,9 +1,5 @@
 # TODO
 
-- Exclude post creator from receiving notifications when a post is created (only
-  departmental mates)
-- A notification should only be created if the resource isn't more than
-  a day old. Notifications such as post creation, likes, comments, etc.
 - Change to using the thumbnail image for a post (on-create and on-react) and
   comment notifications etc.
 - Post audience (School, Faculty or Departmental mates) - PostModel.find(
@@ -11,6 +7,7 @@
   )
 - Check that a post contains either an image or text (one must be there)
 - Remove unused info, like payment details and rubyBalance from a user.
+- Review url endpoints that they follow the REST standard 
 
 ## After MVP
 

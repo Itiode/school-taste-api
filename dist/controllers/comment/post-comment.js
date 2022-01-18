@@ -26,7 +26,7 @@ exports.getPostComments = exports.reactToPostComment = exports.addPostComment = 
 const post_comment_1 = __importStar(require("../../models/comment/post-comment"));
 const post_1 = __importDefault(require("../../models/post"));
 const user_1 = __importDefault(require("../../models/user"));
-const notification_1 = __importDefault(require("../../models/notification"));
+const notification_1 = __importStar(require("../../models/notification"));
 const validators_1 = require("../../shared/utils/validators");
 const constants_1 = require("../../shared/constants");
 const functions_1 = require("../../shared/utils/functions");
@@ -57,12 +57,14 @@ const addPostComment = async (req, res, next) => {
             creator: comment.creator,
             postId: comment.postId,
             date: comment.date,
-            formattedDate: (0, functions_1.formatDate)(comment.date.toString()),
+            formattedDate: (0, functions_1.formatDate)(comment.date.toISOString()),
             reactionCount: comment.reactionCount ? comment.reactionCount : 0,
             reaction: { type: "", userId: "" },
         };
         await post_1.default.updateOne({ _id: postId }, { $inc: { commentCount: 1 } });
-        if (userId !== post.creator.id.toHexString()) {
+        const notifType = constants_1.postNotificationType.commentedOnPostNotification;
+        const shouldCreate = await (0, notification_1.shouldCreateNotif)(userId, notifType, post.creator.id);
+        if (userId !== post.creator.id.toHexString() && shouldCreate) {
             const creators = [
                 {
                     id: userId,
@@ -83,7 +85,7 @@ const addPostComment = async (req, res, next) => {
                     owners,
                     subscriber: { id: post.creator.id },
                     contentId: post._id,
-                    type: constants_1.postNotificationType.commentedOnPostNotification,
+                    type: notifType,
                     phrase,
                     payload,
                 }),
@@ -92,7 +94,7 @@ const addPostComment = async (req, res, next) => {
                     owners,
                     subscriber: { id: userId },
                     contentId: post._id,
-                    type: constants_1.postNotificationType.commentedOnPostNotification,
+                    type: notifType,
                     phrase,
                     payload,
                 }),
@@ -188,7 +190,7 @@ const getPostComments = async (req, res, next) => {
                 },
                 postId: c.postId,
                 date: c.date,
-                formattedDate: (0, functions_1.formatDate)(c.date.toString()),
+                formattedDate: (0, functions_1.formatDate)(c.date.toISOString()),
                 reactionCount: c.reactionCount ? c.reactionCount : 0,
                 reaction: reaction ? reaction : { type: "", userId: "" },
             });
