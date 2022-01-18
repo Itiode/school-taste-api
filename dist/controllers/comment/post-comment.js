@@ -51,6 +51,8 @@ const addPostComment = async (req, res, next) => {
                 id: userId,
             },
         }).save();
+        // Include name and imageUrl so they can be used
+        // to create a comment for the comment list in the frontend.
         const transformedC = {
             id: comment._id,
             text: comment.text,
