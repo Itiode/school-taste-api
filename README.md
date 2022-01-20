@@ -1,5 +1,6 @@
 # TODO
 
+- Review condition for creating a notification again.
 - Change to using the thumbnail image for a post (on-create and on-react) and
   comment notifications etc.
 - Post audience (School, Faculty or Departmental mates) - PostModel.find(
@@ -7,10 +8,11 @@
   )
 - Check that a post contains either an image or text (one must be there)
 - Remove unused info, like payment details and rubyBalance, transaction doc from a user.
-- Review url endpoints that they follow the REST standard 
+- Review url endpoints that they follow the REST standard
 
 ## After MVP
 
+- Create a notification when a post is liked
 - Only an admin can add a school, department, faculty
 - A post can be created with just text
 - When fetching posts, add fallback for a user not being available,

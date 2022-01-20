@@ -80,7 +80,7 @@ export const getNotifications: RequestHandler<
         payload: n.payload,
         contentId: n.contentId,
         date: n.date,
-        formattedDate: formatDate(n.date.toString()),
+        formattedDate: formatDate(n.date.toISOString()),
         seen: n.seen,
         image: notifImage,
       });

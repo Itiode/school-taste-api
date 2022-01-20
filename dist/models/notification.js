@@ -45,13 +45,16 @@ const shouldCreateNotif = async (creatorId, notifType, ownerId) => {
         "creators.id": creatorId,
         type: notifType,
         "owners.id": ownerId,
-    }).select("date");
+    })
+        .sort({ _id: -1 })
+        .select("date");
     if (!notif)
         return true;
     const aDayInMillis = 86400000;
     const currentTime = new Date().getTime();
     const creationTime = new Date(notif.date).getTime();
     const diff = currentTime - creationTime;
+    console.log(diff > aDayInMillis);
     return diff > aDayInMillis;
 };
 exports.shouldCreateNotif = shouldCreateNotif;

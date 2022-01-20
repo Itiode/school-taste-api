@@ -29,7 +29,9 @@ export const shouldCreateNotif = async (
     "creators.id": creatorId,
     type: notifType,
     "owners.id": ownerId,
-  }).select("date");
+  })
+    .sort({ _id: -1 })
+    .select("date");
 
   if (!notif) return true;
 
@@ -37,6 +39,9 @@ export const shouldCreateNotif = async (
   const currentTime = new Date().getTime();
   const creationTime = new Date(notif.date).getTime();
   const diff = currentTime - creationTime;
+
+  console.log(diff > aDayInMillis);
+
   return diff > aDayInMillis;
 };
 

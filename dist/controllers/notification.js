@@ -56,7 +56,7 @@ const getNotifications = async (req, res, next) => {
                 payload: n.payload,
                 contentId: n.contentId,
                 date: n.date,
-                formattedDate: (0, functions_1.formatDate)(n.date.toString()),
+                formattedDate: (0, functions_1.formatDate)(n.date.toISOString()),
                 seen: n.seen,
                 image: notifImage,
             });

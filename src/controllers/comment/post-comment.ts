@@ -60,8 +60,6 @@ export const addPostComment: RequestHandler<
       },
     }).save();
 
-    // Include name and imageUrl so they can be used
-    // to create a comment for the comment list in the frontend.
     const transformedC: PostCommentData = {
       id: comment._id,
       text: comment.text,
