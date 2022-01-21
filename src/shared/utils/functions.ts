@@ -10,6 +10,10 @@ export function getNotificationPayload(payload: string) {
   return payload.length > 100 ? `${payload.slice(0, 97)}...` : payload;
 }
 
+export function getTextForIndexing(text: string) {
+  return text.length > 200 ? `${text.slice(0, 200)}` : text;
+}
+
 export function compressImage(
   inputPath: string,
   filename: string,

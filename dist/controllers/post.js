@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reactToPost = exports.getPostImage = exports.getMyPosts = exports.getAllPosts = exports.getPost = exports.createPost = void 0;
+exports.reactToPost = exports.getPostImage = exports.getMyPosts = exports.getAllPosts = exports.getPost = exports.createPost = exports.createTextPost = void 0;
 const config_1 = __importDefault(require("config"));
 const image_size_1 = __importDefault(require("image-size"));
 const firebase = __importStar(require("firebase-admin"));
@@ -36,6 +36,76 @@ const s3_1 = require("../shared/utils/s3");
 const functions_1 = require("../shared/utils/functions");
 const functions_2 = require("../shared/utils/functions");
 const constants_1 = require("../shared/constants");
+const createTextPost = async (req, res, next) => {
+    const { error } = (0, post_1.valCreateTextPostReqBody)(req.body);
+    if (error)
+        return res.status(400).send({ msg: error.details[0].message });
+    try {
+        const userId = req["user"].id;
+        const user = await user_1.default.findById(userId).select("name studentData");
+        if (!user)
+            return res.status(404).send({ msg: "Can't create post, user not found" });
+        const { text } = req.body;
+        const { name, studentData } = user;
+        const { school, department, faculty, level } = studentData;
+        const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department.name} ${faculty.name} ${level} ${(0, functions_1.getTextForIndexing)(text)}`;
+        const post = await new post_1.default({
+            creator: {
+                id: userId,
+            },
+            text,
+            studentData,
+            tagsString,
+        }).save();
+        const notifType = constants_1.postNotificationType.createdPostNotification;
+        const shouldCreate = await (0, notification_1.shouldCreateNotif)(userId, notifType);
+        if (!shouldCreate)
+            return res.status(201).send({ msg: "Post created successfully" });
+        // Create notifications and notify departmental mates.
+        const depMates = await user_1.default.find({
+            "studentData.school.id": school.id,
+            "studentData.department.id": department.id,
+            "studentData.level": level,
+        }).select("_id name messagingToken");
+        const notifs = [];
+        const notifPayload = (0, functions_1.getNotificationPayload)(post.text);
+        for (let depMate of depMates) {
+            if (depMate._id.toHexString() !== userId) {
+                const notif = new notification_1.default({
+                    creators: [
+                        {
+                            id: userId,
+                            name: `${name.first} ${name.last}`,
+                        },
+                    ],
+                    subscriber: { id: depMate._id },
+                    type: notifType,
+                    phrase: constants_1.notificationPhrase.created,
+                    contentId: post._id,
+                    payload: notifPayload,
+                });
+                notifs.push(notif);
+                const fcmPayload = {
+                    data: {
+                        type: constants_1.postNotificationType.createdPostNotification,
+                        title: `${name.first} ${name.last} created a post`,
+                        body: notifPayload,
+                        contentId: post._id.toHexString(),
+                    },
+                };
+                firebase
+                    .messaging()
+                    .sendToDevice(depMate.messagingToken, fcmPayload, firebase_1.messagingOptions);
+            }
+        }
+        await notification_1.default.insertMany(notifs);
+        res.status(201).send({ msg: "Post created successfully" });
+    }
+    catch (e) {
+        next(new Error("Error in creating post: " + e));
+    }
+};
+exports.createTextPost = createTextPost;
 // TODO: USE A TRANSACTION TO CREATE A POST AND SUBPOSTS
 const createPost = async (req, res, next) => {
     const { error } = (0, post_1.valCreatePostReqBody)(req.body);
@@ -49,7 +119,7 @@ const createPost = async (req, res, next) => {
         const { text } = req.body;
         const { name, studentData } = user;
         const { school, department, faculty, level } = studentData;
-        const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department.name} ${faculty.name} ${level}`;
+        const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department.name} ${faculty.name} ${level} ${(0, functions_1.getTextForIndexing)(text)}`;
         const post = await new post_1.default({
             creator: {
                 id: userId,
@@ -111,6 +181,7 @@ const createPost = async (req, res, next) => {
             return res.status(201).send({ msg: "Post created successfully" });
         // Create notifications and notify departmental mates.
         const depMates = await user_1.default.find({
+            "studentData.school.id": school.id,
             "studentData.department.id": department.id,
             "studentData.level": level,
         }).select("_id name messagingToken");

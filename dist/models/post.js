@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPosts = exports.validateViewPostReq = exports.validateReactToPostParams = exports.valCreatePostReqBody = void 0;
+exports.getPosts = exports.validateViewPostReq = exports.validateReactToPostParams = exports.valCreateTextPostReqBody = exports.valCreatePostReqBody = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const joi_1 = __importDefault(require("joi"));
 const sub_post_1 = __importDefault(require("../models/sub-post"));
@@ -34,7 +34,7 @@ const schema = new mongoose_1.Schema({
     creator: {
         id: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
     },
-    text: { type: String, trim: true, maxLength: 10000, required: true },
+    text: { type: String, trim: true, maxlength: 10000, default: "" },
     studentData: { type: student_data_1.default, required: true },
     tagsString: { type: String, trim: true, required: true },
     tags: { type: [String] },
@@ -48,10 +48,16 @@ const schema = new mongoose_1.Schema({
 exports.default = mongoose_1.default.model("Post", schema);
 function valCreatePostReqBody(data) {
     return joi_1.default.object({
-        text: joi_1.default.string().trim().max(10000).required(),
+        text: joi_1.default.string().trim().max(10000),
     }).validate(data);
 }
 exports.valCreatePostReqBody = valCreatePostReqBody;
+function valCreateTextPostReqBody(data) {
+    return joi_1.default.object({
+        text: joi_1.default.string().trim().min(2).max(10000).required(),
+    }).validate(data);
+}
+exports.valCreateTextPostReqBody = valCreateTextPostReqBody;
 function validateReactToPostParams(data) {
     return joi_1.default.object({
         postId: joi_1.default.string()
@@ -74,6 +80,8 @@ async function getPosts(userId, posts, res) {
     const modifiedPosts = [];
     const tempUsers = [];
     for (const p of posts) {
+        // If no subposts are found, leading to an empty list,
+        // that means it is a text-only post.
         const subPosts = await sub_post_1.default.find({ ppid: p._id }).select("-__v -views -dUrl");
         let tempUser;
         const isFetched = tempUsers.find((tU) => tU.id === p.creator.id);
@@ -90,18 +98,20 @@ async function getPosts(userId, posts, res) {
             tempUser = tempUsers.find((tU) => tU.id === p.creator.id);
         }
         const modifiedSubPosts = [];
-        for (const sP of subPosts) {
-            const sPReaction = sP.reactions.find((r) => r.userId.toHexString() === userId);
-            modifiedSubPosts.push({
-                id: sP._id,
-                type: sP.type,
-                item: sP.item,
-                ppid: sP.ppid,
-                reaction: sPReaction ? sPReaction : { type: "", userId: "" },
-                reactionCount: sP.reactionCount ? sP.reactionCount : 0,
-                commentCount: sP.commentCount,
-                viewCount: sP.viewCount,
-            });
+        if (subPosts.length > 0) {
+            for (const sP of subPosts) {
+                const sPReaction = sP.reactions.find((r) => r.userId.toHexString() === userId);
+                modifiedSubPosts.push({
+                    id: sP._id,
+                    type: sP.type,
+                    item: sP.item,
+                    ppid: sP.ppid,
+                    reaction: sPReaction ? sPReaction : { type: "", userId: "" },
+                    reactionCount: sP.reactionCount ? sP.reactionCount : 0,
+                    commentCount: sP.commentCount,
+                    viewCount: sP.viewCount,
+                });
+            }
         }
         const postReaction = p.reactions.find((r) => r.userId.toHexString() === userId);
         const modPost = {
@@ -109,7 +119,7 @@ async function getPosts(userId, posts, res) {
             creator: {
                 id: tempUser.id,
                 name: tempUser.fullName,
-                imageUrl: tempUser.userImage.original.url,
+                imageUrl: tempUser.userImage.thumbnail.url,
             },
             text: p.text,
             subPosts: modifiedSubPosts,

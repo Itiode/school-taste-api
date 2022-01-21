@@ -10,6 +10,7 @@ import auth from "../middleware/auth";
 const router = Router();
 
 router.post("/", auth, upload.array("post-images", 10), pController.createPost);
+router.post("/text-post", auth, pController.createTextPost);
 router.get("/me/:userId", auth, pController.getMyPosts);
 router.get("/:postId", auth, pController.getPost);
 router.get("/", auth, pController.getAllPosts);

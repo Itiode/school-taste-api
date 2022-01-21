@@ -5,6 +5,7 @@ import * as firebase from "firebase-admin";
 
 import PostModel, {
   valCreatePostReqBody,
+  valCreateTextPostReqBody,
   validateReactToPostParams,
   getPosts,
 } from "../models/post";
@@ -40,10 +41,104 @@ import {
 import {
   compressImage,
   getNotificationPayload,
+  getTextForIndexing,
 } from "../shared/utils/functions";
 import { formatDate } from "../shared/utils/functions";
 import { postNotificationType, notificationPhrase } from "../shared/constants";
 import { User } from "../types/user";
+
+export const createTextPost: RequestHandler<
+  any,
+  SimpleRes,
+  CreatePostReqBody
+> = async (req, res, next) => {
+  const { error } = valCreateTextPostReqBody(req.body);
+  if (error) return res.status(400).send({ msg: error.details[0].message });
+
+  try {
+    const userId = req["user"].id;
+
+    const user: User = await UserModel.findById(userId).select(
+      "name studentData"
+    );
+    if (!user)
+      return res.status(404).send({ msg: "Can't create post, user not found" });
+
+    const { text } = req.body;
+
+    const { name, studentData } = user;
+
+    const { school, department, faculty, level } = studentData;
+
+    const tagsString = `${name.first} ${name.last} ${school.fullName} ${
+      school.shortName
+    } ${department.name} ${faculty.name} ${level} ${getTextForIndexing(text)}`;
+
+    const post = await new PostModel({
+      creator: {
+        id: userId,
+      },
+      text,
+      studentData,
+      tagsString,
+    }).save();
+
+    const notifType = postNotificationType.createdPostNotification;
+
+    const shouldCreate = await shouldCreateNotif(userId, notifType);
+    if (!shouldCreate)
+      return res.status(201).send({ msg: "Post created successfully" });
+
+    // Create notifications and notify departmental mates.
+    const depMates = await UserModel.find({
+      "studentData.school.id": school.id,
+      "studentData.department.id": department.id,
+      "studentData.level": level,
+    }).select("_id name messagingToken");
+
+    const notifs: any[] = [];
+    const notifPayload = getNotificationPayload(post.text);
+
+    for (let depMate of depMates) {
+      if (depMate._id.toHexString() !== userId) {
+        const notif = new NotificationModel({
+          creators: [
+            {
+              id: userId,
+              name: `${name.first} ${name.last}`,
+            },
+          ],
+          subscriber: { id: depMate._id },
+          type: notifType,
+          phrase: notificationPhrase.created,
+          contentId: post._id,
+          payload: notifPayload,
+        });
+
+        notifs.push(notif);
+
+        const fcmPayload = {
+          data: {
+            type: postNotificationType.createdPostNotification,
+            title: `${name.first} ${name.last} created a post`,
+            body: notifPayload,
+            contentId: post._id.toHexString(),
+          },
+        };
+
+        firebase
+          .messaging()
+          .sendToDevice(depMate.messagingToken, fcmPayload, messagingOptions);
+      }
+    }
+
+    await NotificationModel.insertMany(notifs);
+
+    res.status(201).send({ msg: "Post created successfully" });
+  } catch (e) {
+    next(new Error("Error in creating post: " + e));
+  }
+};
 
 // TODO: USE A TRANSACTION TO CREATE A POST AND SUBPOSTS
 export const createPost: RequestHandler<
@@ -69,7 +164,9 @@ export const createPost: RequestHandler<
 
     const { school, department, faculty, level } = studentData;
 
-    const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department.name} ${faculty.name} ${level}`;
+    const tagsString = `${name.first} ${name.last} ${school.fullName} ${
+      school.shortName
+    } ${department.name} ${faculty.name} ${level} ${getTextForIndexing(text)}`;
 
     const post = await new PostModel({
       creator: {
@@ -169,6 +266,7 @@ export const createPost: RequestHandler<
 
     // Create notifications and notify departmental mates.
     const depMates = await UserModel.find({
+      "studentData.school.id": school.id,
       "studentData.department.id": department.id,
       "studentData.level": level,
     }).select("_id name messagingToken");

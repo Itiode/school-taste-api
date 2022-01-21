@@ -291,7 +291,7 @@ const getCourseMates = async (req, res, next) => {
                 const tCM = {
                     id: c._id,
                     fullName: `${c.name.first} ${c.name.last}`,
-                    profileImageUrl: c.profileImage.original.url,
+                    profileImageUrl: c.profileImage.thumbnail.url,
                 };
                 transformedCMs.push(tCM);
             }
