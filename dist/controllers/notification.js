@@ -36,8 +36,8 @@ const getNotifications = async (req, res, next) => {
                     const user = await user_1.default.findById(n.creators[0].id).select("profileImage");
                     image = {
                         thumbnail: {
-                            url: user.profileImage.original.url,
-                            dUrl: user.profileImage.original.dUrl,
+                            url: user.profileImage.thumbnail.url,
+                            dUrl: user.profileImage.thumbnail.dUrl,
                         },
                     };
                     tempUsers.push({

@@ -181,7 +181,7 @@ export const getSubPostComments: RequestHandler<
           creator: c.creator,
           subPostId: c.subPostId,
           date: c.date,
-          formattedDate: formatDate(c.date.toString()),
+          formattedDate: formatDate(c.date.toISOString()),
           reactionCount: c.reactionCount ? c.reactionCount : 0,
           reaction: reaction ? reaction : { type: "", userId: "" },
         };

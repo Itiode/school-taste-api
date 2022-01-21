@@ -190,7 +190,7 @@ const getPostComments = async (req, res, next) => {
                 creator: {
                     id: tempUser.id,
                     name: tempUser.fullName,
-                    imageUrl: tempUser.userImage.original.url,
+                    imageUrl: tempUser.userImage.thumbnail.url,
                 },
                 postId: c.postId,
                 date: c.date,

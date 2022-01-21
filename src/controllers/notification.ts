@@ -57,8 +57,8 @@ export const getNotifications: RequestHandler<
 
           image = {
             thumbnail: {
-              url: user.profileImage.original.url,
-              dUrl: user.profileImage.original.dUrl,
+              url: user.profileImage.thumbnail.url,
+              dUrl: user.profileImage.thumbnail.dUrl,
             },
           };
 

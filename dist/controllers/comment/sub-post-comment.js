@@ -135,7 +135,7 @@ const getSubPostComments = async (req, res, next) => {
                 creator: c.creator,
                 subPostId: c.subPostId,
                 date: c.date,
-                formattedDate: (0, functions_1.formatDate)(c.date.toString()),
+                formattedDate: (0, functions_1.formatDate)(c.date.toISOString()),
                 reactionCount: c.reactionCount ? c.reactionCount : 0,
                 reaction: reaction ? reaction : { type: "", userId: "" },
             };
