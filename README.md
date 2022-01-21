@@ -1,17 +1,11 @@
 # TODO
 
-Start getting thumbnails
-
-- Ensure you send the the image for the following notifications
-  under the thumbnail key. (Post creation, comment).
-- Then for comments, send the image for the user under the the thumbnail
-  key as well
 - Post audience (School, Faculty or Departmental mates) - PostModel.find(
   'schoolId: post.school.id' and ['audience.school': true or 'audience.faculty': 'true' or 'audience.department': true]
   ). If audience is not set, then default to school
 - Check that a post contains either an image or text (one must be there)
 - Deleting images from AWS (e.g when a profile or cover image is changed)
-- Remove unused info, like payment details and rubyBalance, transaction doc from a user.
+- Level should use ID
 - Review url endpoints that they follow the REST standard
 
 

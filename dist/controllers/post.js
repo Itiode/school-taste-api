@@ -89,11 +89,11 @@ const createPost = async (req, res, next) => {
                 }
                 const item = {
                     thumbnail: {
-                        url: `${config_1.default.get("serverAddress")}api/users/post-images/${uploadedThumbImgName}`,
+                        url: `${config_1.default.get("serverAddress")}api/posts/images/${uploadedThumbImgName}`,
                         dUrl: uploadedThumbImg["Location"],
                     },
                     original: {
-                        url: `${config_1.default.get("serverAddress")}api/users/post-images/${uploadedOriImgName}`,
+                        url: `${config_1.default.get("serverAddress")}api/posts/images/${uploadedOriImgName}`,
                         dUrl: uploadedOriImg["Location"],
                     },
                     metadata: { width: imageWidth, height: imageHeight },

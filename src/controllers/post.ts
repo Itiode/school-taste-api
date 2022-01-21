@@ -141,13 +141,13 @@ export const createPost: RequestHandler<
           thumbnail: {
             url: `${config.get(
               "serverAddress"
-            )}api/users/post-images/${uploadedThumbImgName}`,
+            )}api/posts/images/${uploadedThumbImgName}`,
             dUrl: uploadedThumbImg["Location"],
           },
           original: {
             url: `${config.get(
               "serverAddress"
-            )}api/users/post-images/${uploadedOriImgName}`,
+            )}api/posts/images/${uploadedOriImgName}`,
             dUrl: uploadedOriImg["Location"],
           },
           metadata: { width: imageWidth, height: imageHeight },
