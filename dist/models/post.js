@@ -54,7 +54,7 @@ function valCreatePostReqBody(data) {
 exports.valCreatePostReqBody = valCreatePostReqBody;
 function valCreateTextPostReqBody(data) {
     return joi_1.default.object({
-        text: joi_1.default.string().trim().min(2).max(10000).required(),
+        text: joi_1.default.string().trim().min(1).max(10000).required(),
     }).validate(data);
 }
 exports.valCreateTextPostReqBody = valCreateTextPostReqBody;

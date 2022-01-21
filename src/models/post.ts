@@ -44,7 +44,7 @@ export function valCreatePostReqBody(data: CreatePostReqBody) {
 
 export function valCreateTextPostReqBody(data: CreatePostReqBody) {
   return Joi.object({
-    text: Joi.string().trim().min(2).max(10000).required(),
+    text: Joi.string().trim().min(1).max(10000).required(),
   }).validate(data);
 }
 
