@@ -28,7 +28,6 @@ router.put(
 );
 router.get("/profile-images/:filename", auth, uC.getProfileImage);
 router.get("/cover-images/:filename", auth, uC.getCoverImage);
-router.get("/ruby-balance/me", auth, uC.getRubyBalance);
 router.get("/coursemates/me", auth, uC.getCourseMates);
 router.put("/about/me", auth, uC.updateAbout);
 router.put("/phone/me", auth, uC.updatePhone);
@@ -36,6 +35,5 @@ router.put("/faculty/me", auth, uC.updateFaculty);
 router.put("/department/me", auth, uC.updateDepartment);
 router.put("/level/me", auth, uC.updateLevel);
 router.put("/messaging-token/me", auth, uC.updateMessagingToken);
-router.put("/payment-details/me", auth, uC.updatePaymentDetails);
 
 export default router;

@@ -16,9 +16,7 @@ export interface User {
   interests: string[];
   hobbies: string[];
   roles: string[];
-  rubyBalance: number;
   messagingToken: string;
-  paymentDetails: PaymentDetails;
 }
 
 export interface MofifiedUser {
@@ -33,7 +31,6 @@ export interface MofifiedUser {
   about: string;
   gender: string;
   studentData: StudentData;
-  rubyBalance: number;
 }
 
 export interface TempUser {
@@ -100,15 +97,6 @@ export interface UpdateDepReqBody {
 
 export interface UpdateLevelReqBody {
   level: string;
-}
-
-export interface PaymentDetails {
-  bankName: string;
-  bankSortCode: string;
-  accountType: string;
-  accountName: string;
-  accountNumber: string;
-  currency: string;
 }
 
 export interface UpdateMessagingTokenReqBody {

@@ -1,30 +1,14 @@
-export const txDesc = {
-  signupBonus: "Welcome bonus",
-  contentCreation: "SchoolTaste content creation",
-  whatsPoolWinner: "WhatsPool winner",
-  whatsPoolSportsWinner: "WhatsPool winner (Sports competition)",
-  whatsPoolMusicWinner: "WhatsPool winner (Music competion)",
-  whatsPoolGenWinner: "WhatsPool winner (General questions)",
-};
-
-export const rubyCredit = {
-  contentCreation: 1,
-  whatsPoolWinner: 1,
-};
-
-export const maxViewsForRubyCredit = 10;
-
 export const validReactionTypes: string[] = [
-  "Like",
-  "Love",
-  "Celebrate",
-  "Support",
-  "Curious",
-  "Sad",
-  "Crying",
+  "like",
+  "love",
+  "celebrate",
+  "support",
+  "curious",
+  "sad",
+  "crying",
 ];
 
-export const validSubPostTypes: string[] = ["Image", "Video", "Gif", "Sticker"];
+export const validSubPostTypes: string[] = ["image", "video", "gif", "sticker"];
 
 export const notificationPhrase = {
   awarded: "awarded",
@@ -52,9 +36,4 @@ export const commentNotificationType = {
 // BIRTHDAY NOTIFICATION TYPES
 export const birthdayNotificationType = {
   birthdayNotification: "BirthdayNotification",
-};
-
-// RUBY NOTIFICATION TYPES
-export const rubyNotificationType = {
-  awardedRubyNotification: "AwardedRubyNotification",
 };

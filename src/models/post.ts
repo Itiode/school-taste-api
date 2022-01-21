@@ -102,7 +102,6 @@ export async function getPosts(userId: string, posts: any[], res: Response) {
         reactionCount: sP.reactionCount ? sP.reactionCount : 0,
         commentCount: sP.commentCount,
         viewCount: sP.viewCount,
-        metadata: sP.metadata,
       });
     }
 

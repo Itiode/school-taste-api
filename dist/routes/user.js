@@ -38,7 +38,6 @@ router.put("/profile-image/me", auth_1.default, profileImgUpload.single("profile
 router.put("/cover-image/me", auth_1.default, coverImgUpload.single("cover-image"), uC.updateCoverImage);
 router.get("/profile-images/:filename", auth_1.default, uC.getProfileImage);
 router.get("/cover-images/:filename", auth_1.default, uC.getCoverImage);
-router.get("/ruby-balance/me", auth_1.default, uC.getRubyBalance);
 router.get("/coursemates/me", auth_1.default, uC.getCourseMates);
 router.put("/about/me", auth_1.default, uC.updateAbout);
 router.put("/phone/me", auth_1.default, uC.updatePhone);
@@ -46,5 +45,4 @@ router.put("/faculty/me", auth_1.default, uC.updateFaculty);
 router.put("/department/me", auth_1.default, uC.updateDepartment);
 router.put("/level/me", auth_1.default, uC.updateLevel);
 router.put("/messaging-token/me", auth_1.default, uC.updateMessagingToken);
-router.put("/payment-details/me", auth_1.default, uC.updatePaymentDetails);
 exports.default = router;

@@ -2,29 +2,24 @@ import mongoose, { Schema } from "mongoose";
 import Joi from "joi";
 
 import SubPost, { ReactToSubPostParams } from "../types/sub-post";
-import ReactionSchema from "../models/schemas/reaction";
+import reactionSchema from "../models/schemas/reaction";
+import imageSchema from "../models/schemas/image";
 import metadataSchema from "./schemas/metadata";
 
 const schema = new Schema<SubPost>({
   type: {
     type: String,
     trim: true,
-    enum: ["Image", "Video", "Gif", "Sticker"],
+    enum: ["image", "video", "gif", "sticker"],
     required: true,
   },
   ppid: { type: Schema.Types.ObjectId, required: true, ref: "Post" },
-  item: {
-    original: {
-      url: { type: String, required: true },
-      dUrl: { type: String, required: true },
-    },
-  },
-  reactions: [ReactionSchema],
+  item: imageSchema,
+  reactions: [reactionSchema],
   reactionCount: Number,
   views: [String],
   viewCount: Number,
   commentCount: Number,
-  metadata: { type: metadataSchema, required: true },
 });
 
 export default mongoose.model("Sub-Post", schema);

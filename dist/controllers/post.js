@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.viewPost = exports.reactToPost = exports.getPostImage = exports.getMyPosts = exports.getAllPosts = exports.getPost = exports.createPost = void 0;
+exports.reactToPost = exports.getPostImage = exports.getMyPosts = exports.getAllPosts = exports.getPost = exports.createPost = void 0;
 const config_1 = __importDefault(require("config"));
 const image_size_1 = __importDefault(require("image-size"));
 const firebase = __importStar(require("firebase-admin"));
@@ -30,14 +30,13 @@ const post_1 = __importStar(require("../models/post"));
 const notification_1 = __importStar(require("../models/notification"));
 const sub_post_1 = __importDefault(require("../models/sub-post"));
 const user_1 = __importDefault(require("../models/user"));
-const transaction_1 = __importDefault(require("../models/transaction"));
-const constants_1 = require("../shared/constants");
 const validators_1 = require("../shared/utils/validators");
 const firebase_1 = require("../main/firebase");
 const s3_1 = require("../shared/utils/s3");
 const functions_1 = require("../shared/utils/functions");
 const functions_2 = require("../shared/utils/functions");
-const constants_2 = require("../shared/constants");
+const constants_1 = require("../shared/constants");
+// TODO: USE A TRANSACTION TO CREATE A POST AND SUBPOSTS
 const createPost = async (req, res, next) => {
     const { error } = (0, post_1.valCreatePostReqBody)(req.body);
     if (error)
@@ -63,32 +62,51 @@ const createPost = async (req, res, next) => {
         if (req["files"]) {
             for (let i = 0; i < req["files"].length; i++) {
                 const file = req["files"][i];
-                const imageSize = (0, image_size_1.default)(file.path);
-                const uploadedFile = await (0, s3_1.uploadFileToS3)("post-images", file);
-                await (0, s3_1.delFileFromFS)(file.path);
+                const filePath = file.path;
+                const filename = file.filename;
+                const imageSize = (0, image_size_1.default)(filePath);
+                const imageWidth = imageSize.width;
+                const imageHeight = imageSize.height;
+                const thumbImg = await (0, functions_1.compressImage)(filePath, `thumbnail-${filename}`, {
+                    width: Math.round(imageWidth / 2 / 2),
+                    height: Math.round(imageHeight / 2 / 2),
+                });
+                const uploadedThumbImg = await (0, s3_1.uploadFileToS3)("post-images", thumbImg.path, thumbImg.name);
+                await (0, s3_1.delFileFromFS)(thumbImg.path);
+                const oriImg = await (0, functions_1.compressImage)(filePath, `original-${filename}`, {
+                    width: Math.round(imageWidth / 2),
+                    height: Math.round(imageHeight / 2),
+                });
+                const uploadedOriImg = await (0, s3_1.uploadFileToS3)("post-images", oriImg.path, oriImg.name);
+                await (0, s3_1.delFileFromFS)(oriImg.path);
+                // Delete the originally uploaded image
+                await (0, s3_1.delFileFromFS)(filePath);
                 // Remove the folder name (post-images), leaving just the file name
-                const filename = uploadedFile["key"].split("/")[1];
+                const uploadedThumbImgName = uploadedThumbImg["key"].split("/")[1];
+                const uploadedOriImgName = uploadedOriImg["key"].split("/")[1];
                 if (i === 0) {
-                    notifImageUrl = `${config_1.default.get("serverAddress")}api/posts/images/${filename}`;
+                    notifImageUrl = `${config_1.default.get("serverAddress")}api/posts/images/${uploadedOriImgName}`;
                 }
+                const item = {
+                    thumbnail: {
+                        url: `${config_1.default.get("serverAddress")}api/users/post-images/${uploadedThumbImgName}`,
+                        dUrl: uploadedThumbImg["Location"],
+                    },
+                    original: {
+                        url: `${config_1.default.get("serverAddress")}api/users/post-images/${uploadedOriImgName}`,
+                        dUrl: uploadedOriImg["Location"],
+                    },
+                    metadata: { width: imageWidth, height: imageHeight },
+                };
                 await new sub_post_1.default({
-                    type: "Image",
+                    type: "image",
                     ppid: post._id,
-                    item: {
-                        original: {
-                            url: `${config_1.default.get("serverAddress")}api/posts/images/${filename}`,
-                            dUrl: uploadedFile["Location"],
-                        },
-                    },
-                    metadata: {
-                        width: imageSize.width,
-                        height: imageSize.height,
-                    },
+                    item,
                 }).save();
             }
         }
-        const notifType = constants_2.postNotificationType.createdPostNotification;
-        const shouldCreate = await (0, notification_1.shouldCreateNotif)(userId, notifType, post.creator.id);
+        const notifType = constants_1.postNotificationType.createdPostNotification;
+        const shouldCreate = await (0, notification_1.shouldCreateNotif)(userId, notifType);
         if (!shouldCreate)
             return res.status(201).send({ msg: "Post created successfully" });
         // Create notifications and notify departmental mates.
@@ -108,15 +126,15 @@ const createPost = async (req, res, next) => {
                         },
                     ],
                     subscriber: { id: depMate._id },
-                    type: constants_2.postNotificationType.createdPostNotification,
-                    phrase: constants_2.notificationPhrase.created,
+                    type: notifType,
+                    phrase: constants_1.notificationPhrase.created,
                     contentId: post._id,
                     payload: notifPayload,
                 });
                 notifs.push(notif);
                 const fcmPayload = {
                     data: {
-                        type: constants_2.postNotificationType.createdPostNotification,
+                        type: constants_1.postNotificationType.createdPostNotification,
                         title: `${name.first} ${name.last} created a post`,
                         body: notifPayload,
                         contentId: post._id.toHexString(),
@@ -158,7 +176,6 @@ const getPost = async (req, res, next) => {
                 reactionCount: sP.reactionCount ? sP.reactionCount : 0,
                 commentCount: sP.commentCount,
                 viewCount: sP.viewCount,
-                metadata: sP.metadata,
             });
         }
         const postReaction = post.reactions.find((r) => r.userId.toHexString() === userId);
@@ -302,8 +319,8 @@ const reactToPost = async (req, res, next) => {
                     name: `${reactingUser.name.first} ${reactingUser.name.last}`,
                 },
             ];
-            const notifType = constants_2.postNotificationType.reactedToPostNotification;
-            const phrase = constants_2.notificationPhrase.liked;
+            const notifType = constants_1.postNotificationType.reactedToPostNotification;
+            const phrase = constants_1.notificationPhrase.liked;
             const payload = (0, functions_1.getNotificationPayload)(post.text);
             const existingNotif = await notification_1.default.findOne({
                 contentId: postId,
@@ -339,39 +356,3 @@ const reactToPost = async (req, res, next) => {
     }
 };
 exports.reactToPost = reactToPost;
-// TODO: Use a Transaction for this operation
-const viewPost = async (req, res, next) => {
-    try {
-        const { error } = (0, post_1.validateViewPostReq)(req.params);
-        if (error)
-            return res.status(400).send({ msg: error.details[0].message });
-        const userId = req["user"].id;
-        const { postId } = req.params;
-        const user = await user_1.default.findById(userId).select("_id");
-        if (!user)
-            return res.status(404).send({ msg: "No user with the given ID" });
-        const post = await post_1.default.findById(postId).select("-_id views creator");
-        if (!post)
-            return res.status(404).send({ msg: "No post found" });
-        if (!post.views.find((id) => id === userId)) {
-            await post_1.default.updateOne({ _id: postId }, { $addToSet: { views: userId } });
-            const updatedPost = await post_1.default.findByIdAndUpdate(postId, { $inc: { viewCount: 1 } }, { new: true, useFindAndModify: false }).select("viewCount -_id");
-            const postViewCount = updatedPost.viewCount;
-            if (postViewCount % constants_1.maxViewsForRubyCredit === 0) {
-                await user_1.default.updateOne({ _id: post.creator.id }, {
-                    $inc: { rubies: 1 },
-                });
-                await new transaction_1.default({
-                    receiver: post.creator.id,
-                    description: constants_1.txDesc.contentCreation,
-                    amount: constants_1.rubyCredit.contentCreation,
-                }).save();
-            }
-        }
-        res.send({ msg: "Post viewed successfully" });
-    }
-    catch (e) {
-        next(new Error("Error in saving viewed post: " + e));
-    }
-};
-exports.viewPost = viewPost;

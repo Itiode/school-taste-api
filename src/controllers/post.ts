@@ -6,7 +6,6 @@ import * as firebase from "firebase-admin";
 import PostModel, {
   valCreatePostReqBody,
   validateReactToPostParams,
-  validateViewPostReq,
   getPosts,
 } from "../models/post";
 import NotificationModel, { shouldCreateNotif } from "../models/notification";
@@ -23,12 +22,14 @@ import {
   GetPostResBody,
   ReactToPostParams,
   ReactToPostReq,
-  ViewPostParams,
 } from "../types/post";
 import SubPost, { ModifiedSubPost } from "../types/sub-post";
-import { SimpleRes, GetImageParams } from "../types/shared";
-import TransactionModel from "../models/transaction";
-import { txDesc, rubyCredit, maxViewsForRubyCredit } from "../shared/constants";
+import {
+  SimpleRes,
+  GetImageParams,
+  Image,
+  CompressedImage,
+} from "../types/shared";
 import { validateReactionType } from "../shared/utils/validators";
 import { messagingOptions } from "../main/firebase";
 import {
@@ -36,11 +37,15 @@ import {
   getFileFromS3,
   uploadFileToS3,
 } from "../shared/utils/s3";
-import { getNotificationPayload } from "../shared/utils/functions";
+import {
+  compressImage,
+  getNotificationPayload,
+} from "../shared/utils/functions";
 import { formatDate } from "../shared/utils/functions";
 import { postNotificationType, notificationPhrase } from "../shared/constants";
 import { User } from "../types/user";
 
+// TODO: USE A TRANSACTION TO CREATE A POST AND SUBPOSTS
 export const createPost: RequestHandler<
   any,
   SimpleRes,
@@ -80,45 +85,85 @@ export const createPost: RequestHandler<
     if (req["files"]) {
       for (let i = 0; i < req["files"].length; i++) {
         const file = req["files"][i];
+        const filePath = file!.path;
+        const filename = file!.filename;
 
-        const imageSize = sizeOf(file.path);
+        const imageSize = sizeOf(filePath);
+        const imageWidth = imageSize.width!;
+        const imageHeight = imageSize.height!;
 
-        const uploadedFile = await uploadFileToS3("post-images", file);
-        await delFileFromFS(file.path);
+        const thumbImg: CompressedImage = await compressImage(
+          filePath,
+          `thumbnail-${filename}`,
+          {
+            width: Math.round(imageWidth / 2 / 2),
+            height: Math.round(imageHeight / 2 / 2),
+          }
+        );
+
+        const uploadedThumbImg = await uploadFileToS3(
+          "post-images",
+          thumbImg.path,
+          thumbImg.name
+        );
+        await delFileFromFS(thumbImg.path);
+
+        const oriImg: CompressedImage = await compressImage(
+          filePath,
+          `original-${filename}`,
+          {
+            width: Math.round(imageWidth / 2),
+            height: Math.round(imageHeight / 2),
+          }
+        );
+
+        const uploadedOriImg = await uploadFileToS3(
+          "post-images",
+          oriImg.path,
+          oriImg.name
+        );
+        await delFileFromFS(oriImg.path);
+
+        // Delete the originally uploaded image
+        await delFileFromFS(filePath);
 
         // Remove the folder name (post-images), leaving just the file name
-        const filename = uploadedFile["key"].split("/")[1];
+        const uploadedThumbImgName = uploadedThumbImg["key"].split("/")[1];
+        const uploadedOriImgName = uploadedOriImg["key"].split("/")[1];
 
         if (i === 0) {
           notifImageUrl = `${config.get(
             "serverAddress"
-          )}api/posts/images/${filename}`;
+          )}api/posts/images/${uploadedOriImgName}`;
         }
 
+        const item: Image = {
+          thumbnail: {
+            url: `${config.get(
+              "serverAddress"
+            )}api/users/post-images/${uploadedThumbImgName}`,
+            dUrl: uploadedThumbImg["Location"],
+          },
+          original: {
+            url: `${config.get(
+              "serverAddress"
+            )}api/users/post-images/${uploadedOriImgName}`,
+            dUrl: uploadedOriImg["Location"],
+          },
+          metadata: { width: imageWidth, height: imageHeight },
+        };
+
         await new SubPostModel({
-          type: "Image",
+          type: "image",
           ppid: post._id,
-          item: {
-            original: {
-              url: `${config.get("serverAddress")}api/posts/images/${filename}`,
-              dUrl: uploadedFile["Location"],
-            },
-          },
-          metadata: {
-            width: imageSize.width,
-            height: imageSize.height,
-          },
+          item,
         }).save();
       }
     }
 
     const notifType = postNotificationType.createdPostNotification;
 
-    const shouldCreate = await shouldCreateNotif(
-      userId,
-      notifType,
-      post.creator.id
-    );
+    const shouldCreate = await shouldCreateNotif(userId, notifType);
     if (!shouldCreate)
       return res.status(201).send({ msg: "Post created successfully" });
 
@@ -141,7 +186,7 @@ export const createPost: RequestHandler<
             },
           ],
           subscriber: { id: depMate._id },
-          type: postNotificationType.createdPostNotification,
+          type: notifType,
           phrase: notificationPhrase.created,
           contentId: post._id,
           payload: notifPayload,
@@ -207,7 +252,6 @@ export const getPost: RequestHandler<GetPostParams, GetPostResBody> = async (
         reactionCount: sP.reactionCount ? sP.reactionCount : 0,
         commentCount: sP.commentCount,
         viewCount: sP.viewCount,
-        metadata: sP.metadata,
       });
     }
 
@@ -449,61 +493,5 @@ export const reactToPost: RequestHandler<
     res.send({ msg: "Reacted to post successfully" });
   } catch (e) {
     next(new Error("Error in reacting to post: " + e));
-  }
-};
-
-// TODO: Use a Transaction for this operation
-export const viewPost: RequestHandler<ViewPostParams, SimpleRes> = async (
-  req,
-  res,
-  next
-) => {
-  try {
-    const { error } = validateViewPostReq(req.params);
-    if (error) return res.status(400).send({ msg: error.details[0].message });
-
-    const userId = req["user"].id;
-    const { postId } = req.params;
-
-    const user = await UserModel.findById(userId).select("_id");
-    if (!user)
-      return res.status(404).send({ msg: "No user with the given ID" });
-
-    const post = await PostModel.findById(postId).select("-_id views creator");
-
-    if (!post) return res.status(404).send({ msg: "No post found" });
-
-    if (!post.views.find((id: string) => id === userId)) {
-      await PostModel.updateOne(
-        { _id: postId },
-        { $addToSet: { views: userId } }
-      );
-
-      const updatedPost = await PostModel.findByIdAndUpdate(
-        postId,
-        { $inc: { viewCount: 1 } },
-        { new: true, useFindAndModify: false }
-      ).select("viewCount -_id");
-
-      const postViewCount = updatedPost.viewCount;
-      if (postViewCount % maxViewsForRubyCredit === 0) {
-        await UserModel.updateOne(
-          { _id: post.creator.id },
-          {
-            $inc: { rubies: 1 },
-          }
-        );
-
-        await new TransactionModel({
-          receiver: post.creator.id,
-          description: txDesc.contentCreation,
-          amount: rubyCredit.contentCreation,
-        }).save();
-      }
-    }
-
-    res.send({ msg: "Post viewed successfully" });
-  } catch (e) {
-    next(new Error("Error in saving viewed post: " + e));
   }
 };

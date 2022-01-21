@@ -48,14 +48,15 @@ const s3 = new S3({
 // Upload a file to S3
 export function uploadFileToS3(
   folderName: "post-images" | "profile-images" | "cover-images",
-  file: any
+  filePath: fs.PathLike,
+  fileName: string
 ) {
-  const fileStream = fs.createReadStream(file.path);
+  const fileStream = fs.createReadStream(filePath);
 
   const uploadParams: S3.PutObjectRequest = {
     Bucket: bucketName,
     Body: fileStream,
-    Key: `${folderName}/${file.filename}`,
+    Key: `${folderName}/${fileName}`,
   };
 
   return s3.upload(uploadParams).promise();
@@ -69,7 +70,13 @@ export function delFileFromFS(filePath: string) {
 
 // Download a file from S3
 export function getFileFromS3(
-  folderName: "post-images" | "profile-images" | "cover-images",
+  folderName:
+    | "post-images"
+    | "post-thumbnail-images"
+    | "profile-images"
+    | "profile-thumbnail-images"
+    | "cover-images"
+    | "cover-thumbnail-images",
   filename: string
 ) {
   const downloadParams: S3.GetObjectRequest = {

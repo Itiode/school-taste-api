@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validatePaymentDetailsData = exports.valUpdateLevelReqBody = exports.valUpdateDepReqBody = exports.valUpdateFacultyReqBody = exports.validatePhoneData = exports.validateAboutData = exports.validateAuthData = exports.valAddUserReqBody = void 0;
+exports.valUpdateLevelReqBody = exports.valUpdateDepReqBody = exports.valUpdateFacultyReqBody = exports.validatePhoneData = exports.validateAboutData = exports.validateAuthData = exports.valAddUserReqBody = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const config_1 = __importDefault(require("config"));
 const Jwt = __importStar(require("jsonwebtoken"));
@@ -31,46 +31,43 @@ const name_1 = __importDefault(require("./schemas/name"));
 const dob_1 = __importDefault(require("./schemas/dob"));
 const student_data_1 = __importDefault(require("./schemas/student-data"));
 const image_1 = __importDefault(require("./schemas/image"));
-const payment_details_1 = __importDefault(require("./schemas/payment-details"));
 const schema = new mongoose_1.Schema({
     name: name_1.default,
     username: {
         type: String,
         trim: true,
-        minLength: 2,
-        maxLength: 25,
+        minlength: 2,
+        maxlength: 25,
         required: true,
         unique: true,
     },
     email: {
         type: String,
         trim: true,
-        minLength: 5,
-        maxLength: 250,
+        minlength: 5,
+        maxlength: 250,
         unique: true,
         required: true,
     },
     phone: {
         type: String,
         trim: true,
-        minLength: 11,
-        maxLength: 11,
+        minlength: 11,
+        maxlength: 11,
         unique: true,
         required: true,
     },
-    gender: { type: String, enum: ["Male", "Female", "Other"], required: true },
+    gender: { type: String, enum: ["male", "female", "other"], required: true },
     dob: dob_1.default,
     profileImage: { type: image_1.default, required: true },
     coverImage: { type: image_1.default, required: true },
-    about: { type: String, trim: true, minLength: 1, maxLength: 200 },
+    about: { type: String, trim: true, minlength: 1, maxlength: 200 },
     studentData: { type: student_data_1.default, required: true },
     password: { type: String, trim: true, required: true },
     interests: [String],
     hobbies: [String],
     roles: [String],
-    rubyBalance: { type: Number, min: 0, max: 1000, default: 1 },
     messagingToken: String,
-    paymentDetails: payment_details_1.default,
 }, { timestamps: true });
 schema.methods.genAuthToken = function () {
     return Jwt.sign({
@@ -97,7 +94,7 @@ function valAddUserReqBody(data) {
             .trim()
             .min(11)
             .max(11)
-            .regex(new RegExp("^[0-9]*$"))
+            .pattern(new RegExp("^[0-9]*$"))
             .required(),
         gender: joi_1.default.string().trim().min(2).max(25).required(),
         dob: joi_1.default.object({
@@ -107,15 +104,15 @@ function valAddUserReqBody(data) {
         }),
         schoolId: joi_1.default.string()
             .trim()
-            .regex(new RegExp("^[0-9a-fA-F]{24}$"))
+            .pattern(new RegExp("^[0-9a-fA-F]{24}$"))
             .required(),
         facultyId: joi_1.default.string()
             .trim()
-            .regex(new RegExp("^[0-9a-fA-F]{24}$"))
+            .pattern(new RegExp("^[0-9a-fA-F]{24}$"))
             .required(),
         departmentId: joi_1.default.string()
             .trim()
-            .regex(new RegExp("^[0-9a-fA-F]{24}$"))
+            .pattern(new RegExp("^[0-9a-fA-F]{24}$"))
             .required(),
         level: joi_1.default.string().trim().max(15).required(),
         password: joi_1.default.string().trim().min(6).max(50).required(),
@@ -147,7 +144,7 @@ function validatePhoneData(data) {
             .trim()
             .min(11)
             .max(11)
-            .regex(new RegExp("^[0-9]*$"))
+            .pattern(new RegExp("^[0-9]*$"))
             .required(),
     }).validate(data);
 }
@@ -156,7 +153,7 @@ function valUpdateFacultyReqBody(data) {
     return joi_1.default.object({
         facultyId: joi_1.default.string()
             .trim()
-            .regex(new RegExp("^[0-9a-fA-F]{24}$"))
+            .pattern(new RegExp("^[0-9a-fA-F]{24}$"))
             .required(),
     }).validate(data);
 }
@@ -165,7 +162,7 @@ function valUpdateDepReqBody(data) {
     return joi_1.default.object({
         departmentId: joi_1.default.string()
             .trim()
-            .regex(new RegExp("^[0-9a-fA-F]{24}$"))
+            .pattern(new RegExp("^[0-9a-fA-F]{24}$"))
             .required(),
     }).validate(data);
 }
@@ -176,15 +173,3 @@ function valUpdateLevelReqBody(data) {
     }).validate(data);
 }
 exports.valUpdateLevelReqBody = valUpdateLevelReqBody;
-function validatePaymentDetailsData(data) {
-    const schema = joi_1.default.object({
-        bankName: joi_1.default.string().trim().max(500).required(),
-        bankSortCode: joi_1.default.string().trim().max(5).required(),
-        accountType: joi_1.default.string().trim().max(25).required(),
-        accountName: joi_1.default.string().trim().max(200).required(),
-        accountNumber: joi_1.default.string().trim().min(10).max(10).required(),
-        currency: joi_1.default.string().min(2).max(5).required(),
-    });
-    return schema.validate(data);
-}
-exports.validatePaymentDetailsData = validatePaymentDetailsData;

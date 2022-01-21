@@ -1,4 +1,5 @@
 import config from "config";
+import sizeOf from "image-size";
 import bcrypt from "bcryptjs";
 import { RequestHandler } from "express";
 
@@ -8,10 +9,8 @@ import UserModel, {
   validatePhoneData,
   valUpdateFacultyReqBody,
   valUpdateDepReqBody,
-  validatePaymentDetailsData,
   valUpdateLevelReqBody,
 } from "../models/user";
-import NotificationModel from "../models/notification";
 import {
   User,
   AddUserReqBody,
@@ -23,7 +22,6 @@ import {
   UpdateDepReqBody,
   UpdateLevelReqBody,
   UpdateMessagingTokenReqBody,
-  PaymentDetails,
   VerifyUsernameReqBody,
   GetRubyBalanceResBody,
   GetCourseMatesResBody,
@@ -36,12 +34,15 @@ import {
   SimpleRes,
   GetImageParams,
   CourseMate,
+  CompressedImage,
+  Image,
 } from "../types/shared";
 import {
   delFileFromFS,
   getFileFromS3,
   uploadFileToS3,
 } from "../shared/utils/s3";
+import { compressImage } from "../shared/utils/functions";
 
 export const addUser: RequestHandler<any, AuthResBody, AddUserReqBody> = async (
   req,
@@ -185,7 +186,6 @@ export const getUser: RequestHandler<SimpleParams, GetUserResBody> = async (
         coverImage,
         about,
         studentData,
-        rubyBalance: req.params.userId ? 0 : rubyBalance,
       },
     });
   } catch (e) {
@@ -201,27 +201,52 @@ export const updateCoverImage: RequestHandler<any, SimpleRes> = async (
   try {
     const userId = req["user"].id;
     const file = req["file"];
+    const filePath = file!.path;
+    const filename = file!.filename;
 
-    const uploadedFile = await uploadFileToS3("cover-images", file);
-    await delFileFromFS(file!.path);
+    const imageSize = sizeOf(filePath);
+    const imageWidth = imageSize.width!;
+    const imageHeight = imageSize.height!;
 
-    // Remove the folder name (cover-images), leaving just the file name
-    const filename = uploadedFile["key"].split("/")[1];
+    const oriImg: CompressedImage = await compressImage(
+      filePath,
+      `original-${filename}`,
+      {
+        width: Math.round(imageWidth / 2),
+        height: Math.round(imageHeight / 2),
+      }
+    );
 
-    const coverImage = {
+    const uploadedOriImg = await uploadFileToS3(
+      "cover-images",
+      oriImg.path,
+      oriImg.name
+    );
+    await delFileFromFS(oriImg.path);
+
+    // Delete the originally uploaded image
+    await delFileFromFS(filePath);
+
+    // Remove the folder name (cover-images), leaving just the filename
+    const uploadedOriImgName = uploadedOriImg["key"].split("/")[1];
+
+    const coverImage: Image = {
       original: {
-        url: `${config.get("serverAddress")}api/users/cover-images/${filename}`,
-        dUrl: uploadedFile["Location"],
+        url: `${config.get(
+          "serverAddress"
+        )}api/users/cover-images/${uploadedOriImgName}`,
+        dUrl: uploadedOriImg["Location"],
       },
       thumbnail: {
         url: "",
         dUrl: "",
       },
+      metadata: { width: imageWidth, height: imageHeight },
     };
 
     await UserModel.updateOne({ _id: userId }, { $set: { coverImage } });
 
-    // TODO: Delete previous cover images from AWS
+    // TODO: Delete previous cover image (original) from AWS
 
     res.send({ msg: "Cover image updated successfully" });
   } catch (e) {
@@ -251,29 +276,68 @@ export const updateProfileImage: RequestHandler<any, SimpleRes> = async (
   try {
     const userId = req["user"].id;
     const file = req["file"];
+    const filePath = file!.path;
+    const filename = file!.filename;
 
-    const uploadedFile = await uploadFileToS3("profile-images", file);
-    await delFileFromFS(file!.path);
+    const imageSize = sizeOf(filePath);
+    const imageWidth = imageSize.width!;
+    const imageHeight = imageSize.height!;
+
+    const thumbImg: CompressedImage = await compressImage(
+      filePath,
+      `thumbnail-${filename}`,
+      { width: 200, height: 200 }
+    );
+
+    const uploadedThumbImg = await uploadFileToS3(
+      "profile-images",
+      thumbImg.path,
+      thumbImg.name
+    );
+    await delFileFromFS(thumbImg.path);
+
+    const oriImg: CompressedImage = await compressImage(
+      filePath,
+      `original-${filename}`,
+      {
+        width: Math.round(imageWidth / 2),
+        height: Math.round(imageHeight / 2),
+      }
+    );
+
+    const uploadedOriImg = await uploadFileToS3(
+      "profile-images",
+      oriImg.path,
+      oriImg.name
+    );
+    await delFileFromFS(oriImg.path);
+
+    // Delete the originally uploaded image
+    await delFileFromFS(filePath);
 
     // Remove the folder name (profile-images), leaving just the file name
-    const filename = uploadedFile["key"].split("/")[1];
+    const uploadedThumbImgName = uploadedThumbImg["key"].split("/")[1];
+    const uploadedOriImgName = uploadedOriImg["key"].split("/")[1];
 
-    const profileImage = {
+    const profileImage: Image = {
+      thumbnail: {
+        url: `${config.get(
+          "serverAddress"
+        )}api/users/profile-images/${uploadedThumbImgName}`,
+        dUrl: uploadedThumbImg["Location"],
+      },
       original: {
         url: `${config.get(
           "serverAddress"
-        )}api/users/profile-images/${filename}`,
-        dUrl: uploadedFile["Location"],
+        )}api/users/profile-images/${uploadedOriImgName}`,
+        dUrl: uploadedOriImg["Location"],
       },
-      thumbnail: {
-        url: "",
-        dUrl: "",
-      },
+      metadata: { width: imageWidth, height: imageHeight },
     };
 
     await UserModel.updateOne({ _id: userId }, { $set: { profileImage } });
 
-    // TODO: Delete previous profile images from AWS
+    // TODO: Delete previous profile images (original and thumbnail) from AWS
 
     res.send({ msg: "Profile image updated successfully" });
   } catch (e) {
@@ -460,49 +524,6 @@ export const updateLevel: RequestHandler<
   }
 };
 
-export const updatePaymentDetails: RequestHandler<
-  any,
-  SimpleRes,
-  PaymentDetails
-> = async (req, res, next) => {
-  const { error } = validatePaymentDetailsData(req.body);
-  if (error) return res.status(400).send({ msg: error.details[0].message });
-
-  try {
-    const {
-      bankName,
-      bankSortCode,
-      accountType,
-      accountName,
-      accountNumber,
-      currency,
-    } = req.body;
-    const userId = req["user"].id;
-    const user = await UserModel.findById(userId).select("_id");
-    if (!user) return res.status(404).send({ msg: "User not found" });
-
-    await UserModel.updateOne(
-      { _id: userId },
-      {
-        $set: {
-          paymentDetails: {
-            bankName,
-            bankSortCode,
-            accountType,
-            accountName,
-            accountNumber,
-            currency,
-          },
-        },
-      }
-    );
-
-    res.send({ msg: "Payment details updated successfully" });
-  } catch (e) {
-    next(new Error("Error in updating payment details: " + e));
-  }
-};
-
 export const updateMessagingToken: RequestHandler<
   any,
   SimpleRes,
@@ -538,19 +559,5 @@ export const verifyUsername: RequestHandler<
     res.send({ msg: "NOT_FOUND" });
   } catch (e) {
     next(new Error("Error in checking username: " + e));
-  }
-};
-
-export const getRubyBalance: RequestHandler<
-  any,
-  GetRubyBalanceResBody | SimpleRes
-> = async (req, res, next) => {
-  try {
-    const user = await UserModel.findById(req["user"].id).select("rubyBalance");
-    if (!user) return res.status(404).send({ msg: "User not found" });
-
-    res.send({ msg: "Success", data: { balance: user.rubyBalance } });
-  } catch (e) {
-    next(new Error("Error in getting ruby balance: " + e));
   }
 };

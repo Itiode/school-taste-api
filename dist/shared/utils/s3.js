@@ -45,12 +45,12 @@ const s3 = new s3_1.default({
     secretAccessKey,
 });
 // Upload a file to S3
-function uploadFileToS3(folderName, file) {
-    const fileStream = fs_1.default.createReadStream(file.path);
+function uploadFileToS3(folderName, filePath, fileName) {
+    const fileStream = fs_1.default.createReadStream(filePath);
     const uploadParams = {
         Bucket: bucketName,
         Body: fileStream,
-        Key: `${folderName}/${file.filename}`,
+        Key: `${folderName}/${fileName}`,
     };
     return s3.upload(uploadParams).promise();
 }

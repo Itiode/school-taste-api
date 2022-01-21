@@ -1,29 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.rubyNotificationType = exports.birthdayNotificationType = exports.commentNotificationType = exports.postNotificationType = exports.notificationPhrase = exports.validSubPostTypes = exports.validReactionTypes = exports.maxViewsForRubyCredit = exports.rubyCredit = exports.txDesc = void 0;
-exports.txDesc = {
-    signupBonus: "Welcome bonus",
-    contentCreation: "SchoolTaste content creation",
-    whatsPoolWinner: "WhatsPool winner",
-    whatsPoolSportsWinner: "WhatsPool winner (Sports competition)",
-    whatsPoolMusicWinner: "WhatsPool winner (Music competion)",
-    whatsPoolGenWinner: "WhatsPool winner (General questions)",
-};
-exports.rubyCredit = {
-    contentCreation: 1,
-    whatsPoolWinner: 1,
-};
-exports.maxViewsForRubyCredit = 10;
+exports.birthdayNotificationType = exports.commentNotificationType = exports.postNotificationType = exports.notificationPhrase = exports.validSubPostTypes = exports.validReactionTypes = void 0;
 exports.validReactionTypes = [
-    "Like",
-    "Love",
-    "Celebrate",
-    "Support",
-    "Curious",
-    "Sad",
-    "Crying",
+    "like",
+    "love",
+    "celebrate",
+    "support",
+    "curious",
+    "sad",
+    "crying",
 ];
-exports.validSubPostTypes = ["Image", "Video", "Gif", "Sticker"];
+exports.validSubPostTypes = ["image", "video", "gif", "sticker"];
 exports.notificationPhrase = {
     awarded: "awarded",
     created: "created a",
@@ -47,8 +34,4 @@ exports.commentNotificationType = {
 // BIRTHDAY NOTIFICATION TYPES
 exports.birthdayNotificationType = {
     birthdayNotification: "BirthdayNotification",
-};
-// RUBY NOTIFICATION TYPES
-exports.rubyNotificationType = {
-    awardedRubyNotification: "AwardedRubyNotification",
 };

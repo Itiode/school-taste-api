@@ -34,6 +34,5 @@ router.get("/me/:userId", auth_1.default, pController.getMyPosts);
 router.get("/:postId", auth_1.default, pController.getPost);
 router.get("/", auth_1.default, pController.getAllPosts);
 router.put("/react/:postId", auth_1.default, pController.reactToPost);
-router.put("/view/:postId", auth_1.default, pController.viewPost);
 router.get("/images/:filename", pController.getPostImage);
 exports.default = router;

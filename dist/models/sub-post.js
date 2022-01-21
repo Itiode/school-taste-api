@@ -26,27 +26,21 @@ exports.validateReactToSubPostParams = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const joi_1 = __importDefault(require("joi"));
 const reaction_1 = __importDefault(require("../models/schemas/reaction"));
-const metadata_1 = __importDefault(require("./schemas/metadata"));
+const image_1 = __importDefault(require("../models/schemas/image"));
 const schema = new mongoose_1.Schema({
     type: {
         type: String,
         trim: true,
-        enum: ["Image", "Video", "Gif", "Sticker"],
+        enum: ["image", "video", "gif", "sticker"],
         required: true,
     },
     ppid: { type: mongoose_1.Schema.Types.ObjectId, required: true, ref: "Post" },
-    item: {
-        original: {
-            url: { type: String, required: true },
-            dUrl: { type: String, required: true },
-        },
-    },
+    item: image_1.default,
     reactions: [reaction_1.default],
     reactionCount: Number,
     views: [String],
     viewCount: Number,
     commentCount: Number,
-    metadata: { type: metadata_1.default, required: true },
 });
 exports.default = mongoose_1.default.model("Sub-Post", schema);
 function validateReactToSubPostParams(data) {

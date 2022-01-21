@@ -23,13 +23,17 @@ const NotificationModel = mongoose.model("Notification", schema);
 export const shouldCreateNotif = async (
   creatorId: string,
   notifType: string,
-  ownerId: string
+  ownerId?: string
 ) => {
-  const notif = await NotificationModel.findOne({
-    "creators.id": creatorId,
-    type: notifType,
-    "owners.id": ownerId,
-  })
+  const query = ownerId
+    ? {
+        "creators.id": creatorId,
+        type: notifType,
+        "owners.id": ownerId,
+      }
+    : { "creators.id": creatorId, type: notifType };
+
+  const notif = await NotificationModel.findOne(query)
     .sort({ _id: -1 })
     .select("date");
 

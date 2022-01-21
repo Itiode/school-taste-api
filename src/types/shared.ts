@@ -13,12 +13,23 @@ export interface SimpleRes {
 export interface Image {
   thumbnail: { url: string; dUrl: string };
   original: { url: string; dUrl: string };
+  metadata: Metadata;
 }
 
 export interface Metadata {
   width: number;
   height: number;
-  size?: number;
+}
+
+export interface CompressedImage {
+  format: string;
+  width: number;
+  height: number;
+  channels: number;
+  premultiplied: boolean;
+  size: number;
+  path: string;
+  name: string;
 }
 
 export interface StudentData {
