@@ -44,8 +44,6 @@ export const shouldCreateNotif = async (
   const creationTime = new Date(notif.date).getTime();
   const diff = currentTime - creationTime;
 
-  console.log(diff > aDayInMillis);
-
   return diff > aDayInMillis;
 };
 

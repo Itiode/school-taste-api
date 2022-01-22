@@ -120,6 +120,11 @@ const createPost = async (req, res, next) => {
         const { name, studentData } = user;
         const { school, department, faculty, level } = studentData;
         const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department.name} ${faculty.name} ${level} ${(0, functions_1.getTextForIndexing)(text)}`;
+        const files = req["files"] || [];
+        if (files.length < 1)
+            return res
+                .status(400)
+                .send({ msg: "Post must contain at least one image" });
         const post = await new post_1.default({
             creator: {
                 id: userId,
@@ -129,51 +134,49 @@ const createPost = async (req, res, next) => {
             tagsString,
         }).save();
         let notifImageUrl = "";
-        if (req["files"]) {
-            for (let i = 0; i < req["files"].length; i++) {
-                const file = req["files"][i];
-                const filePath = file.path;
-                const filename = file.filename;
-                const imageSize = (0, image_size_1.default)(filePath);
-                const imageWidth = imageSize.width;
-                const imageHeight = imageSize.height;
-                const thumbImg = await (0, functions_1.compressImage)(filePath, `thumbnail-${filename}`, {
-                    width: Math.round(imageWidth / 2 / 2),
-                    height: Math.round(imageHeight / 2 / 2),
-                });
-                const uploadedThumbImg = await (0, s3_1.uploadFileToS3)("post-images", thumbImg.path, thumbImg.name);
-                await (0, s3_1.delFileFromFS)(thumbImg.path);
-                const oriImg = await (0, functions_1.compressImage)(filePath, `original-${filename}`, {
-                    width: Math.round(imageWidth / 2),
-                    height: Math.round(imageHeight / 2),
-                });
-                const uploadedOriImg = await (0, s3_1.uploadFileToS3)("post-images", oriImg.path, oriImg.name);
-                await (0, s3_1.delFileFromFS)(oriImg.path);
-                // Delete the originally uploaded image
-                await (0, s3_1.delFileFromFS)(filePath);
-                // Remove the folder name (post-images), leaving just the file name
-                const uploadedThumbImgName = uploadedThumbImg["key"].split("/")[1];
-                const uploadedOriImgName = uploadedOriImg["key"].split("/")[1];
-                if (i === 0) {
-                    notifImageUrl = `${config_1.default.get("serverAddress")}api/posts/images/${uploadedOriImgName}`;
-                }
-                const item = {
-                    thumbnail: {
-                        url: `${config_1.default.get("serverAddress")}api/posts/images/${uploadedThumbImgName}`,
-                        dUrl: uploadedThumbImg["Location"],
-                    },
-                    original: {
-                        url: `${config_1.default.get("serverAddress")}api/posts/images/${uploadedOriImgName}`,
-                        dUrl: uploadedOriImg["Location"],
-                    },
-                    metadata: { width: imageWidth, height: imageHeight },
-                };
-                await new sub_post_1.default({
-                    type: "image",
-                    ppid: post._id,
-                    item,
-                }).save();
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const filePath = file.path;
+            const filename = file.filename;
+            const imageSize = (0, image_size_1.default)(filePath);
+            const imageWidth = imageSize.width;
+            const imageHeight = imageSize.height;
+            const thumbImg = await (0, functions_1.compressImage)(filePath, `thumbnail-${filename}`, {
+                width: Math.round(imageWidth / 2 / 2),
+                height: Math.round(imageHeight / 2 / 2),
+            });
+            const uploadedThumbImg = await (0, s3_1.uploadFileToS3)("post-images", thumbImg.path, thumbImg.name);
+            await (0, s3_1.delFileFromFS)(thumbImg.path);
+            const oriImg = await (0, functions_1.compressImage)(filePath, `original-${filename}`, {
+                width: Math.round(imageWidth / 2),
+                height: Math.round(imageHeight / 2),
+            });
+            const uploadedOriImg = await (0, s3_1.uploadFileToS3)("post-images", oriImg.path, oriImg.name);
+            await (0, s3_1.delFileFromFS)(oriImg.path);
+            // Delete the originally uploaded image
+            await (0, s3_1.delFileFromFS)(filePath);
+            // Remove the folder name (post-images), leaving just the file name
+            const uploadedThumbImgName = uploadedThumbImg["key"].split("/")[1];
+            const uploadedOriImgName = uploadedOriImg["key"].split("/")[1];
+            if (i === 0) {
+                notifImageUrl = `${config_1.default.get("serverAddress")}api/posts/images/${uploadedOriImgName}`;
             }
+            const item = {
+                thumbnail: {
+                    url: `${config_1.default.get("serverAddress")}api/posts/images/${uploadedThumbImgName}`,
+                    dUrl: uploadedThumbImg["Location"],
+                },
+                original: {
+                    url: `${config_1.default.get("serverAddress")}api/posts/images/${uploadedOriImgName}`,
+                    dUrl: uploadedOriImg["Location"],
+                },
+                metadata: { width: imageWidth, height: imageHeight },
+            };
+            await new sub_post_1.default({
+                type: "image",
+                ppid: post._id,
+                item,
+            }).save();
         }
         const notifType = constants_1.postNotificationType.createdPostNotification;
         const shouldCreate = await (0, notification_1.shouldCreateNotif)(userId, notifType);

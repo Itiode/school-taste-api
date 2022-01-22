@@ -168,6 +168,12 @@ export const createPost: RequestHandler<
       school.shortName
     } ${department.name} ${faculty.name} ${level} ${getTextForIndexing(text)}`;
 
+    const files = req["files"] || [];
+    if (files.length < 1)
+      return res
+        .status(400)
+        .send({ msg: "Post must contain at least one image" });
+
     const post = await new PostModel({
       creator: {
         id: userId,
@@ -179,83 +185,81 @@ export const createPost: RequestHandler<
 
     let notifImageUrl = "";
 
-    if (req["files"]) {
-      for (let i = 0; i < req["files"].length; i++) {
-        const file = req["files"][i];
-        const filePath = file!.path;
-        const filename = file!.filename;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const filePath = file!.path;
+      const filename = file!.filename;
 
-        const imageSize = sizeOf(filePath);
-        const imageWidth = imageSize.width!;
-        const imageHeight = imageSize.height!;
+      const imageSize = sizeOf(filePath);
+      const imageWidth = imageSize.width!;
+      const imageHeight = imageSize.height!;
 
-        const thumbImg: CompressedImage = await compressImage(
-          filePath,
-          `thumbnail-${filename}`,
-          {
-            width: Math.round(imageWidth / 2 / 2),
-            height: Math.round(imageHeight / 2 / 2),
-          }
-        );
-
-        const uploadedThumbImg = await uploadFileToS3(
-          "post-images",
-          thumbImg.path,
-          thumbImg.name
-        );
-        await delFileFromFS(thumbImg.path);
-
-        const oriImg: CompressedImage = await compressImage(
-          filePath,
-          `original-${filename}`,
-          {
-            width: Math.round(imageWidth / 2),
-            height: Math.round(imageHeight / 2),
-          }
-        );
-
-        const uploadedOriImg = await uploadFileToS3(
-          "post-images",
-          oriImg.path,
-          oriImg.name
-        );
-        await delFileFromFS(oriImg.path);
-
-        // Delete the originally uploaded image
-        await delFileFromFS(filePath);
-
-        // Remove the folder name (post-images), leaving just the file name
-        const uploadedThumbImgName = uploadedThumbImg["key"].split("/")[1];
-        const uploadedOriImgName = uploadedOriImg["key"].split("/")[1];
-
-        if (i === 0) {
-          notifImageUrl = `${config.get(
-            "serverAddress"
-          )}api/posts/images/${uploadedOriImgName}`;
+      const thumbImg: CompressedImage = await compressImage(
+        filePath,
+        `thumbnail-${filename}`,
+        {
+          width: Math.round(imageWidth / 2 / 2),
+          height: Math.round(imageHeight / 2 / 2),
         }
+      );
 
-        const item: Image = {
-          thumbnail: {
-            url: `${config.get(
-              "serverAddress"
-            )}api/posts/images/${uploadedThumbImgName}`,
-            dUrl: uploadedThumbImg["Location"],
-          },
-          original: {
-            url: `${config.get(
-              "serverAddress"
-            )}api/posts/images/${uploadedOriImgName}`,
-            dUrl: uploadedOriImg["Location"],
-          },
-          metadata: { width: imageWidth, height: imageHeight },
-        };
+      const uploadedThumbImg = await uploadFileToS3(
+        "post-images",
+        thumbImg.path,
+        thumbImg.name
+      );
+      await delFileFromFS(thumbImg.path);
 
-        await new SubPostModel({
-          type: "image",
-          ppid: post._id,
-          item,
-        }).save();
+      const oriImg: CompressedImage = await compressImage(
+        filePath,
+        `original-${filename}`,
+        {
+          width: Math.round(imageWidth / 2),
+          height: Math.round(imageHeight / 2),
+        }
+      );
+
+      const uploadedOriImg = await uploadFileToS3(
+        "post-images",
+        oriImg.path,
+        oriImg.name
+      );
+      await delFileFromFS(oriImg.path);
+
+      // Delete the originally uploaded image
+      await delFileFromFS(filePath);
+
+      // Remove the folder name (post-images), leaving just the file name
+      const uploadedThumbImgName = uploadedThumbImg["key"].split("/")[1];
+      const uploadedOriImgName = uploadedOriImg["key"].split("/")[1];
+
+      if (i === 0) {
+        notifImageUrl = `${config.get(
+          "serverAddress"
+        )}api/posts/images/${uploadedOriImgName}`;
       }
+
+      const item: Image = {
+        thumbnail: {
+          url: `${config.get(
+            "serverAddress"
+          )}api/posts/images/${uploadedThumbImgName}`,
+          dUrl: uploadedThumbImg["Location"],
+        },
+        original: {
+          url: `${config.get(
+            "serverAddress"
+          )}api/posts/images/${uploadedOriImgName}`,
+          dUrl: uploadedOriImg["Location"],
+        },
+        metadata: { width: imageWidth, height: imageHeight },
+      };
+
+      await new SubPostModel({
+        type: "image",
+        ppid: post._id,
+        item,
+      }).save();
     }
 
     const notifType = postNotificationType.createdPostNotification;
