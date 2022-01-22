@@ -38,7 +38,7 @@ export default mongoose.model("Post", schema);
 
 export function valCreatePostReqBody(data: CreatePostReqBody) {
   return Joi.object({
-    text: Joi.string().trim().max(10000),
+    text: Joi.string().trim().min(0).max(10000),
   }).validate(data);
 }
 
