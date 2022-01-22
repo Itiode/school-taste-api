@@ -198,7 +198,10 @@ const updateProfileImage = async (req, res, next) => {
         const imageSize = (0, image_size_1.default)(filePath);
         const imageWidth = imageSize.width;
         const imageHeight = imageSize.height;
-        const thumbImg = await (0, functions_1.compressImage)(filePath, `thumbnail-${filename}`, { width: 200, height: 200 });
+        const thumbImg = await (0, functions_1.compressImage)(filePath, `thumbnail-${filename}`, {
+            width: Math.round(imageWidth / 2 / 2),
+            height: Math.round(imageHeight / 2 / 2),
+        });
         const uploadedThumbImg = await (0, s3_1.uploadFileToS3)("profile-images", thumbImg.path, thumbImg.name);
         await (0, s3_1.delFileFromFS)(thumbImg.path);
         const oriImg = await (0, functions_1.compressImage)(filePath, `original-${filename}`, {

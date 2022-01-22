@@ -286,7 +286,10 @@ export const updateProfileImage: RequestHandler<any, SimpleRes> = async (
     const thumbImg: CompressedImage = await compressImage(
       filePath,
       `thumbnail-${filename}`,
-      { width: 200, height: 200 }
+      {
+        width: Math.round(imageWidth / 2 / 2),
+        height: Math.round(imageHeight / 2 / 2),
+      }
     );
 
     const uploadedThumbImg = await uploadFileToS3(

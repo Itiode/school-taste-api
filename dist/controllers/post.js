@@ -142,14 +142,14 @@ const createPost = async (req, res, next) => {
             const imageWidth = imageSize.width;
             const imageHeight = imageSize.height;
             const thumbImg = await (0, functions_1.compressImage)(filePath, `thumbnail-${filename}`, {
-                width: Math.round(imageWidth / 2 / 2),
-                height: Math.round(imageHeight / 2 / 2),
+                width: Math.round(imageWidth / 2),
+                height: Math.round(imageHeight / 2),
             });
             const uploadedThumbImg = await (0, s3_1.uploadFileToS3)("post-images", thumbImg.path, thumbImg.name);
             await (0, s3_1.delFileFromFS)(thumbImg.path);
             const oriImg = await (0, functions_1.compressImage)(filePath, `original-${filename}`, {
-                width: Math.round(imageWidth / 2),
-                height: Math.round(imageHeight / 2),
+                width: Math.round(imageWidth),
+                height: Math.round(imageHeight),
             });
             const uploadedOriImg = await (0, s3_1.uploadFileToS3)("post-images", oriImg.path, oriImg.name);
             await (0, s3_1.delFileFromFS)(oriImg.path);

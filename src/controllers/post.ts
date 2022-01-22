@@ -198,8 +198,8 @@ export const createPost: RequestHandler<
         filePath,
         `thumbnail-${filename}`,
         {
-          width: Math.round(imageWidth / 2 / 2),
-          height: Math.round(imageHeight / 2 / 2),
+          width: Math.round(imageWidth / 2),
+          height: Math.round(imageHeight / 2),
         }
       );
 
@@ -214,8 +214,8 @@ export const createPost: RequestHandler<
         filePath,
         `original-${filename}`,
         {
-          width: Math.round(imageWidth / 2),
-          height: Math.round(imageHeight / 2),
+          width: Math.round(imageWidth),
+          height: Math.round(imageHeight),
         }
       );
 
