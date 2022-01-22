@@ -48,7 +48,7 @@ const schema = new mongoose_1.Schema({
 exports.default = mongoose_1.default.model("Post", schema);
 function valCreatePostReqBody(data) {
     return joi_1.default.object({
-        text: joi_1.default.string().trim().max(10000),
+        text: joi_1.default.string().trim().max(10000).allow(''),
     }).validate(data);
 }
 exports.valCreatePostReqBody = valCreatePostReqBody;
