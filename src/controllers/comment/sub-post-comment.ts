@@ -18,6 +18,7 @@ import UserModel from "../../models/user";
 import { validateReactionType } from "../../shared/utils/validators";
 import { SimpleRes } from "../../types/shared";
 import { formatDate } from "../../shared/utils/functions";
+import { TempUser, User } from "../../types/user";
 
 export const addSubPostComment: RequestHandler<
   any,
@@ -161,7 +162,7 @@ export const getSubPostComments: RequestHandler<
     const pageNumber = +req.query.pageNumber;
     const pageSize = +req.query.pageSize;
 
-    const comments = await SubPostCommentModel.find({
+    const comments: SubPostComment[] = await SubPostCommentModel.find({
       subPostId: req.params.subPostId,
     })
       // .skip((pageNumber - 1) * pageSize)
@@ -169,24 +170,47 @@ export const getSubPostComments: RequestHandler<
       .select("-__v")
       .sort({ _id: -1 });
 
-    const transformedComments: SubPostCommentData[] = comments.map(
-      (c: SubPostComment) => {
+      const transformedComments: SubPostCommentData[] = [];
+      const tempUsers: TempUser[] = [];
+
+      for (const c of comments) {
+        let tempUser: TempUser;
+  
+        const isFetched = tempUsers.find((tU) => tU.id === c.creator.id);
+        if (!isFetched) {
+          const creator: User = await UserModel.findById(c.creator.id).select(
+            "name profileImage"
+          );
+  
+          tempUser = {
+            id: creator._id,
+            fullName: `${creator.name.first} ${creator.name.last}`,
+            userImage: creator.profileImage,
+          };
+          tempUsers.push(tempUser);
+        } else {
+          tempUser = tempUsers.find((tU) => tU.id === c.creator.id)!;
+        }
+  
         const reaction = c.reactions.find(
           (r: any) => r.userId.toHexString() === userId
         );
-
-        return {
+  
+        transformedComments.push({
           id: c._id,
           text: c.text,
-          creator: c.creator,
+          creator: {
+            id: tempUser.id,
+            name: tempUser.fullName,
+            imageUrl: tempUser.userImage.thumbnail.url,
+          },
           subPostId: c.subPostId,
           date: c.date,
           formattedDate: formatDate(c.date.toISOString()),
           reactionCount: c.reactionCount ? c.reactionCount : 0,
           reaction: reaction ? reaction : { type: "", userId: "" },
-        };
+        });
       }
-    );
 
     res.send({
       msg: "Sub post comments gotten successfully",

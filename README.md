@@ -13,7 +13,6 @@
 - Create a reusable function for creating notifications when a post (text post or image post) is created.
 - Create a notification when a post is liked
 - Only an admin can add a school, department, faculty
-- A post can be created with just text
 - When fetching posts, add fallback for a user not being available,
   in such a case, the post shouldn't be included in the returned posts.
 - Include name in a reaction when fetching a post, subpost, comment or sub post comment

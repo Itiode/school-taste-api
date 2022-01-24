@@ -1,6 +1,7 @@
 import { SchoolData } from "./student-data/school";
 import { FacultyData } from "./student-data/faculty";
 import { DepartmentData } from "./student-data/department";
+import { LevelData } from "./student-data/level";
 
 export interface SimpleParams {
   userId: string;
@@ -36,7 +37,7 @@ export interface StudentData {
   school: SchoolData;
   department: DepartmentData;
   faculty: FacultyData;
-  level: string;
+  level: LevelData;
 }
 
 export interface CourseMate {
