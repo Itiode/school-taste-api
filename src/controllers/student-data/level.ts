@@ -13,7 +13,7 @@ export const getLevels: RequestHandler<
   GetLevelsResBody | SimpleRes
 > = async (req, res, next) => {
   try {
-    const levels = await LevelModel.find().select("-__v").sort({ name: 1 });
+    const levels = await LevelModel.find().select("-__v").sort({ name: -1 });
 
     const transformedLs: LevelData[] = levels.map((f: Level) => {
       return {

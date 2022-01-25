@@ -7,7 +7,7 @@ exports.getLevels = void 0;
 const level_1 = __importDefault(require("../../models/student-data/level"));
 const getLevels = async (req, res, next) => {
     try {
-        const levels = await level_1.default.find().select("-__v").sort({ name: 1 });
+        const levels = await level_1.default.find().select("-__v").sort({ name: -1 });
         const transformedLs = levels.map((f) => {
             return {
                 id: f._id,
