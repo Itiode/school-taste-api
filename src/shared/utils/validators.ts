@@ -1,6 +1,6 @@
-import Joi from 'joi';
+import Joi from "joi";
 
-import { validReactionTypes, validSubPostTypes } from '../constants';
+import { validReactionTypes, validSubPostTypes } from "../constants";
 
 // TODO: To be implemented
 export function validateIdWithJoi() {}
@@ -16,3 +16,8 @@ export function validateSubPostType(subPostType: string): boolean {
 
   return isValid ? true : false;
 }
+
+export const JoiValidators = {
+  id: Joi.string().trim().pattern(new RegExp("^[0-9a-fA-F]{24}$")),
+  phone: Joi.string().trim().min(11).max(11).pattern(new RegExp("^[0-9]*$")),
+};

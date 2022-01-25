@@ -166,7 +166,9 @@ export const createPost: RequestHandler<
 
     const tagsString = `${name.first} ${name.last} ${school.fullName} ${
       school.shortName
-    } ${department.name} ${faculty.name} ${level} ${getTextForIndexing(text)}`;
+    } ${department.name} ${faculty.name} ${level.name} ${getTextForIndexing(
+      text
+    )}`;
 
     const files = req["files"] || [];
     if (files.length < 1)

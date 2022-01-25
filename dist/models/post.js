@@ -30,6 +30,7 @@ const functions_1 = require("../shared/utils/functions");
 const user_1 = __importDefault(require("../models/user"));
 const reaction_1 = __importDefault(require("./schemas/reaction"));
 const student_data_1 = __importDefault(require("./schemas/student-data"));
+const validators_1 = require("../shared/utils/validators");
 const schema = new mongoose_1.Schema({
     creator: {
         id: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
@@ -48,7 +49,7 @@ const schema = new mongoose_1.Schema({
 exports.default = mongoose_1.default.model("Post", schema);
 function valCreatePostReqBody(data) {
     return joi_1.default.object({
-        text: joi_1.default.string().trim().max(10000).allow(''),
+        text: joi_1.default.string().trim().max(10000).allow(""),
     }).validate(data);
 }
 exports.valCreatePostReqBody = valCreatePostReqBody;
@@ -60,19 +61,13 @@ function valCreateTextPostReqBody(data) {
 exports.valCreateTextPostReqBody = valCreateTextPostReqBody;
 function validateReactToPostParams(data) {
     return joi_1.default.object({
-        postId: joi_1.default.string()
-            .trim()
-            .regex(new RegExp("^[0-9a-fA-F]{24}$"))
-            .required(),
+        postId: validators_1.JoiValidators.id.required(),
     }).validate(data);
 }
 exports.validateReactToPostParams = validateReactToPostParams;
 function validateViewPostReq(data) {
     return joi_1.default.object({
-        postId: joi_1.default.string()
-            .trim()
-            .regex(new RegExp("^[0-9a-fA-F]{24}$"))
-            .required(),
+        postId: validators_1.JoiValidators.id.required(),
     }).validate(data);
 }
 exports.validateViewPostReq = validateViewPostReq;

@@ -60,7 +60,7 @@ export interface AddUserReqBody {
   schoolId: string;
   facultyId: string;
   departmentId: string;
-  level: string;
+  levelId: string;
   password: string;
 }
 
@@ -96,7 +96,7 @@ export interface UpdateDepReqBody {
 }
 
 export interface UpdateLevelReqBody {
-  level: string;
+  levelId: string;
 }
 
 export interface UpdateMessagingTokenReqBody {
@@ -110,11 +110,4 @@ export interface VerifyUsernameReqBody {
 export interface GetCourseMatesResBody {
   msg: string;
   data?: CourseMate[];
-}
-
-export interface GetRubyBalanceResBody {
-  msg: string;
-  data: {
-    balance: number;
-  };
 }

@@ -19,6 +19,7 @@ const notification_1 = __importDefault(require("./routes/notification"));
 const school_1 = __importDefault(require("./routes/student-data/school"));
 const faculty_1 = __importDefault(require("./routes/student-data/faculty"));
 const department_1 = __importDefault(require("./routes/student-data/department"));
+const level_1 = __importDefault(require("./routes/student-data/level"));
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
@@ -33,6 +34,7 @@ app.use("/api/notifications", notification_1.default);
 app.use("/api/schools", school_1.default);
 app.use("/api/faculties", faculty_1.default);
 app.use("/api/departments", department_1.default);
+app.use("/api/levels", level_1.default);
 app.use(auth_1.default);
 (0, db_1.default)((db, err) => {
     if (!err) {

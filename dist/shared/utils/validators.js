@@ -1,6 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateSubPostType = exports.validateReactionType = exports.validateIdWithJoi = void 0;
+exports.JoiValidators = exports.validateSubPostType = exports.validateReactionType = exports.validateIdWithJoi = void 0;
+const joi_1 = __importDefault(require("joi"));
 const constants_1 = require("../constants");
 // TODO: To be implemented
 function validateIdWithJoi() { }
@@ -15,3 +19,7 @@ function validateSubPostType(subPostType) {
     return isValid ? true : false;
 }
 exports.validateSubPostType = validateSubPostType;
+exports.JoiValidators = {
+    id: joi_1.default.string().trim().pattern(new RegExp("^[0-9a-fA-F]{24}$")),
+    phone: joi_1.default.string().trim().min(11).max(11).pattern(new RegExp("^[0-9]*$")),
+};

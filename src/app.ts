@@ -17,6 +17,7 @@ import notificationRoutes from "./routes/notification";
 import schoolRoutes from "./routes/student-data/school";
 import facultyRoutes from "./routes/student-data/faculty";
 import departmentRoutes from "./routes/student-data/department";
+import levelRoutes from "./routes/student-data/level";
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/schools", schoolRoutes);
 app.use("/api/faculties", facultyRoutes);
 app.use("/api/departments", departmentRoutes);
+app.use("/api/levels", levelRoutes);
 
 app.use(error);
 

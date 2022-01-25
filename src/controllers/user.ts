@@ -23,12 +23,12 @@ import {
   UpdateLevelReqBody,
   UpdateMessagingTokenReqBody,
   VerifyUsernameReqBody,
-  GetRubyBalanceResBody,
   GetCourseMatesResBody,
 } from "../types/user";
 import SchoolModel from "../models/student-data/school";
 import FacultyModel from "../models/student-data/faculty";
 import DepModel from "../models/student-data/department";
+import LevelModel from "../models/student-data/level";
 import {
   SimpleParams,
   SimpleRes,
@@ -36,6 +36,7 @@ import {
   CourseMate,
   CompressedImage,
   Image,
+  StudentData,
 } from "../types/shared";
 import {
   delFileFromFS,
@@ -62,7 +63,7 @@ export const addUser: RequestHandler<any, AuthResBody, AddUserReqBody> = async (
     schoolId,
     facultyId,
     departmentId,
-    level,
+    levelId,
     password,
   } = req.body;
 
@@ -99,7 +100,10 @@ export const addUser: RequestHandler<any, AuthResBody, AddUserReqBody> = async (
     const dep = await DepModel.findById(departmentId);
     if (!dep) return res.status(404).send({ msg: "Department not found" });
 
-    const studentData = {
+    const level = await LevelModel.findById(levelId);
+    if (!level) return res.status(404).send({ msg: "Level not found" });
+
+    const studentData: StudentData = {
       school: {
         id: school._id,
         fullName: school.fullName,
@@ -113,7 +117,10 @@ export const addUser: RequestHandler<any, AuthResBody, AddUserReqBody> = async (
         id: dep._id,
         name: dep.name,
       },
-      level,
+      level: {
+        id: level._id,
+        name: level.name,
+      },
     };
 
     const user = await new UserModel({
@@ -494,7 +501,7 @@ export const updateDepartment: RequestHandler<
 
     await UserModel.updateOne(
       { _id: userId },
-      { "studentData.department": { id: departmentId, name: dep.name } }
+      { "studentData.department": { id: dep._id, name: dep.name } }
     );
 
     res.send({ msg: "Department updated successfully" });
@@ -516,9 +523,14 @@ export const updateLevel: RequestHandler<
     const user = await UserModel.findById(userId);
     if (!user) return res.status(404).send({ msg: "User not found" });
 
+    const { levelId } = req.body;
+
+    const lev = await LevelModel.findById(levelId);
+    if (!lev) return res.status(404).send({ msg: "Level not found" });
+
     await UserModel.updateOne(
       { _id: userId },
-      { "studentData.level": req.body.level }
+      { "studentData.level": { id: lev._id, name: lev.name } }
     );
 
     res.send({ msg: "Level updated successfully" });

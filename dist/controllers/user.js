@@ -30,13 +30,14 @@ const user_1 = __importStar(require("../models/user"));
 const school_1 = __importDefault(require("../models/student-data/school"));
 const faculty_1 = __importDefault(require("../models/student-data/faculty"));
 const department_1 = __importDefault(require("../models/student-data/department"));
+const level_1 = __importDefault(require("../models/student-data/level"));
 const s3_1 = require("../shared/utils/s3");
 const functions_1 = require("../shared/utils/functions");
 const addUser = async (req, res, next) => {
     const { error } = (0, user_1.valAddUserReqBody)(req.body);
     if (error)
         return res.status(400).send({ msg: error.details[0].message });
-    const { name, username, email, phone, dob, gender, schoolId, facultyId, departmentId, level, password, } = req.body;
+    const { name, username, email, phone, dob, gender, schoolId, facultyId, departmentId, levelId, password, } = req.body;
     try {
         const fetchedUser = await user_1.default.findOne({
             $or: [{ phone }, { email }, { username }],
@@ -68,6 +69,9 @@ const addUser = async (req, res, next) => {
         const dep = await department_1.default.findById(departmentId);
         if (!dep)
             return res.status(404).send({ msg: "Department not found" });
+        const level = await level_1.default.findById(levelId);
+        if (!level)
+            return res.status(404).send({ msg: "Level not found" });
         const studentData = {
             school: {
                 id: school._id,
@@ -82,7 +86,10 @@ const addUser = async (req, res, next) => {
                 id: dep._id,
                 name: dep.name,
             },
-            level,
+            level: {
+                id: level._id,
+                name: level.name,
+            },
         };
         const user = await new user_1.default({
             name,
@@ -343,7 +350,7 @@ const updateDepartment = async (req, res, next) => {
         const dep = await department_1.default.findById(departmentId);
         if (!dep)
             return res.status(404).send({ msg: "Department not found" });
-        await user_1.default.updateOne({ _id: userId }, { "studentData.department": { id: departmentId, name: dep.name } });
+        await user_1.default.updateOne({ _id: userId }, { "studentData.department": { id: dep._id, name: dep.name } });
         res.send({ msg: "Department updated successfully" });
     }
     catch (e) {
@@ -360,7 +367,11 @@ const updateLevel = async (req, res, next) => {
         const user = await user_1.default.findById(userId);
         if (!user)
             return res.status(404).send({ msg: "User not found" });
-        await user_1.default.updateOne({ _id: userId }, { "studentData.level": req.body.level });
+        const { levelId } = req.body;
+        const lev = await level_1.default.findById(levelId);
+        if (!lev)
+            return res.status(404).send({ msg: "Level not found" });
+        await user_1.default.updateOne({ _id: userId }, { "studentData.level": { id: lev._id, name: lev.name } });
         res.send({ msg: "Level updated successfully" });
     }
     catch (e) {

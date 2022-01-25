@@ -31,6 +31,7 @@ const name_1 = __importDefault(require("./schemas/name"));
 const dob_1 = __importDefault(require("./schemas/dob"));
 const student_data_1 = __importDefault(require("./schemas/student-data"));
 const image_1 = __importDefault(require("./schemas/image"));
+const validators_1 = require("../shared/utils/validators");
 const schema = new mongoose_1.Schema({
     name: name_1.default,
     username: {
@@ -90,31 +91,17 @@ function valAddUserReqBody(data) {
             .max(250)
             .email({ minDomainSegments: 2 })
             .required(),
-        phone: joi_1.default.string()
-            .trim()
-            .min(11)
-            .max(11)
-            .pattern(new RegExp("^[0-9]*$"))
-            .required(),
+        phone: validators_1.JoiValidators.phone.required(),
         gender: joi_1.default.string().trim().min(2).max(25).required(),
         dob: joi_1.default.object({
             day: joi_1.default.number().min(1).max(31).required(),
             month: joi_1.default.number().min(1).max(12).required(),
             year: joi_1.default.number().min(1980).max(2022).required(),
         }),
-        schoolId: joi_1.default.string()
-            .trim()
-            .pattern(new RegExp("^[0-9a-fA-F]{24}$"))
-            .required(),
-        facultyId: joi_1.default.string()
-            .trim()
-            .pattern(new RegExp("^[0-9a-fA-F]{24}$"))
-            .required(),
-        departmentId: joi_1.default.string()
-            .trim()
-            .pattern(new RegExp("^[0-9a-fA-F]{24}$"))
-            .required(),
-        level: joi_1.default.string().trim().max(15).required(),
+        schoolId: validators_1.JoiValidators.id.required(),
+        facultyId: validators_1.JoiValidators.id.required(),
+        departmentId: validators_1.JoiValidators.id.required(),
+        levelId: validators_1.JoiValidators.id.required(),
         password: joi_1.default.string().trim().min(6).max(50).required(),
     });
     return schema.validate(data);
@@ -140,36 +127,25 @@ function validateAboutData(data) {
 exports.validateAboutData = validateAboutData;
 function validatePhoneData(data) {
     return joi_1.default.object({
-        phone: joi_1.default.string()
-            .trim()
-            .min(11)
-            .max(11)
-            .pattern(new RegExp("^[0-9]*$"))
-            .required(),
+        phone: validators_1.JoiValidators.phone.required(),
     }).validate(data);
 }
 exports.validatePhoneData = validatePhoneData;
 function valUpdateFacultyReqBody(data) {
     return joi_1.default.object({
-        facultyId: joi_1.default.string()
-            .trim()
-            .pattern(new RegExp("^[0-9a-fA-F]{24}$"))
-            .required(),
+        facultyId: validators_1.JoiValidators.id.required(),
     }).validate(data);
 }
 exports.valUpdateFacultyReqBody = valUpdateFacultyReqBody;
 function valUpdateDepReqBody(data) {
     return joi_1.default.object({
-        departmentId: joi_1.default.string()
-            .trim()
-            .pattern(new RegExp("^[0-9a-fA-F]{24}$"))
-            .required(),
+        departmentId: validators_1.JoiValidators.id.required(),
     }).validate(data);
 }
 exports.valUpdateDepReqBody = valUpdateDepReqBody;
 function valUpdateLevelReqBody(data) {
     return joi_1.default.object({
-        level: joi_1.default.string().trim().max(15).required(),
+        levelId: validators_1.JoiValidators.id.required(),
     }).validate(data);
 }
 exports.valUpdateLevelReqBody = valUpdateLevelReqBody;

@@ -17,6 +17,7 @@ import { TempUser } from "../types/user";
 
 import reactionSchema from "./schemas/reaction";
 import studentDataSchema from "./schemas/student-data";
+import { JoiValidators } from "../shared/utils/validators";
 
 const schema = new Schema<Post>({
   creator: {
@@ -38,7 +39,7 @@ export default mongoose.model("Post", schema);
 
 export function valCreatePostReqBody(data: CreatePostReqBody) {
   return Joi.object({
-    text: Joi.string().trim().max(10000).allow(''),
+    text: Joi.string().trim().max(10000).allow(""),
   }).validate(data);
 }
 
@@ -50,19 +51,13 @@ export function valCreateTextPostReqBody(data: CreatePostReqBody) {
 
 export function validateReactToPostParams(data: ReactToPostParams) {
   return Joi.object({
-    postId: Joi.string()
-      .trim()
-      .regex(new RegExp("^[0-9a-fA-F]{24}$"))
-      .required(),
+    postId: JoiValidators.id.required(),
   }).validate(data);
 }
 
 export function validateViewPostReq(data: ViewPostParams) {
   return Joi.object({
-    postId: Joi.string()
-      .trim()
-      .regex(new RegExp("^[0-9a-fA-F]{24}$"))
-      .required(),
+    postId: JoiValidators.id.required(),
   }).validate(data);
 }
 

@@ -4,7 +4,6 @@
   'schoolId: post.school.id' and ['audience.school': true or 'audience.faculty': 'true' or 'audience.department': true]
   ). If audience is not set, then default to school
 - Deleting images from AWS (e.g when a profile or cover image is changed)
-- Level should use ID. Then use id to fetch posts, create notifications, fetch coursemates, etc.
 - Use a transaction in creating posts and subposts, updating profile image, cover image and so on
 - Review url endpoints that they follow the REST standard
 

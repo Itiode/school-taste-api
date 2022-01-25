@@ -119,7 +119,7 @@ const createPost = async (req, res, next) => {
         const { text } = req.body;
         const { name, studentData } = user;
         const { school, department, faculty, level } = studentData;
-        const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department.name} ${faculty.name} ${level} ${(0, functions_1.getTextForIndexing)(text)}`;
+        const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department.name} ${faculty.name} ${level.name} ${(0, functions_1.getTextForIndexing)(text)}`;
         const files = req["files"] || [];
         if (files.length < 1)
             return res

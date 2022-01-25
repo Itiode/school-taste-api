@@ -16,6 +16,7 @@ import nameSchema from "./schemas/name";
 import dobSchema from "./schemas/dob";
 import studentDataSchema from "./schemas/student-data";
 import imageSchema from "./schemas/image";
+import { JoiValidators } from "../shared/utils/validators";
 
 const schema = new Schema<User>(
   {
@@ -85,31 +86,17 @@ export function valAddUserReqBody(data: AddUserReqBody) {
       .max(250)
       .email({ minDomainSegments: 2 })
       .required(),
-    phone: Joi.string()
-      .trim()
-      .min(11)
-      .max(11)
-      .pattern(new RegExp("^[0-9]*$"))
-      .required(),
+    phone: JoiValidators.phone.required(),
     gender: Joi.string().trim().min(2).max(25).required(),
     dob: Joi.object({
       day: Joi.number().min(1).max(31).required(),
       month: Joi.number().min(1).max(12).required(),
       year: Joi.number().min(1980).max(2022).required(),
     }),
-    schoolId: Joi.string()
-      .trim()
-      .pattern(new RegExp("^[0-9a-fA-F]{24}$"))
-      .required(),
-    facultyId: Joi.string()
-      .trim()
-      .pattern(new RegExp("^[0-9a-fA-F]{24}$"))
-      .required(),
-    departmentId: Joi.string()
-      .trim()
-      .pattern(new RegExp("^[0-9a-fA-F]{24}$"))
-      .required(),
-    level: Joi.string().trim().max(15).required(),
+    schoolId: JoiValidators.id.required(),
+    facultyId: JoiValidators.id.required(),
+    departmentId: JoiValidators.id.required(),
+    levelId: JoiValidators.id.required(),
     password: Joi.string().trim().min(6).max(50).required(),
   });
 
@@ -137,35 +124,24 @@ export function validateAboutData(data: AboutData) {
 
 export function validatePhoneData(data: PhoneData) {
   return Joi.object({
-    phone: Joi.string()
-      .trim()
-      .min(11)
-      .max(11)
-      .pattern(new RegExp("^[0-9]*$"))
-      .required(),
+    phone: JoiValidators.phone.required(),
   }).validate(data);
 }
 
 export function valUpdateFacultyReqBody(data: UpdateFacultyReqBody) {
   return Joi.object({
-    facultyId: Joi.string()
-      .trim()
-      .pattern(new RegExp("^[0-9a-fA-F]{24}$"))
-      .required(),
+    facultyId: JoiValidators.id.required(),
   }).validate(data);
 }
 
 export function valUpdateDepReqBody(data: UpdateDepReqBody) {
   return Joi.object({
-    departmentId: Joi.string()
-      .trim()
-      .pattern(new RegExp("^[0-9a-fA-F]{24}$"))
-      .required(),
+    departmentId: JoiValidators.id.required(),
   }).validate(data);
 }
 
 export function valUpdateLevelReqBody(data: UpdateLevelReqBody) {
   return Joi.object({
-    level: Joi.string().trim().max(15).required(),
+    levelId: JoiValidators.id.required(),
   }).validate(data);
 }
