@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.auth = void 0;
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const user_1 = __importStar(require("../models/user"));
 const auth = async (req, res, next) => {
     const { error } = (0, user_1.validateAuthData)(req.body);
@@ -33,7 +33,7 @@ const auth = async (req, res, next) => {
         const user = await user_1.default.findOne({ email: req.body.email });
         if (!user)
             return res.status(404).send({ msg: "User not registered!" });
-        const isPw = await bcryptjs_1.default.compare(req.body.password, user.password);
+        const isPw = await bcrypt_1.default.compare(req.body.password, user.password);
         if (!isPw)
             return res.status(400).send({ msg: "Invalid email or password." });
         res.send({

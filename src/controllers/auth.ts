@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 
 import { AuthResBody } from "../types/user";
 import UserModel, { validateAuthData } from "../models/user";

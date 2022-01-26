@@ -14,23 +14,6 @@ const bucketName = config_1.default.get("awsBucketName");
 const region = config_1.default.get("awsBucketRegion");
 const accessKeyId = config_1.default.get("awsBucketAccessKeyId");
 const secretAccessKey = config_1.default.get("awsBucketSecretAccessKey");
-// export function getStorageConfig(
-//   folderName: "post-images" | "profile-images" | "cover-images"
-// ) {
-//   const config = multerS3({
-//     s3: s3,
-//     bucket: bucketName,
-//     metadata: function (req, file, cb) {
-//       cb(null, { fieldName: file.fieldname });
-//     },
-//     key: function (req, file, cb) {
-//       const ext = file.originalname.split(".")[1];
-//       const filename = `${folderName}/ST_IMG_${nanoid()}.${ext}`;
-//       cb(null, filename);
-//     },
-//   });
-//   return config;
-// }
 exports.default = multer_1.default.diskStorage({
     destination: "public/uploads",
     filename: function (req, file, cb) {

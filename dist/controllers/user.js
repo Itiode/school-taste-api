@@ -25,7 +25,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyUsername = exports.updateMessagingToken = exports.updateLevel = exports.updateDepartment = exports.updateFaculty = exports.getCourseMates = exports.updatePhone = exports.updateAbout = exports.getProfileImage = exports.updateProfileImage = exports.getCoverImage = exports.updateCoverImage = exports.getUser = exports.addUser = void 0;
 const config_1 = __importDefault(require("config"));
 const image_size_1 = __importDefault(require("image-size"));
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const user_1 = __importStar(require("../models/user"));
 const school_1 = __importDefault(require("../models/student-data/school"));
 const faculty_1 = __importDefault(require("../models/student-data/faculty"));
@@ -55,7 +55,7 @@ const addUser = async (req, res, next) => {
                 return res.status(400).send({ msg: "This username exists already" });
             }
         }
-        const hashedPw = await bcryptjs_1.default.hash(password, 10);
+        const hashedPw = await bcrypt_1.default.hash(password, 10);
         const userImage = {
             original: { url: "", dUrl: "" },
             thumbnail: { url: "", dUrl: "" },

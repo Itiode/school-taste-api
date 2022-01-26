@@ -15,13 +15,13 @@ router.get("/me", auth, uC.getUser);
 router.get("/:userId", auth, uC.getUser);
 router.post("/verify-username", uC.verifyUsername);
 router.put(
-  "/profile-image/me",
+  "/profile-images/me",
   auth,
   profileImgUpload.single("profile-image"),
   uC.updateProfileImage
 );
 router.put(
-  "/cover-image/me",
+  "/cover-images/me",
   auth,
   coverImgUpload.single("cover-image"),
   uC.updateCoverImage

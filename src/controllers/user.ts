@@ -1,6 +1,6 @@
 import config from "config";
 import sizeOf from "image-size";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import { RequestHandler } from "express";
 
 import UserModel, {

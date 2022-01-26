@@ -27,7 +27,9 @@ const addSchool = async (req, res, next) => {
         return res.status(400).send({ msg: error.details[0].message });
     try {
         const { shortName, fullName } = req.body;
-        const fetchedSchool = await school_1.default.findOne({ shortName, fullName });
+        const fetchedSchool = await school_1.default.findOne({
+            $or: [{ shortName }, { fullName }],
+        });
         if (fetchedSchool)
             return res.status(400).send({ msg: "School already added" });
         await new school_1.default({

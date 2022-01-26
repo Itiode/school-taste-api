@@ -1,6 +1,5 @@
 import config from "config";
 import S3 from "aws-sdk/clients/s3";
-import multerS3 from "multer-s3";
 import multer from "multer";
 import { nanoid } from "nanoid";
 import fs from "fs";
@@ -10,25 +9,6 @@ const bucketName: string = config.get("awsBucketName");
 const region: string = config.get("awsBucketRegion");
 const accessKeyId: string = config.get("awsBucketAccessKeyId");
 const secretAccessKey: string = config.get("awsBucketSecretAccessKey");
-
-// export function getStorageConfig(
-//   folderName: "post-images" | "profile-images" | "cover-images"
-// ) {
-//   const config = multerS3({
-//     s3: s3,
-//     bucket: bucketName,
-//     metadata: function (req, file, cb) {
-//       cb(null, { fieldName: file.fieldname });
-//     },
-//     key: function (req, file, cb) {
-//       const ext = file.originalname.split(".")[1];
-//       const filename = `${folderName}/ST_IMG_${nanoid()}.${ext}`;
-//       cb(null, filename);
-//     },
-//   });
-
-//   return config;
-// }
 
 export default multer.diskStorage({
   destination: "public/uploads",
