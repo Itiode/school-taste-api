@@ -53,36 +53,43 @@ export function uploadFileToS3(
 ) {
   const fileStream = fs.createReadStream(filePath);
 
-  const uploadParams: S3.PutObjectRequest = {
+  const params: S3.PutObjectRequest = {
     Bucket: bucketName,
     Body: fileStream,
     Key: `${folderName}/${fileName}`,
   };
 
-  return s3.upload(uploadParams).promise();
+  return s3.upload(params).promise();
 }
 
 const unlinkFile = util.promisify(fs.unlink);
 
-export function delFileFromFS(filePath: string) {
+export function deleteFileFromFS(filePath: string) {
   return unlinkFile(filePath);
 }
 
 // Download a file from S3
 export function getFileFromS3(
-  folderName:
-    | "post-images"
-    | "post-thumbnail-images"
-    | "profile-images"
-    | "profile-thumbnail-images"
-    | "cover-images"
-    | "cover-thumbnail-images",
+  folderName: "post-images" | "profile-images" | "cover-images",
   filename: string
 ) {
-  const downloadParams: S3.GetObjectRequest = {
+  const params: S3.GetObjectRequest = {
     Key: `${folderName}/${filename}`,
     Bucket: bucketName,
   };
 
-  return s3.getObject(downloadParams).createReadStream();
+  return s3.getObject(params).createReadStream();
+}
+
+// Delete a file from S3
+export function deleteFileFromS3(
+  folderName: "post-images" | "profile-images" | "cover-images",
+  filename: string
+) {
+  const params: S3.DeleteObjectRequest = {
+    Key: `${folderName}/${filename}`,
+    Bucket: bucketName,
+  };
+
+  return s3.deleteObject(params).promise();
 }

@@ -161,9 +161,9 @@ const updateCoverImage = async (req, res, next) => {
             height: Math.round(imageHeight / 2),
         });
         const uploadedOriImg = await (0, s3_1.uploadFileToS3)("cover-images", oriImg.path, oriImg.name);
-        await (0, s3_1.delFileFromFS)(oriImg.path);
+        await (0, s3_1.deleteFileFromFS)(oriImg.path);
         // Delete the originally uploaded image
-        await (0, s3_1.delFileFromFS)(filePath);
+        await (0, s3_1.deleteFileFromFS)(filePath);
         // Remove the folder name (cover-images), leaving just the filename
         const uploadedOriImgName = uploadedOriImg["key"].split("/")[1];
         const coverImage = {
@@ -199,6 +199,10 @@ exports.getCoverImage = getCoverImage;
 const updateProfileImage = async (req, res, next) => {
     try {
         const userId = req["user"].id;
+        const user = await user_1.default.findById(userId).select("profileImage");
+        if (!user)
+            return res.status(404).send({ msg: "User not found" });
+        const prevImage = user.profileImage;
         const file = req["file"];
         const filePath = file.path;
         const filename = file.filename;
@@ -210,15 +214,15 @@ const updateProfileImage = async (req, res, next) => {
             height: Math.round(imageHeight / 2 / 2),
         });
         const uploadedThumbImg = await (0, s3_1.uploadFileToS3)("profile-images", thumbImg.path, thumbImg.name);
-        await (0, s3_1.delFileFromFS)(thumbImg.path);
+        await (0, s3_1.deleteFileFromFS)(thumbImg.path);
         const oriImg = await (0, functions_1.compressImage)(filePath, `original-${filename}`, {
             width: Math.round(imageWidth / 2),
             height: Math.round(imageHeight / 2),
         });
         const uploadedOriImg = await (0, s3_1.uploadFileToS3)("profile-images", oriImg.path, oriImg.name);
-        await (0, s3_1.delFileFromFS)(oriImg.path);
+        await (0, s3_1.deleteFileFromFS)(oriImg.path);
         // Delete the originally uploaded image
-        await (0, s3_1.delFileFromFS)(filePath);
+        await (0, s3_1.deleteFileFromFS)(filePath);
         // Remove the folder name (profile-images), leaving just the file name
         const uploadedThumbImgName = uploadedThumbImg["key"].split("/")[1];
         const uploadedOriImgName = uploadedOriImg["key"].split("/")[1];
@@ -234,7 +238,15 @@ const updateProfileImage = async (req, res, next) => {
             metadata: { width: imageWidth, height: imageHeight },
         };
         await user_1.default.updateOne({ _id: userId }, { $set: { profileImage } });
-        // TODO: Delete previous profile images (original and thumbnail) from AWS
+        // Delete previous profile images (original and thumbnail) from AWS
+        if (prevImage.thumbnail.url) {
+            const filename = prevImage.thumbnail.url.split("profile-images/")[1];
+            await (0, s3_1.deleteFileFromS3)("profile-images", filename);
+        }
+        if (prevImage.original.url) {
+            const filename = prevImage.original.url.split("profile-images/")[1];
+            await (0, s3_1.deleteFileFromS3)("profile-images", filename);
+        }
         res.send({ msg: "Profile image updated successfully" });
     }
     catch (e) {

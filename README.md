@@ -1,16 +1,15 @@
 # TODO
 
-- Post audience (School, Faculty or Departmental mates) - PostModel.find(
-  'schoolId: post.school.id' and ['audience.school': true or 'audience.faculty': 'true' or 'audience.department': true]
-  ). If audience is not set, then default to school
 - Deleting images from AWS (e.g when a profile or cover image is changed)
 - Use a transaction in creating posts and subposts, updating profile image, cover image and so on
 - Review url endpoints that they follow the REST standard
 
 ## After MVP
 
+- Limit the creation of notifications when a post is liked
+- Add limit for updating school, faculty, department and level.
 - Create a reusable function for creating notifications when a post (text post or image post) is created.
-- Create a notification when a post is liked
+- Consider indexing school ID, to optimize post fetching
 - Only an admin can add a school, department, faculty
 - When fetching posts, add fallback for a user not being available,
   in such a case, the post shouldn't be included in the returned posts.

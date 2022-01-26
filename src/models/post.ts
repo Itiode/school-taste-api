@@ -26,6 +26,13 @@ const schema = new Schema<Post>({
   text: { type: String, trim: true, maxlength: 10000, default: "" },
   studentData: { type: studentDataSchema, required: true },
   tagsString: { type: String, trim: true, required: true },
+  audience: {
+    type: String,
+    trim: true,
+    enum: ["public", "school", "faculty", "department", "level"],
+    default: "public",
+    required: true,
+  },
   tags: { type: [String] },
   date: { type: Date, default: Date.now },
   reactions: [reactionSchema],

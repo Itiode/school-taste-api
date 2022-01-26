@@ -10,6 +10,7 @@ export interface Post {
   text: string;
   studentData: StudentData;
   tagsString: string;
+  audience: string;
   tags: string[];
   date: Date;
   reactions: Reaction[];

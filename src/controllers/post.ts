@@ -34,7 +34,7 @@ import {
 import { validateReactionType } from "../shared/utils/validators";
 import { messagingOptions } from "../main/firebase";
 import {
-  delFileFromFS,
+  deleteFileFromFS,
   getFileFromS3,
   uploadFileToS3,
 } from "../shared/utils/s3";
@@ -72,7 +72,9 @@ export const createTextPost: RequestHandler<
 
     const tagsString = `${name.first} ${name.last} ${school.fullName} ${
       school.shortName
-    } ${department.name} ${faculty.name} ${level} ${getTextForIndexing(text)}`;
+    } ${department.name} ${faculty.name} ${level.name} ${getTextForIndexing(
+      text
+    )}`;
 
     const post = await new PostModel({
       creator: {
@@ -210,7 +212,7 @@ export const createPost: RequestHandler<
         thumbImg.path,
         thumbImg.name
       );
-      await delFileFromFS(thumbImg.path);
+      await deleteFileFromFS(thumbImg.path);
 
       const oriImg: CompressedImage = await compressImage(
         filePath,
@@ -226,10 +228,10 @@ export const createPost: RequestHandler<
         oriImg.path,
         oriImg.name
       );
-      await delFileFromFS(oriImg.path);
+      await deleteFileFromFS(oriImg.path);
 
       // Delete the originally uploaded image
-      await delFileFromFS(filePath);
+      await deleteFileFromFS(filePath);
 
       // Remove the folder name (post-images), leaving just the file name
       const uploadedThumbImgName = uploadedThumbImg["key"].split("/")[1];

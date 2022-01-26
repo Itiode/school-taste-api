@@ -48,7 +48,7 @@ const createTextPost = async (req, res, next) => {
         const { text } = req.body;
         const { name, studentData } = user;
         const { school, department, faculty, level } = studentData;
-        const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department.name} ${faculty.name} ${level} ${(0, functions_1.getTextForIndexing)(text)}`;
+        const tagsString = `${name.first} ${name.last} ${school.fullName} ${school.shortName} ${department.name} ${faculty.name} ${level.name} ${(0, functions_1.getTextForIndexing)(text)}`;
         const post = await new post_1.default({
             creator: {
                 id: userId,
@@ -146,15 +146,15 @@ const createPost = async (req, res, next) => {
                 height: Math.round(imageHeight / 2),
             });
             const uploadedThumbImg = await (0, s3_1.uploadFileToS3)("post-images", thumbImg.path, thumbImg.name);
-            await (0, s3_1.delFileFromFS)(thumbImg.path);
+            await (0, s3_1.deleteFileFromFS)(thumbImg.path);
             const oriImg = await (0, functions_1.compressImage)(filePath, `original-${filename}`, {
                 width: Math.round(imageWidth),
                 height: Math.round(imageHeight),
             });
             const uploadedOriImg = await (0, s3_1.uploadFileToS3)("post-images", oriImg.path, oriImg.name);
-            await (0, s3_1.delFileFromFS)(oriImg.path);
+            await (0, s3_1.deleteFileFromFS)(oriImg.path);
             // Delete the originally uploaded image
-            await (0, s3_1.delFileFromFS)(filePath);
+            await (0, s3_1.deleteFileFromFS)(filePath);
             // Remove the folder name (post-images), leaving just the file name
             const uploadedThumbImgName = uploadedThumbImg["key"].split("/")[1];
             const uploadedOriImgName = uploadedOriImg["key"].split("/")[1];

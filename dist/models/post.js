@@ -38,6 +38,13 @@ const schema = new mongoose_1.Schema({
     text: { type: String, trim: true, maxlength: 10000, default: "" },
     studentData: { type: student_data_1.default, required: true },
     tagsString: { type: String, trim: true, required: true },
+    audience: {
+        type: String,
+        trim: true,
+        enum: ["public", "school", "faculty", "department", "level"],
+        default: "public",
+        required: true,
+    },
     tags: { type: [String] },
     date: { type: Date, default: Date.now },
     reactions: [reaction_1.default],

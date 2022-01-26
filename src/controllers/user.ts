@@ -39,9 +39,10 @@ import {
   StudentData,
 } from "../types/shared";
 import {
-  delFileFromFS,
+  deleteFileFromFS,
   getFileFromS3,
   uploadFileToS3,
+  deleteFileFromS3,
 } from "../shared/utils/s3";
 import { compressImage } from "../shared/utils/functions";
 
@@ -229,10 +230,10 @@ export const updateCoverImage: RequestHandler<any, SimpleRes> = async (
       oriImg.path,
       oriImg.name
     );
-    await delFileFromFS(oriImg.path);
+    await deleteFileFromFS(oriImg.path);
 
     // Delete the originally uploaded image
-    await delFileFromFS(filePath);
+    await deleteFileFromFS(filePath);
 
     // Remove the folder name (cover-images), leaving just the filename
     const uploadedOriImgName = uploadedOriImg["key"].split("/")[1];
@@ -282,6 +283,10 @@ export const updateProfileImage: RequestHandler<any, SimpleRes> = async (
 ) => {
   try {
     const userId = req["user"].id;
+    const user = await UserModel.findById(userId).select("profileImage");
+    if (!user) return res.status(404).send({ msg: "User not found" });
+    const prevImage: Image = user.profileImage;
+
     const file = req["file"];
     const filePath = file!.path;
     const filename = file!.filename;
@@ -304,7 +309,7 @@ export const updateProfileImage: RequestHandler<any, SimpleRes> = async (
       thumbImg.path,
       thumbImg.name
     );
-    await delFileFromFS(thumbImg.path);
+    await deleteFileFromFS(thumbImg.path);
 
     const oriImg: CompressedImage = await compressImage(
       filePath,
@@ -320,10 +325,10 @@ export const updateProfileImage: RequestHandler<any, SimpleRes> = async (
       oriImg.path,
       oriImg.name
     );
-    await delFileFromFS(oriImg.path);
+    await deleteFileFromFS(oriImg.path);
 
     // Delete the originally uploaded image
-    await delFileFromFS(filePath);
+    await deleteFileFromFS(filePath);
 
     // Remove the folder name (profile-images), leaving just the file name
     const uploadedThumbImgName = uploadedThumbImg["key"].split("/")[1];
@@ -347,7 +352,16 @@ export const updateProfileImage: RequestHandler<any, SimpleRes> = async (
 
     await UserModel.updateOne({ _id: userId }, { $set: { profileImage } });
 
-    // TODO: Delete previous profile images (original and thumbnail) from AWS
+    // Delete previous profile images (original and thumbnail) from AWS
+    if (prevImage.thumbnail.url) {
+      const filename = prevImage.thumbnail.url.split("profile-images/")[1];
+      await deleteFileFromS3("profile-images", filename);
+    }
+
+    if (prevImage.original.url) {
+      const filename = prevImage.original.url.split("profile-images/")[1];
+      await deleteFileFromS3("profile-images", filename);
+    }
 
     res.send({ msg: "Profile image updated successfully" });
   } catch (e) {
