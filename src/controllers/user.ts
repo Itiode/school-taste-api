@@ -208,6 +208,10 @@ export const updateCoverImage: RequestHandler<any, SimpleRes> = async (
 ) => {
   try {
     const userId = req["user"].id;
+    const user = await UserModel.findById(userId).select("coverImage");
+    if (!user) return res.status(404).send({ msg: "User not found" });
+    const prevImage: Image = user.coverImage;
+
     const file = req["file"];
     const filePath = file!.path;
     const filename = file!.filename;
@@ -254,7 +258,16 @@ export const updateCoverImage: RequestHandler<any, SimpleRes> = async (
 
     await UserModel.updateOne({ _id: userId }, { $set: { coverImage } });
 
-    // TODO: Delete previous cover image (original) from AWS
+    // Delete previous cover images (original and thumbnail) from AWS
+    if (prevImage.thumbnail.url) {
+      const filename = prevImage.thumbnail.url.split("cover-images/")[1];
+      await deleteFileFromS3("cover-images", filename);
+    }
+
+    if (prevImage.original.url) {
+      const filename = prevImage.original.url.split("cover-images/")[1];
+      await deleteFileFromS3("cover-images", filename);
+    }
 
     res.send({ msg: "Cover image updated successfully" });
   } catch (e) {
